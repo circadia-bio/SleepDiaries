@@ -1,0 +1,200 @@
+// ─── Question types ────────────────────────────────────────────────────────────
+// time        → up/down stepper for hour:minute + am/pm
+// duration    → up/down stepper for hours and minutes
+// yes_no      → large Yes / No buttons
+// rating      → 1–5 option buttons with labels
+// number      → up/down stepper for a single integer
+// medication  → add/edit/delete medication entries with dose + time
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const MORNING_QUESTIONS = [
+  {
+    id: 'mq1',
+    number: 1,
+    text: 'What time did you get into bed last night?',
+    type: 'time',
+    defaultValue: { hour: 22, minute: 30 },
+  },
+  {
+    id: 'mq2',
+    number: 2,
+    text: 'What time did you try to go to sleep?',
+    type: 'time',
+    defaultValue: { hour: 23, minute: 0 },
+  },
+  {
+    id: 'mq3',
+    number: 3,
+    text: 'How long did it take you to fall asleep?',
+    type: 'duration',
+    defaultValue: { hours: 0, minutes: 30 },
+  },
+  {
+    id: 'mq4',
+    number: 4,
+    text: 'Did you wake up during the night?',
+    type: 'yes_no',
+    followUp: 'mq4b',
+  },
+  {
+    id: 'mq4b',
+    number: '4b',
+    text: 'How many times did you wake up?',
+    type: 'number',
+    defaultValue: 1,
+    min: 1,
+    max: 20,
+    unit: 'times',
+    conditionalOn: { id: 'mq4', value: 'yes' },
+  },
+  {
+    id: 'mq5',
+    number: 5,
+    text: 'How long were you awake during the night in total?',
+    type: 'duration',
+    defaultValue: { hours: 0, minutes: 0 },
+  },
+  {
+    id: 'mq6',
+    number: 6,
+    text: 'What time was your final awakening?',
+    type: 'time',
+    defaultValue: { hour: 6, minute: 30 },
+  },
+  {
+    id: 'mq7',
+    number: 7,
+    text: 'What time did you get out of bed for the day?',
+    type: 'time',
+    defaultValue: { hour: 7, minute: 0 },
+  },
+  {
+    id: 'mq8',
+    number: 8,
+    text: 'Did you wake up earlier than you planned?',
+    type: 'yes_no',
+    followUp: 'mq8b',
+  },
+  {
+    id: 'mq8b',
+    number: '8b',
+    text: 'How much earlier did you wake up?',
+    type: 'duration',
+    defaultValue: { hours: 0, minutes: 30 },
+    conditionalOn: { id: 'mq8', value: 'yes' },
+  },
+  {
+    id: 'mq9',
+    number: 9,
+    text: 'How many alcoholic drinks did you have yesterday?',
+    type: 'number',
+    defaultValue: 0,
+    min: 0,
+    max: 30,
+    unit: 'drinks',
+  },
+  {
+    id: 'mq10',
+    number: 10,
+    text: 'Did you use any sleep aids (medication, supplements, etc.)?',
+    type: 'yes_no',
+    followUp: 'mq10b',
+  },
+  {
+    id: 'mq10b',
+    number: '10b',
+    text: 'What did you use to help you sleep?',
+    type: 'medication',
+    conditionalOn: { id: 'mq10', value: 'yes' },
+  },
+  {
+    id: 'mq11',
+    number: 11,
+    text: 'How would you rate the quality of your sleep?',
+    type: 'rating',
+    options: [
+      { value: 1, label: 'Very poor' },
+      { value: 2, label: 'Poor' },
+      { value: 3, label: 'Fair' },
+      { value: 4, label: 'Good' },
+      { value: 5, label: 'Very good' },
+    ],
+  },
+  {
+    id: 'mq12',
+    number: 12,
+    text: 'How rested did you feel when you woke up for the day?',
+    type: 'rating',
+    options: [
+      { value: 1, label: 'Not rested at all' },
+      { value: 2, label: 'Slightly rested' },
+      { value: 3, label: 'Somewhat rested' },
+      { value: 4, label: 'Well rested' },
+      { value: 5, label: 'Very well rested' },
+    ],
+  },
+  {
+    id: 'mq13',
+    number: 13,
+    text: 'Comments (optional)',
+    type: 'text_input',
+    placeholder: 'Any notes about your sleep last night...',
+    optional: true,
+  },
+];
+
+export const EVENING_QUESTIONS = [
+  {
+    id: 'eq1',
+    number: 1,
+    text: 'Did you nap today?',
+    type: 'yes_no',
+    followUp: 'eq1b',
+  },
+  {
+    id: 'eq1b',
+    number: '1b',
+    text: 'How long did you nap?',
+    type: 'duration',
+    defaultValue: { hours: 0, minutes: 30 },
+    conditionalOn: { id: 'eq1', value: 'yes' },
+  },
+  {
+    id: 'eq2',
+    number: 2,
+    text: 'How many caffeinated drinks did you have today?',
+    type: 'number',
+    defaultValue: 0,
+    min: 0,
+    max: 20,
+    unit: 'drinks',
+  },
+  {
+    id: 'eq3',
+    number: 3,
+    text: 'Did you exercise today?',
+    type: 'yes_no',
+  },
+  {
+    id: 'eq4',
+    number: 4,
+    text: 'Did you use any medications to help you sleep?',
+    type: 'yes_no',
+    followUp: 'eq4b',
+  },
+  {
+    id: 'eq4b',
+    number: '4b',
+    text: 'What medication do you use to help you sleep?',
+    type: 'medication',
+    conditionalOn: { id: 'eq4', value: 'yes' },
+  },
+  {
+    id: 'eq5',
+    number: 5,
+    text: 'Comments (optional)',
+    type: 'text_input',
+    placeholder: 'Any notes about your day...',
+    optional: true,
+  },
+];

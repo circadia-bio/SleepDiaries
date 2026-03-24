@@ -1,0 +1,844 @@
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+
+// ─── Colour tokens (morning = amber, evening = blue) ─────────────────────────
+const THEME = {
+  morning: {
+    primary:     '#E07A20',
+    primaryLight:'#F5C96A',
+    progressBg:  '#F5DEB3',
+    background:  '#FDFAF5',
+    cardBg:      '#FFF8EE',
+  },
+  evening: {
+    primary:     '#2A6CB5',
+    primaryLight:'#7EB0E0',
+    progressBg:  '#C8DFF5',
+    background:  '#F5F9FF',
+    cardBg:      '#EEF5FF',
+  },
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const pad = (n) => String(n).padStart(2, '0');
+
+const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+// Build the flat ordered list of questions, inserting conditional follow-ups
+// after the question they depend on when the trigger answer is selected.
+const buildFlow = (questions, answers) => {
+  const flow = [];
+  for (const q of questions) {
+    if (q.conditionalOn) continue; // handled inline below
+    flow.push(q);
+    if (q.followUp) {
+      const followUp = questions.find((x) => x.id === q.followUp);
+      if (followUp && answers[q.id] === 'yes') {
+        flow.push(followUp);
+      }
+    }
+  }
+  return flow;
+};
+
+// ─── Input: Time stepper (24-hour) ───────────────────────────────────────────
+const TimeInput = ({ value, onChange, theme }) => {
+  const { hour, minute } = value;
+  const c = THEME[theme];
+
+  const adjust = (field, delta) => {
+    if (field === 'hour')   onChange({ ...value, hour:   (hour   + delta + 24) % 24 });
+    if (field === 'minute') onChange({ ...value, minute: (minute + delta + 60) % 60 });
+  };
+
+  const Stepper = ({ field, display }) => (
+    <View style={styles.stepperCol}>
+      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: c.primaryLight }]} onPress={() => adjust(field, 1)}>
+        <Ionicons name="caret-up" size={20} color={c.primary} />
+      </TouchableOpacity>
+      <Text style={[styles.stepValue, { color: c.primary }]}>{display}</Text>
+      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: c.primaryLight }]} onPress={() => adjust(field, -1)}>
+        <Ionicons name="caret-down" size={20} color={c.primary} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={styles.timeRow}>
+      <Stepper field="hour"   display={pad(hour)} />
+      <Text style={[styles.timeSep, { color: c.primary }]}>:</Text>
+      <Stepper field="minute" display={pad(minute)} />
+    </View>
+  );
+};
+
+// ─── Input: Duration stepper ──────────────────────────────────────────────────
+const DurationInput = ({ value, onChange, theme }) => {
+  const { hours, minutes } = value;
+  const c = THEME[theme];
+
+  const Stepper = ({ field, display, unit }) => (
+    <View style={styles.stepperCol}>
+      <TouchableOpacity
+        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+        onPress={() => onChange({ ...value, [field]: clamp(value[field] + (field === 'hours' ? 1 : 5), 0, field === 'hours' ? 23 : 55) })}
+      >
+        <Ionicons name="caret-up" size={20} color={c.primary} />
+      </TouchableOpacity>
+      <Text style={[styles.stepValue, { color: c.primary }]}>{display}</Text>
+      <TouchableOpacity
+        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+        onPress={() => onChange({ ...value, [field]: clamp(value[field] - (field === 'hours' ? 1 : 5), 0, field === 'hours' ? 23 : 55) })}
+      >
+        <Ionicons name="caret-down" size={20} color={c.primary} />
+      </TouchableOpacity>
+      <Text style={[styles.stepUnit, { color: c.primary }]}>{unit}</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.durationRow}>
+      <Stepper field="hours"   display={String(hours)}   unit="hrs" />
+      <View style={styles.durationGap} />
+      <Stepper field="minutes" display={pad(minutes)} unit="min" />
+    </View>
+  );
+};
+
+// ─── Input: Yes / No ──────────────────────────────────────────────────────────
+const YesNoInput = ({ value, onChange, theme }) => {
+  const c = THEME[theme];
+  return (
+    <View style={styles.yesNoRow}>
+      {['yes', 'no'].map((opt) => {
+        const selected = value === opt;
+        return (
+          <TouchableOpacity
+            key={opt}
+            style={[
+              styles.yesNoBtn,
+              selected
+                ? { backgroundColor: c.primary, borderColor: c.primary }
+                : { backgroundColor: '#fff', borderColor: c.primary },
+            ]}
+            onPress={() => onChange(opt)}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.yesNoText, { color: selected ? '#fff' : c.primary }]}>
+              {opt === 'yes' ? 'Yes' : 'No'}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+// ─── Input: 1–5 Rating ────────────────────────────────────────────────────────
+const RatingInput = ({ value, onChange, options, theme }) => {
+  const c = THEME[theme];
+  return (
+    <View style={styles.ratingCol}>
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <TouchableOpacity
+            key={opt.value}
+            style={[
+              styles.ratingBtn,
+              selected
+                ? { backgroundColor: c.primary, borderColor: c.primary }
+                : { backgroundColor: '#fff', borderColor: c.primary },
+            ]}
+            onPress={() => onChange(opt.value)}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.ratingText, { color: selected ? '#fff' : c.primary }]}>
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+// ─── Input: Number stepper ────────────────────────────────────────────────────
+const NumberInput = ({ value, onChange, min = 0, max = 99, unit = '', theme }) => {
+  const c = THEME[theme];
+  return (
+    <View style={styles.numberRow}>
+      <TouchableOpacity
+        style={[styles.numBtn, { borderColor: c.primary }]}
+        onPress={() => onChange(clamp(value - 1, min, max))}
+      >
+        <Ionicons name="remove" size={24} color={c.primary} />
+      </TouchableOpacity>
+      <Text style={[styles.numValue, { color: c.primary }]}>{value}</Text>
+      <TouchableOpacity
+        style={[styles.numBtn, { borderColor: c.primary }]}
+        onPress={() => onChange(clamp(value + 1, min, max))}
+      >
+        <Ionicons name="add" size={24} color={c.primary} />
+      </TouchableOpacity>
+      {unit ? <Text style={[styles.numUnit, { color: c.primary }]}>{unit}</Text> : null}
+    </View>
+  );
+};
+
+// ─── Input: Medication list ───────────────────────────────────────────────────
+const MedicationInput = ({ value = [], onChange, theme }) => {
+  const c = THEME[theme];
+  const [expanded, setExpanded] = useState({});
+
+  const addMed = () => {
+    const newMed = { id: Date.now(), name: 'New Medication', dose: '', times: [''] };
+    onChange([...value, newMed]);
+    setExpanded((e) => ({ ...e, [newMed.id]: true }));
+  };
+
+  const removeMed = (id) => onChange(value.filter((m) => m.id !== id));
+
+  const updateMed = (id, field, val) =>
+    onChange(value.map((m) => (m.id === id ? { ...m, [field]: val } : m)));
+
+  const addTime = (id) =>
+    onChange(value.map((m) => (m.id === id ? { ...m, times: [...m.times, ''] } : m)));
+
+  const updateTime = (id, idx, val) =>
+    onChange(value.map((m) =>
+      m.id === id ? { ...m, times: m.times.map((t, i) => (i === idx ? val : t)) } : m
+    ));
+
+  return (
+    <View style={styles.medContainer}>
+      {value.map((med) => (
+        <View key={med.id} style={[styles.medCard, { backgroundColor: c.cardBg ?? '#EEF5FF', borderColor: c.primaryLight }]}>
+          {/* Med header */}
+          <View style={styles.medHeader}>
+            <TextInput
+              style={[styles.medNameInput, { color: c.primary }]}
+              value={med.name}
+              onChangeText={(t) => updateMed(med.id, 'name', t)}
+              placeholder="Medication name"
+              placeholderTextColor="#aaa"
+            />
+            <View style={styles.medHeaderActions}>
+              <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.medIconBtn}>
+                <Ionicons name="trash-outline" size={20} color={c.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setExpanded((e) => ({ ...e, [med.id]: !e[med.id] }))}
+                style={styles.medIconBtn}
+              >
+                <Ionicons
+                  name={expanded[med.id] ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'}
+                  size={22}
+                  color={c.primary}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Expanded detail */}
+          {expanded[med.id] && (
+            <View style={styles.medDetail}>
+              <View style={styles.medRow}>
+                <Text style={[styles.medLabel, { color: c.primary }]}>Dose:</Text>
+                <TextInput
+                  style={[styles.medDoseInput, { borderColor: c.primaryLight, color: c.primary }]}
+                  value={med.dose}
+                  onChangeText={(t) => updateMed(med.id, 'dose', t)}
+                  placeholder="e.g. 5"
+                  keyboardType="numeric"
+                  placeholderTextColor="#aaa"
+                />
+                <Text style={[styles.medLabel, { color: c.primary }]}>mg</Text>
+              </View>
+
+              {med.times.map((t, i) => (
+                <View key={i} style={styles.medRow}>
+                  <Text style={[styles.medLabel, { color: c.primary }]}>Time:</Text>
+                  <TextInput
+                    style={[styles.medTimeInput, { borderColor: c.primaryLight, color: c.primary }]}
+                    value={t}
+                    onChangeText={(v) => updateTime(med.id, i, v)}
+                    placeholder="e.g. 10:30 pm"
+                    placeholderTextColor="#aaa"
+                  />
+                </View>
+              ))}
+
+              <TouchableOpacity
+                style={[styles.addTimeBtn, { borderColor: c.primary }]}
+                onPress={() => addTime(med.id)}
+              >
+                <Ionicons name="add-circle-outline" size={18} color={c.primary} />
+                <Text style={[styles.addTimeBtnText, { color: c.primary }]}>Add New Time</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      ))}
+
+      <TouchableOpacity
+        style={[styles.addMedBtn, { backgroundColor: c.primary }]}
+        onPress={addMed}
+      >
+        <Ionicons name="add" size={20} color="#fff" />
+        <Text style={styles.addMedBtnText}>Add Medicine</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ─── Input: Free text ─────────────────────────────────────────────────────────
+const TextInputField = ({ value, onChange, placeholder, theme }) => {
+  const c = THEME[theme];
+  return (
+    <TextInput
+      style={[styles.freeText, { borderColor: c.primaryLight, color: c.primary }]}
+      value={value}
+      onChangeText={onChange}
+      placeholder={placeholder}
+      placeholderTextColor="#aaa"
+      multiline
+      numberOfLines={4}
+      textAlignVertical="top"
+    />
+  );
+};
+
+// ─── Main QuestionnaireScreen ─────────────────────────────────────────────────
+export default function QuestionnaireScreen() {
+  const router = useRouter();
+  const { entryType = 'morning' } = useLocalSearchParams();
+  const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
+  const theme = entryType === 'morning' ? 'morning' : 'evening';
+  const c = THEME[theme];
+
+  const [answers, setAnswers] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Rebuild the flow whenever answers change (conditional questions appear/disappear)
+  const flow = buildFlow(allQuestions, answers);
+  const total = flow.length;
+  const question = flow[currentIndex];
+
+  const setAnswer = useCallback((id, value) => {
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  }, []);
+
+  const getDefaultValue = (q) => {
+    if (q.type === 'time')       return q.defaultValue ?? { hour: 12, minute: 0 };
+    if (q.type === 'duration')   return q.defaultValue ?? { hours: 0, minutes: 0 };
+    if (q.type === 'number')     return q.defaultValue ?? 0;
+    if (q.type === 'rating')     return null;
+    if (q.type === 'yes_no')     return null;
+    if (q.type === 'medication') return [];
+    if (q.type === 'text_input') return '';
+    return null;
+  };
+
+  const currentValue = answers[question?.id] ?? getDefaultValue(question);
+
+  const canProceed = () => {
+    if (!question) return false;
+    if (question.optional) return true;
+    const val = answers[question.id];
+    if (question.type === 'yes_no')   return val === 'yes' || val === 'no';
+    if (question.type === 'rating')   return val !== null && val !== undefined;
+    if (question.type === 'time')     return true; // always has a default
+    if (question.type === 'duration') return true;
+    if (question.type === 'number')   return true;
+    if (question.type === 'medication') return true;
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!canProceed()) return;
+    if (currentIndex < total - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      // All done — pass answers back or save them
+      Alert.alert(
+        'Entry complete!',
+        `Your ${entryType} entry has been saved.`,
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+      console.log('Final answers:', answers);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    } else {
+      router.back();
+    }
+  };
+
+  if (!question) return null;
+
+  const progress = (currentIndex + 1) / total;
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: c.background }]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {/* ── Progress bar ── */}
+        <View style={styles.progressRow}>
+          <Ionicons name="person-circle-outline" size={32} color={c.primary} />
+          <View style={[styles.progressTrack, { backgroundColor: c.progressBg }]}>
+            <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: c.primary }]} />
+          </View>
+          <Text style={[styles.progressLabel, { color: c.primary }]}>
+            {currentIndex + 1}/{total}
+          </Text>
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* ── Question text ── */}
+          <Text style={[styles.questionText, { color: c.primary }]}>
+            {question.number}. {question.text}
+          </Text>
+
+          {/* ── Input ── */}
+          <View style={styles.inputArea}>
+            {question.type === 'time' && (
+              <TimeInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                theme={theme}
+              />
+            )}
+            {question.type === 'duration' && (
+              <DurationInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                theme={theme}
+              />
+            )}
+            {question.type === 'yes_no' && (
+              <YesNoInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                theme={theme}
+              />
+            )}
+            {question.type === 'rating' && (
+              <RatingInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                options={question.options}
+                theme={theme}
+              />
+            )}
+            {question.type === 'number' && (
+              <NumberInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                min={question.min}
+                max={question.max}
+                unit={question.unit}
+                theme={theme}
+              />
+            )}
+            {question.type === 'medication' && (
+              <MedicationInput
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                theme={theme}
+              />
+            )}
+            {question.type === 'text_input' && (
+              <TextInputField
+                value={currentValue}
+                onChange={(v) => setAnswer(question.id, v)}
+                placeholder={question.placeholder}
+                theme={theme}
+              />
+            )}
+          </View>
+        </ScrollView>
+
+        {/* ── Clouds decoration ── */}
+        <View style={styles.cloudsRow}>
+          <View style={[styles.cloudDeco, styles.cloudDecoLeft,  { backgroundColor: c.progressBg }]} />
+          <View style={[styles.cloudDeco, styles.cloudDecoRight, { backgroundColor: c.progressBg }]} />
+        </View>
+
+        {/* ── Back / Next buttons ── */}
+        <View style={styles.navRow}>
+          <TouchableOpacity
+            style={[styles.backBtn, { borderColor: c.primary }]}
+            onPress={handleBack}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="arrow-back" size={18} color={c.primary} />
+            <Text style={[styles.backBtnText, { color: c.primary }]}>Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.nextBtn,
+              { backgroundColor: canProceed() ? c.primary : '#ccc' },
+            ]}
+            onPress={handleNext}
+            activeOpacity={0.8}
+            disabled={!canProceed()}
+          >
+            <Text style={styles.nextBtnText}>
+              {currentIndex === total - 1 ? 'Finish' : 'Next'}
+            </Text>
+            <Ionicons name="arrow-forward" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+
+  // Progress
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 10,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 6,
+  },
+  progressLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    minWidth: 36,
+    textAlign: 'right',
+  },
+
+  // Question
+  scrollView:   { flex: 1 },
+  scrollContent:{ paddingHorizontal: 24, paddingBottom: 24 },
+  questionText: {
+    fontSize: 26,
+    fontWeight: '800',
+    marginTop: 24,
+    marginBottom: 40,
+    lineHeight: 34,
+  },
+  inputArea: {
+    alignItems: 'center',
+  },
+
+  // Time stepper
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepperCol: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  stepBtn: {
+    width: 52,
+    height: 44,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepValue: {
+    fontSize: 40,
+    fontWeight: '800',
+    minWidth: 52,
+    textAlign: 'center',
+  },
+  stepUnit: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  timeSep: {
+    fontSize: 40,
+    fontWeight: '800',
+    marginTop: -12,
+  },
+
+  // Duration
+  durationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  durationGap: { width: 32 },
+
+  // Yes / No
+  yesNoRow: {
+    flexDirection: 'row',
+    gap: 20,
+    marginTop: 8,
+  },
+  yesNoBtn: {
+    width: 130,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  yesNoText: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  // Rating
+  ratingCol: {
+    width: '100%',
+    gap: 12,
+  },
+  ratingBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Number
+  numberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  numBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  numValue: {
+    fontSize: 48,
+    fontWeight: '800',
+    minWidth: 60,
+    textAlign: 'center',
+  },
+  numUnit: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+
+  // Medication
+  medContainer: { width: '100%', gap: 12 },
+  medCard: {
+    borderRadius: 12,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+  },
+  medHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    justifyContent: 'space-between',
+  },
+  medNameInput: {
+    fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  medHeaderActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  medIconBtn: {
+    padding: 4,
+  },
+  medDetail: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  medRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  medLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    minWidth: 40,
+  },
+  medDoseInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 14,
+    minWidth: 60,
+    textAlign: 'center',
+  },
+  medTimeInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 14,
+    minWidth: 110,
+  },
+  addTimeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  addTimeBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  addMedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  addMedBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  // Free text
+  freeText: {
+    width: '100%',
+    borderWidth: 1.5,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    minHeight: 120,
+  },
+
+  // Cloud decorations
+  cloudsRow: {
+    height: 40,
+    position: 'relative',
+  },
+  cloudDeco: {
+    position: 'absolute',
+    borderRadius: 30,
+    opacity: 0.5,
+  },
+  cloudDecoLeft: {
+    width: 120,
+    height: 40,
+    bottom: 0,
+    left: -20,
+  },
+  cloudDecoRight: {
+    width: 100,
+    height: 36,
+    bottom: 0,
+    right: 10,
+  },
+
+  // Navigation
+  navRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    gap: 16,
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  backBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  nextBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 28,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  nextBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  // Tab bar
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#E2EAF4',
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 3,
+    fontWeight: '500',
+  },
+});
