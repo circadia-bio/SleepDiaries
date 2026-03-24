@@ -1,5 +1,8 @@
 # 🌙 Sleep Diaries
 
+![](header.png)
+
+
 An open-source, research-grade sleep diary mobile app built with React Native and Expo. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
 ---
