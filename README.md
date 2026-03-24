@@ -233,6 +233,22 @@ To adapt the app for a specific study protocol:
 
 ---
 
+## 👥 Authors
+
+**Northumbria University**
+
+| Role | Name |
+|------|------|
+| Principal Investigator & Supervisor | Lucas França |
+| Principal Investigator & Supervisor | Mario Miguel |
+| Development | Lucas França |
+| Design | Bri Baehl |
+| Design | Jacob Howard |
+| Design | Frederic Kussow |
+| Design | Yuliana Luna Colón |
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome. If you are adapting this for a research study and want to share improvements back, please open a pull request.
