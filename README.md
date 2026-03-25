@@ -269,9 +269,7 @@ The app design was created by exchange students — Bri Baehl, Jacob Howard, Fre
 
 ## 🤖 AI Acknowledgement
 
-Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, and the final report — all through conversation-driven development in a single session.
-
-🔗 [claude.ai](https://claude.ai)
+Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, and the final report.
 
 ---
 
