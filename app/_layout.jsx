@@ -17,7 +17,7 @@ export default function RootLayout() {
     checkName();
   }, []);
 
-  if (!checked) return null; // Splash while checking storage
+  if (!checked) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -26,6 +26,10 @@ export default function RootLayout() {
       <Stack.Screen
         name="questionnaire"
         options={{ animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="past-entries"
+        options={{ animation: 'slide_from_right' }}
       />
     </Stack>
   );
