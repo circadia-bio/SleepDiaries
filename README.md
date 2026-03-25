@@ -27,6 +27,10 @@ The app is intentionally simple and modular — the question sets, input types, 
 
 ---
 
+## 📱 Screens
+
+![](screens.png)
+
 ## 🗂️ Project Structure
 
 ```
