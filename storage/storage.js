@@ -16,23 +16,17 @@ export const loadName = async () => {
 };
 
 // ─── Entries ──────────────────────────────────────────────────────────────────
-
-// Load all entries (returns array, newest first)
 export const loadEntries = async () => {
   const raw = await AsyncStorage.getItem(KEYS.ENTRIES);
   return raw ? JSON.parse(raw) : [];
 };
 
-// Save a completed entry
 export const saveEntry = async (entryType, answers) => {
   const entries = await loadEntries();
   const now = new Date();
-  const dateStr = now.toISOString().split('T')[0]; // e.g. "2024-01-15"
-
-  // Replace if same type + date already exists, otherwise prepend
+  const dateStr = now.toISOString().split('T')[0];
   const id = `${dateStr}-${entryType}`;
   const filtered = entries.filter((e) => e.id !== id);
-
   const newEntry = {
     id,
     type: entryType,
@@ -40,19 +34,16 @@ export const saveEntry = async (entryType, answers) => {
     completedAt: now.toISOString(),
     answers,
   };
-
   await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify([newEntry, ...filtered]));
   return newEntry;
 };
 
-// Check if a specific entry type has been completed today
 export const isTodayComplete = async (entryType) => {
   const entries = await loadEntries();
   const today = new Date().toISOString().split('T')[0];
   return entries.some((e) => e.date === today && e.type === entryType);
 };
 
-// Load today's completion state for both entries
 export const loadTodayStatus = async () => {
   const entries = await loadEntries();
   const today = new Date().toISOString().split('T')[0];
@@ -63,7 +54,79 @@ export const loadTodayStatus = async () => {
   };
 };
 
-// Clear all data (for logout / delete account)
 export const clearAll = async () => {
   await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.ENTRIES]);
+};
+
+// ─── Data export ──────────────────────────────────────────────────────────────
+import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+
+const ALL_QUESTIONS = [...MORNING_QUESTIONS, ...EVENING_QUESTIONS];
+
+const flattenAnswer = (question, value) => {
+  if (value === null || value === undefined) return '';
+  switch (question.type) {
+    case 'time':
+      return `${String(value.hour).padStart(2, '0')}:${String(value.minute).padStart(2, '0')}`;
+    case 'duration':
+      return `${value.hours}h ${value.minutes}m`;
+    case 'yes_no':
+      return value;
+    case 'number':
+      return String(value);
+    case 'rating':
+      return String(value);
+    case 'medication':
+      if (!value || value.length === 0) return '';
+      return value.map((m) => `${m.name}${m.dose ? ` (${m.dose}mg)` : ''}`).join('; ');
+    case 'text_input':
+      return (value || '').replace(/,/g, ';').replace(/\n/g, ' ');
+    default:
+      return String(value);
+  }
+};
+
+// Build a flat CSV string from all entries
+export const exportToCSV = async (userName) => {
+  const entries = await loadEntries();
+  if (entries.length === 0) return null;
+
+  // ── Build headers ──
+  const morningHeaders = MORNING_QUESTIONS.map((q) => `morning_q${q.number}_${q.id}`);
+  const eveningHeaders = EVENING_QUESTIONS.map((q) => `evening_q${q.number}_${q.id}`);
+  const headers = ['participant', 'date', 'entry_type', 'completed_at', ...morningHeaders, ...eveningHeaders];
+
+  // ── Build rows ──
+  const rows = entries.map((entry) => {
+    const isMorning = entry.type === 'morning';
+    const questions = isMorning ? MORNING_QUESTIONS : EVENING_QUESTIONS;
+
+    const morningCols = MORNING_QUESTIONS.map((q) => {
+      if (!isMorning) return '';
+      return flattenAnswer(q, entry.answers?.[q.id]);
+    });
+
+    const eveningCols = EVENING_QUESTIONS.map((q) => {
+      if (isMorning) return '';
+      return flattenAnswer(q, entry.answers?.[q.id]);
+    });
+
+    return [
+      userName ?? 'participant',
+      entry.date,
+      entry.type,
+      entry.completedAt,
+      ...morningCols,
+      ...eveningCols,
+    ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
+  });
+
+  return [headers.join(','), ...rows].join('\n');
+};
+
+// Build a JSON export string
+export const exportToJSON = async (userName) => {
+  const entries = await loadEntries();
+  if (entries.length === 0) return null;
+  return JSON.stringify({ participant: userName, exportedAt: new Date().toISOString(), entries }, null, 2);
 };

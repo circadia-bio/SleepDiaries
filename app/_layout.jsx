@@ -9,9 +9,7 @@ export default function RootLayout() {
   useEffect(() => {
     const checkName = async () => {
       const name = await loadName();
-      if (name) {
-        router.replace('/(tabs)/home');
-      }
+      if (name) router.replace('/(tabs)/home');
       setChecked(true);
     };
     checkName();
@@ -23,14 +21,9 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="questionnaire"
-        options={{ animation: 'slide_from_bottom' }}
-      />
-      <Stack.Screen
-        name="past-entries"
-        options={{ animation: 'slide_from_right' }}
-      />
+      <Stack.Screen name="questionnaire"  options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="past-entries"   options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="export"         options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
 }

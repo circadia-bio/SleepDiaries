@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
 import { saveEntry } from '../storage/storage';
 
-// ─── Colour tokens (morning = amber, evening = blue) ─────────────────────────
 const THEME = {
   morning: {
     primary:     '#E07A20',
@@ -36,6 +35,23 @@ const THEME = {
 
 const pad = (n) => String(n).padStart(2, '0');
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+// ─── Pre-populate all default values upfront ──────────────────────────────────
+const buildInitialAnswers = (questions) => {
+  const answers = {};
+  for (const q of questions) {
+    switch (q.type) {
+      case 'time':       answers[q.id] = q.defaultValue ?? { hour: 12, minute: 0 }; break;
+      case 'duration':   answers[q.id] = q.defaultValue ?? { hours: 0, minutes: 0 }; break;
+      case 'number':     answers[q.id] = q.defaultValue ?? 0; break;
+      case 'medication': answers[q.id] = []; break;
+      case 'text_input': answers[q.id] = ''; break;
+      // yes_no and rating intentionally left null — user must choose
+      default: answers[q.id] = null;
+    }
+  }
+  return answers;
+};
 
 const buildFlow = (questions, answers) => {
   const flow = [];
@@ -169,7 +185,6 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
   const updateMed  = (id, field, val) => onChange(value.map((m) => (m.id === id ? { ...m, [field]: val } : m)));
   const addTime    = (id) => onChange(value.map((m) => (m.id === id ? { ...m, times: [...m.times, ''] } : m)));
   const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((t, i) => (i === idx ? val : t)) } : m));
-
   return (
     <View style={styles.medContainer}>
       {value.map((med) => (
@@ -235,7 +250,8 @@ export default function QuestionnaireScreen() {
   const theme = entryType === 'morning' ? 'morning' : 'evening';
   const c = THEME[theme];
 
-  const [answers, setAnswers] = useState({});
+  // ── Pre-populate ALL defaults so untouched questions still save ──
+  const [answers, setAnswers] = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const flow = buildFlow(allQuestions, answers);
@@ -246,18 +262,7 @@ export default function QuestionnaireScreen() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }, []);
 
-  const getDefaultValue = (q) => {
-    if (q.type === 'time')       return q.defaultValue ?? { hour: 12, minute: 0 };
-    if (q.type === 'duration')   return q.defaultValue ?? { hours: 0, minutes: 0 };
-    if (q.type === 'number')     return q.defaultValue ?? 0;
-    if (q.type === 'rating')     return null;
-    if (q.type === 'yes_no')     return null;
-    if (q.type === 'medication') return [];
-    if (q.type === 'text_input') return '';
-    return null;
-  };
-
-  const currentValue = answers[question?.id] ?? getDefaultValue(question);
+  const currentValue = answers[question?.id] ?? null;
 
   const canProceed = () => {
     if (!question) return false;
@@ -273,7 +278,6 @@ export default function QuestionnaireScreen() {
     if (currentIndex < total - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // ── Save to AsyncStorage ──
       await saveEntry(entryType, answers);
       Alert.alert(
         'Entry complete!',
@@ -295,8 +299,6 @@ export default function QuestionnaireScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: c.background }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-
-        {/* ── Progress bar ── */}
         <View style={styles.progressRow}>
           <Ionicons name="person-circle-outline" size={32} color={c.primary} />
           <View style={[styles.progressTrack, { backgroundColor: c.progressBg }]}>
@@ -320,13 +322,11 @@ export default function QuestionnaireScreen() {
           </View>
         </ScrollView>
 
-        {/* ── Clouds decoration ── */}
         <View style={styles.cloudsRow}>
           <View style={[styles.cloudDeco, styles.cloudDecoLeft,  { backgroundColor: c.progressBg }]} />
           <View style={[styles.cloudDeco, styles.cloudDecoRight, { backgroundColor: c.progressBg }]} />
         </View>
 
-        {/* ── Back / Next buttons ── */}
         <View style={styles.navRow}>
           <TouchableOpacity style={[styles.backBtn, { borderColor: c.primary }]} onPress={handleBack} activeOpacity={0.8}>
             <Ionicons name="arrow-back" size={18} color={c.primary} />
@@ -339,7 +339,6 @@ export default function QuestionnaireScreen() {
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

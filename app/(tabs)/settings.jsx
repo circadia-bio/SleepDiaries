@@ -19,14 +19,12 @@ export default function SettingsScreen() {
   const [textToSpeech, setTextToSpeech]   = useState(false);
   const [biggerText, setBiggerText]       = useState(false);
 
-  // Load saved notification preference on mount
   useEffect(() => {
     loadNotificationsEnabled().then(setNotifications);
   }, []);
 
   const handleNotificationsToggle = async (value) => {
     if (value) {
-      // Check permission before enabling
       const granted = await requestNotificationPermission();
       if (!granted) {
         Alert.alert(
@@ -39,11 +37,10 @@ export default function SettingsScreen() {
     }
     setNotifications(value);
     await saveNotificationsEnabled(value);
-
     if (value) {
       Alert.alert(
         'Reminders set',
-        `You'll receive a morning reminder at 8:00 AM and an evening reminder at 9:00 PM every day.`,
+        "You'll receive a morning reminder at 8:00 AM and an evening reminder at 9:00 PM every day.",
         [
           { text: 'Send test notification', onPress: sendTestNotification },
           { text: 'OK' },
@@ -76,12 +73,12 @@ export default function SettingsScreen() {
     );
   };
 
-  const Row = ({ label, icon, right }) => (
-    <View style={styles.row}>
+  const Row = ({ label, icon, right, onPress }) => (
+    <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
       <Ionicons name={icon} size={20} color="#4A7BB5" style={{ marginRight: 12 }} />
       <Text style={styles.rowLabel}>{label}</Text>
       <View style={styles.rowRight}>{right}</View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -99,28 +96,22 @@ export default function SettingsScreen() {
         {/* Language */}
         <Text style={styles.sectionHeader}>Language</Text>
         <View style={styles.card}>
-          <TouchableOpacity style={styles.row}>
-            <Ionicons name="language-outline" size={20} color="#4A7BB5" style={{ marginRight: 12 }} />
-            <Text style={styles.rowLabel}>Choose Language</Text>
-            <View style={styles.rowRight}>
-              <Text style={styles.rowValue}>English</Text>
-              <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
-            </View>
-          </TouchableOpacity>
+          <Row label="Choose Language" icon="language-outline"
+            right={
+              <View style={styles.rowRight}>
+                <Text style={styles.rowValue}>English</Text>
+                <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+              </View>
+            }
+          />
         </View>
 
         {/* Notifications */}
         <Text style={styles.sectionHeader}>Notifications</Text>
         <View style={styles.card}>
-          <Row
-            label="Daily Reminders"
-            icon="notifications-outline"
+          <Row label="Daily Reminders" icon="notifications-outline"
             right={
-              <Switch
-                value={notifications}
-                onValueChange={handleNotificationsToggle}
-                trackColor={{ true: '#4A7BB5' }}
-              />
+              <Switch value={notifications} onValueChange={handleNotificationsToggle} trackColor={{ true: '#4A7BB5' }} />
             }
           />
           <Text style={styles.cardHint}>
@@ -142,13 +133,22 @@ export default function SettingsScreen() {
           <Text style={styles.cardHint}>Read questions aloud through the speaker.</Text>
         </View>
 
+        {/* Data */}
+        <Text style={styles.sectionHeader}>Data</Text>
+        <View style={styles.card}>
+          <Row
+            label="Export Data"
+            icon="download-outline"
+            onPress={() => router.push('/export')}
+            right={<Ionicons name="chevron-forward" size={16} color="#94A3B8" />}
+          />
+          <Text style={styles.cardHint}>Export your entries as CSV or JSON for research use.</Text>
+        </View>
+
         {/* Account */}
         <Text style={styles.sectionHeader}>Account</Text>
         <View style={styles.card}>
-          <TouchableOpacity style={styles.row} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={20} color="#4A7BB5" style={{ marginRight: 12 }} />
-            <Text style={styles.rowLabel}>Log Out</Text>
-          </TouchableOpacity>
+          <Row label="Log Out" icon="log-out-outline" onPress={handleLogout} right={null} />
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
             <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
