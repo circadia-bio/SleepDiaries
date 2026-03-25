@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { loadName, loadTodayStatus } from '../../storage/storage';
+import { loadName, loadTodayStatus, loadEntries } from '../../storage/storage';
+import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 
 const Icon = ({ name, size = 20, color = '#4A7BB5' }) => {
   const map = {
@@ -31,8 +32,7 @@ const EntryCard = ({ type, completed, onPress }) => {
   return (
     <TouchableOpacity
       style={[styles.entryCard, isMorning ? styles.morningCard : styles.eveningCard]}
-      onPress={onPress}
-      activeOpacity={0.85}
+      onPress={onPress} activeOpacity={0.85}
     >
       <View style={styles.entryCardInner}>
         <Text style={[styles.entryTitle, { color: titleColor }]}>
@@ -53,20 +53,26 @@ const EntryCard = ({ type, completed, onPress }) => {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName]               = useState('');
   const [morningCompleted, setMorningCompleted] = useState(false);
   const [eveningCompleted, setEveningCompleted] = useState(false);
-  const finalReportUnlocked = false;
+  const [reportUnlocked, setReportUnlocked]   = useState(false);
+  const [morningCount, setMorningCount]       = useState(0);
 
-  // Reload every time the screen comes into focus (e.g. after finishing an entry)
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
-        const name = await loadName();
-        const status = await loadTodayStatus();
+        const [name, status, allEntries] = await Promise.all([
+          loadName(),
+          loadTodayStatus(),
+          loadEntries(),
+        ]);
+        const mCount = allEntries.filter((e) => e.type === 'morning').length;
         setUserName(name ?? '');
         setMorningCompleted(status.morningCompleted);
         setEveningCompleted(status.eveningCompleted);
+        setMorningCount(mCount);
+        setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
       };
       load();
     }, [])
@@ -120,6 +126,7 @@ export default function HomeScreen() {
 
         {/* ── Bottom cards row ── */}
         <View style={styles.bottomRow}>
+          {/* Past Entries */}
           <TouchableOpacity
             style={[styles.bottomCard, styles.bottomCardActive]}
             activeOpacity={0.8}
@@ -129,16 +136,30 @@ export default function HomeScreen() {
             <Text style={styles.bottomCardLabel}>Past Entries</Text>
           </TouchableOpacity>
 
+          {/* Final Report */}
           <TouchableOpacity
-            style={[styles.bottomCard, styles.bottomCardLocked]}
-            activeOpacity={finalReportUnlocked ? 0.8 : 1}
-            disabled={!finalReportUnlocked}
+            style={[styles.bottomCard, reportUnlocked ? styles.bottomCardActive : styles.bottomCardLocked]}
+            activeOpacity={reportUnlocked ? 0.8 : 1}
+            onPress={() => reportUnlocked && router.push('/final-report')}
+            disabled={!reportUnlocked}
           >
-            <View style={styles.lockedIconStack}>
-              <Icon name="lock" size={20} color="#94A3B8" />
-              <Icon name="list" size={28} color="#94A3B8" />
-            </View>
-            <Text style={styles.bottomCardLabelLocked}>Final Report</Text>
+            {reportUnlocked ? (
+              <>
+                <Icon name="list" size={32} color="#4A7BB5" />
+                <Text style={styles.bottomCardLabel}>Final Report</Text>
+              </>
+            ) : (
+              <>
+                <View style={styles.lockedIconStack}>
+                  <Icon name="lock" size={20} color="#94A3B8" />
+                  <Icon name="list" size={28} color="#94A3B8" />
+                </View>
+                <Text style={styles.bottomCardLabelLocked}>Final Report</Text>
+                <Text style={styles.bottomCardHint}>
+                  {MIN_ENTRIES_FOR_REPORT - morningCount} more {MIN_ENTRIES_FOR_REPORT - morningCount === 1 ? 'entry' : 'entries'} needed
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -178,7 +199,8 @@ const styles = StyleSheet.create({
   bottomCard:         { flex: 1, borderRadius: 16, padding: 20, alignItems: 'center', justifyContent: 'center', minHeight: 110, borderWidth: 1.5 },
   bottomCardActive:   { backgroundColor: '#F5F9FF', borderColor: '#B0CCEE' },
   bottomCardLocked:   { backgroundColor: '#F0F0F0', borderColor: '#D0D0D0' },
-  lockedIconStack:    { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 8 },
+  lockedIconStack:    { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 4 },
   bottomCardLabel:       { fontSize: 14, fontWeight: '700', color: '#4A7BB5', marginTop: 8 },
   bottomCardLabelLocked: { fontSize: 14, fontWeight: '600', color: '#94A3B8' },
+  bottomCardHint:        { fontSize: 11, color: '#B0CCEE', marginTop: 4, textAlign: 'center' },
 });
