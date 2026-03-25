@@ -21,7 +21,15 @@
     },
     "scheme": "sleep-diaries",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4A7BB5",
+          "sounds": []
+        }
+      ]
     ]
   }
 }

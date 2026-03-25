@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, Switch, Alert,
@@ -6,12 +6,51 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { clearAll } from '../../storage/storage';
+import {
+  loadNotificationsEnabled,
+  saveNotificationsEnabled,
+  sendTestNotification,
+  requestNotificationPermission,
+} from '../../storage/notifications';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const [notifications, setNotifications] = useState(true);
-  const [textToSpeech, setTextToSpeech] = useState(false);
-  const [biggerText, setBiggerText] = useState(false);
+  const [textToSpeech, setTextToSpeech]   = useState(false);
+  const [biggerText, setBiggerText]       = useState(false);
+
+  // Load saved notification preference on mount
+  useEffect(() => {
+    loadNotificationsEnabled().then(setNotifications);
+  }, []);
+
+  const handleNotificationsToggle = async (value) => {
+    if (value) {
+      // Check permission before enabling
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          'Permission required',
+          'Please enable notifications for Sleep Diaries in your device Settings to receive reminders.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
+    setNotifications(value);
+    await saveNotificationsEnabled(value);
+
+    if (value) {
+      Alert.alert(
+        'Reminders set',
+        `You'll receive a morning reminder at 8:00 AM and an evening reminder at 9:00 PM every day.`,
+        [
+          { text: 'Send test notification', onPress: sendTestNotification },
+          { text: 'OK' },
+        ]
+      );
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -50,12 +89,14 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Settings</Text>
 
+        {/* Accessibility */}
         <Text style={styles.sectionHeader}>Accessibility</Text>
         <View style={styles.card}>
           <Row label="Bigger Text" icon="text-outline"
             right={<Switch value={biggerText} onValueChange={setBiggerText} trackColor={{ true: '#4A7BB5' }} />} />
         </View>
 
+        {/* Language */}
         <Text style={styles.sectionHeader}>Language</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row}>
@@ -68,13 +109,32 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Notifications */}
         <Text style={styles.sectionHeader}>Notifications</Text>
         <View style={styles.card}>
-          <Row label="Push Notifications" icon="notifications-outline"
-            right={<Switch value={notifications} onValueChange={setNotifications} trackColor={{ true: '#4A7BB5' }} />} />
-          <Text style={styles.cardHint}>Turning on will send push notifications to your device.</Text>
+          <Row
+            label="Daily Reminders"
+            icon="notifications-outline"
+            right={
+              <Switch
+                value={notifications}
+                onValueChange={handleNotificationsToggle}
+                trackColor={{ true: '#4A7BB5' }}
+              />
+            }
+          />
+          <Text style={styles.cardHint}>
+            Morning reminder at 8:00 AM and evening reminder at 9:00 PM every day.
+          </Text>
+          {notifications && (
+            <TouchableOpacity style={styles.testBtn} onPress={sendTestNotification}>
+              <Ionicons name="notifications-outline" size={14} color="#4A7BB5" />
+              <Text style={styles.testBtnText}>Send test notification</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
+        {/* Text to Speech */}
         <Text style={styles.sectionHeader}>Text to Speech</Text>
         <View style={styles.card}>
           <Row label="Text to Speech" icon="volume-medium-outline"
@@ -82,6 +142,7 @@ export default function SettingsScreen() {
           <Text style={styles.cardHint}>Read questions aloud through the speaker.</Text>
         </View>
 
+        {/* Account */}
         <Text style={styles.sectionHeader}>Account</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row} onPress={handleLogout}>
@@ -114,4 +175,6 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: 14, color: '#94A3B8' },
   divider:  { height: 1, backgroundColor: '#E2EAF4' },
   cardHint: { fontSize: 12, color: '#94A3B8', paddingBottom: 12, lineHeight: 18 },
+  testBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14 },
+  testBtnText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
 });
