@@ -244,15 +244,11 @@ To adapt the app for a specific study protocol:
 
 **Northumbria University**
 
-| Role | Name |
-|------|------|
-| Principal Investigator & Supervisor | Lucas França |
-| Principal Investigator & Supervisor | Mario Miguel |
+| Role | Names |
+|------|-------|
+| Principal Investigators & Supervisors | Lucas França, Mario Miguel |
 | Development | Lucas França |
-| Design | Bri Baehl |
-| Design | Jacob Howard |
-| Design | Frederic Kussow |
-| Design | Yuliana Luna Colón |
+| Design | Bri Baehl, Jacob Howard, Frederic Kussow, Yuliana Luna Colón |
 
 ---
 
@@ -274,8 +270,8 @@ Contributions are welcome. If you are adapting this for a research study and wan
 |---------|---------|---------|
 | `expo` | ~55.0.8 | Core Expo SDK |
 | `expo-router` | ~55.0.7 | File-based navigation |
-| `react-native` | 0.83.2 | Cross-platform mobile framework |
-| `@expo/vector-icons` | bundled | Ionicons icon set |
+| `react-native` | 0.79.2 | Cross-platform mobile framework |
+| `@expo/vector-icons` | ^14.0.0 | Ionicons icon set |
 | `@react-native-async-storage/async-storage` | 2.2.0 | Local data persistence |
 | `expo-notifications` | ~55.0.13 | Push notifications for reminders |
 | `react-native-safe-area-context` | ~5.6.2 | Safe area handling |
