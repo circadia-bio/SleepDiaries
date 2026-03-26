@@ -4,7 +4,7 @@
 
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
-🌐 **Web app:** _link coming soon_
+🌐 **Web app:** https://sleepdiaries.circadia-lab.uk
 
 ---
 
@@ -111,7 +111,7 @@ npm run deploy
 
 Then drag the `docs/` folder to [Netlify Drop](https://app.netlify.com/drop), or connect your repository for automatic deployments.
 
-🌐 **Live web app:** _link coming soon_
+🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
 
 ---
 
