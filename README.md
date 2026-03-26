@@ -30,7 +30,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
 - 📱 **iOS & Android** — single codebase via React Native + Expo
-- 🌐 **Web** — responsive web app hosted via Netlify, constrained to a mobile-phone layout on desktop
+- 🌐 **Web** — responsive web app hosted, constrained to a mobile-phone layout on desktop
 
 ---
 
