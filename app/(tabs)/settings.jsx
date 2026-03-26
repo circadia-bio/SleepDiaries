@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Image, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Switch, Alert, Platform,
+  SafeAreaView, ScrollView, Switch, Alert, Platform, Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -153,11 +153,14 @@ export default function SettingsScreen() {
             resizeMode="contain"
           />
           <Text style={styles.aboutText}>© Circadia Lab</Text>
-          <Text style={styles.aboutText}>MIT License</Text>
+          <Text style={styles.aboutText}>MIT Licence</Text>
           <Text style={styles.aboutSmall}>Lucas França · Mario Leocadio-Miguel</Text>
           <Text style={styles.aboutLabel}>Design</Text>
           <Text style={styles.aboutSmall}>Bri Baehl · Jacob Howard</Text>
           <Text style={styles.aboutSmall}>Frederic Kussow · Yuliana Luna Colón</Text>
+          <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
+            <Text style={styles.aboutLinkText}>circadia-lab.uk</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Account — native only */}
@@ -202,4 +205,6 @@ const styles = StyleSheet.create({
   aboutText:  { fontSize: 14, color: '#1E3A5F', fontWeight: '600' },
   aboutLabel: { fontSize: 12, color: '#E07A20', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   aboutSmall: { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18 },
+  aboutLink:     { marginTop: 8 },
+  aboutLinkText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600', textDecorationLine: 'underline' },
 });
