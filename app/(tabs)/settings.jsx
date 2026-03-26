@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, Image, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, Switch, Alert, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -144,6 +144,22 @@ export default function SettingsScreen() {
           <Text style={styles.cardHint}>Export your entries as CSV or JSON for research use.</Text>
         </View>
 
+        {/* About */}
+        <Text style={styles.sectionHeader}>About</Text>
+        <View style={[styles.card, styles.aboutCard]}>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.aboutText}>© Circadia Lab</Text>
+          <Text style={styles.aboutText}>MIT License</Text>
+          <Text style={styles.aboutSmall}>Lucas França · Mario Leocadio-Miguel</Text>
+          <Text style={styles.aboutLabel}>Design</Text>
+          <Text style={styles.aboutSmall}>Bri Baehl · Jacob Howard</Text>
+          <Text style={styles.aboutSmall}>Frederic Kussow · Yuliana Luna Colón</Text>
+        </View>
+
         {/* Account — native only */}
         {Platform.OS !== 'web' && (
           <>
@@ -180,4 +196,10 @@ const styles = StyleSheet.create({
   cardHint: { fontSize: 12, color: '#94A3B8', paddingBottom: 12, lineHeight: 18 },
   testBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14 },
   testBtnText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
+
+  aboutCard:  { alignItems: 'center', paddingVertical: 20, gap: 4 },
+  logo:       { width: 160, height: 60, marginBottom: 8 },
+  aboutText:  { fontSize: 14, color: '#1E3A5F', fontWeight: '600' },
+  aboutLabel: { fontSize: 12, color: '#E07A20', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
+  aboutSmall: { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18 },
 });
