@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
+import { useFonts } from 'expo-font';
 import { loadName } from '../storage/storage';
 
 export default function RootLayout() {
-  const router = useRouter();
+  const router  = useRouter();
   const [checked, setChecked] = useState(false);
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Livvic-Bold':    require('../assets/fonts/Livvic-Bold.ttf'),
+    'Afacad-Bold':    require('../assets/fonts/Afacad-Bold.ttf'),
+    'Afacad-Medium':  require('../assets/fonts/Afacad-Medium.ttf'),
+    'Afacad-Regular': require('../assets/fonts/Afacad-Regular.ttf'),
+  });
 
   useEffect(() => {
     const checkName = async () => {
@@ -15,6 +23,7 @@ export default function RootLayout() {
     checkName();
   }, []);
 
+  // Don't block on fonts — if they fail or take too long, render anyway
   if (!checked) return null;
 
   return (

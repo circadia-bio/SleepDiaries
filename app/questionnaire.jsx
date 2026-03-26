@@ -1,42 +1,41 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
+  View, Text, TouchableOpacity, StyleSheet,
+  ScrollView, TextInput, KeyboardAvoidingView,
+  Platform, Alert, ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
 import { saveEntry } from '../storage/storage';
 
 const THEME = {
   morning: {
-    primary:     '#E07A20',
-    primaryLight:'#F5C96A',
-    progressBg:  '#F5DEB3',
-    background:  '#FDFAF5',
-    cardBg:      '#FFF8EE',
+    primary:      '#E07A20',
+    primaryLight: '#F5C96A',
+    progressBg:   '#F5DEB3',
+    background:   'transparent',
+    cardBg:       '#FFF8EE',
+    progressFill: '#E07A20',
+    progressTrackBg: '#FFFFFF',
+    progressTrackBorder: '#F5C96A',
   },
   evening: {
-    primary:     '#2A6CB5',
-    primaryLight:'#7EB0E0',
-    progressBg:  '#C8DFF5',
-    background:  '#F5F9FF',
-    cardBg:      '#EEF5FF',
+    primary:      '#2A6CB5',
+    primaryLight: '#7EB0E0',
+    progressBg:   '#C8DFF5',
+    background:   'transparent',
+    cardBg:       '#EEF5FF',
+    progressFill: '#4A9FE0',
+    progressTrackBg: '#FFFFFF',
+    progressTrackBorder: '#A8D0F0',
   },
 };
 
 const pad = (n) => String(n).padStart(2, '0');
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
-// ─── Pre-populate all default values upfront ──────────────────────────────────
 const buildInitialAnswers = (questions) => {
   const answers = {};
   for (const q of questions) {
@@ -46,8 +45,7 @@ const buildInitialAnswers = (questions) => {
       case 'number':     answers[q.id] = q.defaultValue ?? 0; break;
       case 'medication': answers[q.id] = []; break;
       case 'text_input': answers[q.id] = ''; break;
-      // yes_no and rating intentionally left null — user must choose
-      default: answers[q.id] = null;
+      default:           answers[q.id] = null;
     }
   }
   return answers;
@@ -242,20 +240,49 @@ const TextInputField = ({ value, onChange, placeholder, theme }) => {
   );
 };
 
-// ─── Main QuestionnaireScreen ─────────────────────────────────────────────────
+// ─── Progress Bar matching Figma design ───────────────────────────────────────
+const ProgressBar = ({ current, total, theme }) => {
+  const c = THEME[theme];
+  const progress = current / total;
+  return (
+    <View style={styles.progressRow}>
+      {/* Person icon */}
+      <View style={[styles.progressIcon, { borderColor: c.primary }]}>
+        <Ionicons name="person-outline" size={20} color={c.primary} />
+      </View>
+
+      {/* Track */}
+      <View style={[styles.progressTrack, {
+        borderColor: c.progressTrackBorder,
+        backgroundColor: c.progressTrackBg,
+      }]}>
+        <View style={[styles.progressFill, {
+          width: `${progress * 100}%`,
+          backgroundColor: c.progressFill,
+        }]} />
+      </View>
+
+      {/* Counter */}
+      <Text style={[styles.progressLabel, { color: c.primary }]}>
+        {current}/{total}
+      </Text>
+    </View>
+  );
+};
+
 export default function QuestionnaireScreen() {
-  const router = useRouter();
+  const router   = useRouter();
+  const insets   = useSafeAreaInsets();
   const { entryType = 'morning' } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
   const c = THEME[theme];
 
-  // ── Pre-populate ALL defaults so untouched questions still save ──
-  const [answers, setAnswers] = useState(() => buildInitialAnswers(allQuestions));
+  const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const flow = buildFlow(allQuestions, answers);
-  const total = flow.length;
+  const flow     = buildFlow(allQuestions, answers);
+  const total    = flow.length;
   const question = flow[currentIndex];
 
   const setAnswer = useCallback((id, value) => {
@@ -294,17 +321,17 @@ export default function QuestionnaireScreen() {
 
   if (!question) return null;
 
-  const progress = (currentIndex + 1) / total;
-
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: c.background }]}>
+    <ImageBackground
+      source={require('../assets/images/questionnaire-bg.png')}
+      style={styles.root}
+      resizeMode="cover"
+    >
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.progressRow}>
-          <Ionicons name="person-circle-outline" size={32} color={c.primary} />
-          <View style={[styles.progressTrack, { backgroundColor: c.progressBg }]}>
-            <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: c.primary }]} />
-          </View>
-          <Text style={[styles.progressLabel, { color: c.primary }]}>{currentIndex + 1}/{total}</Text>
+
+        {/* ── Progress bar ── */}
+        <View style={{ paddingTop: insets.top + 8 }}>
+          <ProgressBar current={currentIndex + 1} total={total} theme={theme} />
         </View>
 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
@@ -322,12 +349,8 @@ export default function QuestionnaireScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.cloudsRow}>
-          <View style={[styles.cloudDeco, styles.cloudDecoLeft,  { backgroundColor: c.progressBg }]} />
-          <View style={[styles.cloudDeco, styles.cloudDecoRight, { backgroundColor: c.progressBg }]} />
-        </View>
-
-        <View style={styles.navRow}>
+        {/* ── Nav buttons ── */}
+        <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
           <TouchableOpacity style={[styles.backBtn, { borderColor: c.primary }]} onPress={handleBack} activeOpacity={0.8}>
             <Ionicons name="arrow-back" size={18} color={c.primary} />
             <Text style={[styles.backBtnText, { color: c.primary }]}>Back</Text>
@@ -339,21 +362,55 @@ export default function QuestionnaireScreen() {
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
+
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  progressRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8, gap: 10 },
-  progressTrack: { flex: 1, height: 12, borderRadius: 6, overflow: 'hidden' },
-  progressFill:  { height: '100%', borderRadius: 6 },
-  progressLabel: { fontSize: 14, fontWeight: '700', minWidth: 36, textAlign: 'right' },
-  scrollView:    { flex: 1 },
+  root:       { flex: 1 },
+  scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 24 },
   questionText:  { fontSize: 26, fontWeight: '800', marginTop: 24, marginBottom: 40, lineHeight: 34 },
   inputArea:     { alignItems: 'center' },
+
+  // ── Progress bar — matches Figma design ──
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 10,
+  },
+  progressIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
+  progressTrack: {
+    flex: 1,
+    height: 28,              // thick like Figma
+    borderRadius: 14,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 14,
+  },
+  progressLabel: {
+    fontSize: 16,
+    fontWeight: '800',
+    minWidth: 40,
+    textAlign: 'right',
+  },
+
+  // ── Inputs ──
   timeRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
   stepperCol:    { alignItems: 'center', gap: 12 },
   stepBtn:       { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
@@ -388,11 +445,7 @@ const styles = StyleSheet.create({
   addMedBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 14, gap: 8 },
   addMedBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   freeText:      { width: '100%', borderWidth: 1.5, borderRadius: 12, padding: 14, fontSize: 16, minHeight: 120 },
-  cloudsRow:     { height: 40, position: 'relative' },
-  cloudDeco:     { position: 'absolute', borderRadius: 30, opacity: 0.5 },
-  cloudDecoLeft: { width: 120, height: 40, bottom: 0, left: -20 },
-  cloudDecoRight:{ width: 100, height: 36, bottom: 0, right: 10 },
-  navRow:        { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 12, gap: 16 },
+  navRow:        { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12, gap: 16 },
   backBtn:       { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderRadius: 28, paddingHorizontal: 24, paddingVertical: 12, gap: 6 },
   backBtnText:   { fontSize: 16, fontWeight: '700' },
   nextBtn:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 28, paddingVertical: 14, gap: 8 },

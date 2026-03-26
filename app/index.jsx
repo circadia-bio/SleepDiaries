@@ -1,24 +1,21 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, KeyboardAvoidingView, Platform,
+  ActivityIndicator, ImageBackground, Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveName } from '../storage/storage';
 
+const { height: H } = Dimensions.get('window');
+
 export default function LoginScreen() {
-  const router = useRouter();
-  const [name, setName] = useState('');
+  const router  = useRouter();
+  const insets  = useSafeAreaInsets();
+  const [name, setName]       = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError]     = useState('');
 
   const handleStart = async () => {
     if (!name.trim()) {
@@ -33,78 +30,111 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ImageBackground
+      source={require('../assets/images/login-bg.png')}
+      style={styles.root}
+      resizeMode="cover"
+    >
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.cloudTopLeft} />
-        <View style={styles.cloudTopRight} />
-        <View style={styles.cloudBottomLeft} />
-        <View style={styles.cloudBottomRight} />
+        {/* Form anchored to lower-middle of screen */}
+        <View style={[styles.inner, { paddingBottom: insets.bottom + 40 }]}>
 
-        <View style={styles.inner}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoBox}>
-              <Ionicons name="moon" size={36} color="#fff" />
-            </View>
-            <Text style={styles.appName}>Sleep Diaries</Text>
-            <Text style={styles.subtitle}>Let's get started — what's your name?</Text>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <Text style={styles.subtitle}>Enter your name to get started</Text>
+
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Your name"
+              placeholderTextColor="#A0B8D0"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              autoCorrect={false}
+              returnKeyType="go"
+              onSubmitEditing={handleStart}
+            />
           </View>
 
-          <View style={styles.form}>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          <TouchableOpacity
+            style={[styles.loginBtn, (!name.trim() || loading) && styles.loginBtnDisabled]}
+            onPress={handleStart}
+            activeOpacity={0.85}
+            disabled={!name.trim() || loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginBtnText}>Let's go</Text>
+            )}
+          </TouchableOpacity>
 
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="Your name"
-                placeholderTextColor="#A0B4CC"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-                autoCorrect={false}
-                returnKeyType="go"
-                onSubmitEditing={handleStart}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.loginBtn, (!name.trim() || loading) && styles.loginBtnDisabled]}
-              onPress={handleStart}
-              activeOpacity={0.85}
-              disabled={!name.trim() || loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.loginBtnText}>Let's go →</Text>
-              )}
-            </TouchableOpacity>
-          </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea:    { flex: 1, backgroundColor: '#C8DFF5' },
-  container:   { flex: 1 },
-  cloudTopLeft:    { position: 'absolute', width: 160, height: 70, borderRadius: 35, backgroundColor: '#DEEEFA', top: 20,   left: -30,  opacity: 0.8 },
-  cloudTopRight:   { position: 'absolute', width: 120, height: 55, borderRadius: 28, backgroundColor: '#DEEEFA', top: 50,   right: -20, opacity: 0.7 },
-  cloudBottomLeft: { position: 'absolute', width: 140, height: 60, borderRadius: 30, backgroundColor: '#DEEEFA', bottom: 30, left: -20,  opacity: 0.7 },
-  cloudBottomRight:{ position: 'absolute', width: 180, height: 70, borderRadius: 35, backgroundColor: '#DEEEFA', bottom: 10, right: -30, opacity: 0.8 },
-  inner:          { flex: 1, paddingHorizontal: 32, justifyContent: 'center', gap: 32 },
-  logoContainer:  { alignItems: 'center', gap: 8 },
-  logoBox:        { width: 80, height: 80, borderRadius: 20, backgroundColor: '#4A7BB5', alignItems: 'center', justifyContent: 'center', marginBottom: 8, transform: [{ rotate: '-8deg' }] },
-  appName:        { fontSize: 32, fontWeight: '800', color: '#E07A20', letterSpacing: 0.5 },
-  subtitle:       { fontSize: 14, color: '#4A7BB5', textAlign: 'center' },
-  form:           { gap: 14 },
-  inputWrapper:   { position: 'relative', justifyContent: 'center' },
-  input:          { backgroundColor: '#EEF5FF', borderWidth: 1.5, borderColor: '#B0CCEE', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 14, fontSize: 16, color: '#1E3A5F' },
-  errorText:      { color: '#C0392B', fontSize: 13, textAlign: 'center', fontWeight: '500' },
-  loginBtn:       { backgroundColor: '#4A7BB5', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 4 },
-  loginBtnDisabled: { backgroundColor: '#A0B4CC' },
-  loginBtnText:   { color: '#fff', fontSize: 18, fontWeight: '700' },
+  root:      { flex: 1 },
+  container: { flex: 1 },
+
+  inner: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 36,
+    paddingTop: 24,
+    gap: 14,
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#4A6A8A',
+    textAlign: 'center',
+    fontWeight: '400',
+  },
+  errorText: {
+    color: '#C0392B',
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  inputWrapper: { justifyContent: 'center' },
+  input: {
+    backgroundColor: 'rgba(240, 247, 255, 0.92)',
+    borderWidth: 1.5,
+    borderColor: '#7EB0DC',
+    borderRadius: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: '#1E3A5F',
+  },
+  loginBtn: {
+    backgroundColor: '#5B9BC5',
+    borderRadius: 30,
+    paddingVertical: 17,
+    alignItems: 'center',
+    shadowColor: '#3A7AAA',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  loginBtnDisabled: {
+    backgroundColor: '#A0BDD4',
+    shadowOpacity: 0,
+  },
+  loginBtnText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
 });

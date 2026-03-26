@@ -1,71 +1,72 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, StatusBar,
+  StyleSheet, StatusBar, Dimensions, ImageBackground,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FONTS } from '../../theme/typography';
 import { loadName, loadTodayStatus, loadEntries } from '../../storage/storage';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 
-const Icon = ({ name, size = 20, color = '#4A7BB5' }) => {
-  const map = {
-    sun:     'sunny-outline',
-    moon:    'moon-outline',
-    clock:   'time-outline',
-    list:    'clipboard-outline',
-    lock:    'lock-closed-outline',
-    profile: 'person-circle-outline',
-    warning: 'alert-circle-outline',
-    check:   'checkmark-circle-outline',
-  };
-  return <Ionicons name={map[name] ?? 'ellipse-outline'} size={size} color={color} />;
-};
+const { height: H } = Dimensions.get('window');
 
-const EntryCard = ({ type, completed, onPress }) => {
-  const isMorning = type === 'morning';
-  const titleColor = isMorning ? '#C25E00' : '#1E4A8A';
+const EntryCard = ({ type, completed, morningDone, onPress }) => {
+  const isMorning  = type === 'morning';
+  const isLocked   = !isMorning && !morningDone;
+  const titleColor = isMorning ? '#C25E00' : '#1A3D6E';
+  const bgColor    = isMorning ? '#F5C96A' : '#7EB0E0';
+
   const statusLabel = completed
     ? `${isMorning ? 'Morning' : 'Evening'} Entry Completed`
+    : isLocked
+    ? 'Complete a Morning Entry first\nbefore an Evening Entry.'
     : `New Action Item: Complete ${isMorning ? 'Morning' : 'Evening'} Entry`;
 
   return (
     <TouchableOpacity
-      style={[styles.entryCard, isMorning ? styles.morningCard : styles.eveningCard]}
-      onPress={onPress} activeOpacity={0.85}
+      style={[styles.entryCard, { backgroundColor: bgColor }, isLocked && styles.entryCardLocked]}
+      onPress={onPress}
+      activeOpacity={isLocked ? 1 : 0.85}
+      disabled={isLocked}
     >
-      <View style={styles.entryCardInner}>
+      <View style={styles.entryTitleRow}>
         <Text style={[styles.entryTitle, { color: titleColor }]}>
-          {isMorning ? 'Morning Entry ' : 'Evening Entry '}
-          <Icon name={isMorning ? 'sun' : 'moon'} size={18} color={titleColor} />
+          {isMorning ? 'Morning Entry' : 'Evening Entry'}
         </Text>
-        <View style={styles.statusBadge}>
-          {!completed && <Icon name="warning" size={14} color="#1E4A8A" />}
-          <Text style={[completed ? styles.statusTextComplete : styles.statusTextPending, { marginHorizontal: 4 }]}>
-            {statusLabel}
-          </Text>
-          {completed && <Icon name="check" size={14} color="#7A4800" />}
-        </View>
+        <Ionicons name={isMorning ? 'sunny' : 'moon'} size={22} color={titleColor} />
       </View>
+      {!isLocked ? (
+        <View style={styles.statusBadge}>
+          <Ionicons
+            name={completed ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+            size={14} color={titleColor}
+          />
+          <Text style={[styles.statusText, { color: titleColor }]}> {statusLabel}</Text>
+        </View>
+      ) : (
+        <Text style={styles.lockedMsg}>{statusLabel}</Text>
+      )}
     </TouchableOpacity>
   );
 };
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [userName, setUserName]               = useState('');
+  const insets = useSafeAreaInsets();
+
+  const [userName, setUserName]                 = useState('');
   const [morningCompleted, setMorningCompleted] = useState(false);
   const [eveningCompleted, setEveningCompleted] = useState(false);
-  const [reportUnlocked, setReportUnlocked]   = useState(false);
-  const [morningCount, setMorningCount]       = useState(0);
+  const [reportUnlocked, setReportUnlocked]     = useState(false);
+  const [morningCount, setMorningCount]         = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
         const [name, status, allEntries] = await Promise.all([
-          loadName(),
-          loadTodayStatus(),
-          loadEntries(),
+          loadName(), loadTodayStatus(), loadEntries(),
         ]);
         const mCount = allEntries.filter((e) => e.type === 'morning').length;
         setUserName(name ?? '');
@@ -79,128 +80,144 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#DDEEFF" />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <View style={styles.root}>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
-        {/* ── Header ── */}
+      <ImageBackground
+        source={require('../../assets/images/homepage-bg.png')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
-          <View style={styles.headerSky}>
-            <View style={[styles.cloud, styles.cloudLeft]} />
-            <View style={[styles.cloud, styles.cloudRight]} />
-          </View>
           <View style={styles.headerContent}>
-            <View>
-              <Text style={styles.welcomeText}>Welcome,</Text>
-              <Text style={styles.userName}>{userName}!</Text>
+            <View style={styles.welcomeContainer}>
+              <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>Welcome,</Text>
+              <Text style={[styles.userName,    { fontFamily: FONTS.heading }]}>{userName}!</Text>
             </View>
             <TouchableOpacity style={styles.profileButton}>
-              <Icon name="profile" size={24} color="#4A7BB5" />
-              <Text style={styles.profileLabel}>Profile</Text>
+              <Ionicons name="person-circle-outline" size={32} color="#4A7BB5" />
+              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>Profile</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* ── New Entry section ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>New Entry</Text>
-          <EntryCard
-            type="morning"
-            completed={morningCompleted}
-            onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
-          />
-          <EntryCard
-            type="evening"
-            completed={eveningCompleted}
-            onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
-          />
-        </View>
+        <View style={styles.body}>
 
-        {/* ── Instructions card ── */}
-        <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8}>
-          <Text style={styles.instructionsTitle}>Instructions</Text>
-          <Text style={styles.instructionsBody}>
-            Click here to learn more about sleep diaries and additional information.
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>New Entry</Text>
+            <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
+              onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
+            <EntryCard type="evening" completed={eveningCompleted} morningDone={morningCompleted}
+              onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} />
+          </View>
 
-        {/* ── Bottom cards row ── */}
-        <View style={styles.bottomRow}>
-          {/* Past Entries */}
-          <TouchableOpacity
-            style={[styles.bottomCard, styles.bottomCardActive]}
-            activeOpacity={0.8}
-            onPress={() => router.push('/past-entries')}
-          >
-            <Icon name="clock" size={32} color="#4A7BB5" />
-            <Text style={styles.bottomCardLabel}>Past Entries</Text>
+          <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8}>
+            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>Instructions</Text>
+            <Text style={[styles.instructionsBody,  { fontFamily: FONTS.bodyRegular }]}>
+              Click here to learn more about sleep diaries and additional information.
+            </Text>
           </TouchableOpacity>
 
-          {/* Final Report */}
-          <TouchableOpacity
-            style={[styles.bottomCard, reportUnlocked ? styles.bottomCardActive : styles.bottomCardLocked]}
-            activeOpacity={reportUnlocked ? 0.8 : 1}
-            onPress={() => reportUnlocked && router.push('/final-report')}
-            disabled={!reportUnlocked}
-          >
-            {reportUnlocked ? (
-              <>
-                <Icon name="list" size={32} color="#4A7BB5" />
-                <Text style={styles.bottomCardLabel}>Final Report</Text>
-              </>
-            ) : (
-              <>
-                <View style={styles.lockedIconStack}>
-                  <Icon name="lock" size={20} color="#94A3B8" />
-                  <Icon name="list" size={28} color="#94A3B8" />
-                </View>
-                <Text style={styles.bottomCardLabelLocked}>Final Report</Text>
-                <Text style={styles.bottomCardHint}>
-                  {MIN_ENTRIES_FOR_REPORT - morningCount} more {MIN_ENTRIES_FOR_REPORT - morningCount === 1 ? 'entry' : 'entries'} needed
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+          <View style={styles.bottomRow}>
+            <TouchableOpacity style={[styles.bottomCard, styles.bottomCardActive]}
+              onPress={() => router.push('/past-entries')} activeOpacity={0.8}>
+              <Ionicons name="time" size={36} color="#4A7BB5" />
+              <Text style={[styles.bottomCardLabel, { fontFamily: FONTS.body }]}>Past Entries</Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity
+              style={[styles.bottomCard, reportUnlocked ? styles.bottomCardActive : styles.bottomCardLocked]}
+              onPress={() => reportUnlocked && router.push('/final-report')}
+              activeOpacity={reportUnlocked ? 0.8 : 1} disabled={!reportUnlocked}
+            >
+              {reportUnlocked ? (
+                <>
+                  <Ionicons name="clipboard" size={36} color="#4A7BB5" />
+                  <Text style={[styles.bottomCardLabel, { fontFamily: FONTS.body }]}>Final Report</Text>
+                </>
+              ) : (
+                <>
+                  <View style={styles.lockedStack}>
+                    <Ionicons name="lock-closed" size={18} color="#94A3B8" />
+                    <Ionicons name="clipboard-outline" size={32} color="#94A3B8" />
+                  </View>
+                  <Text style={[styles.bottomCardLabelLocked, { fontFamily: FONTS.bodyMedium }]}>Final Report</Text>
+                  <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
+                    {MIN_ENTRIES_FOR_REPORT - morningCount} more {(MIN_ENTRIES_FOR_REPORT - morningCount) === 1 ? 'entry' : 'entries'} needed
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea:      { flex: 1, backgroundColor: '#EEF5FF' },
+  root:          { flex: 1 },
   scrollView:    { flex: 1 },
-  scrollContent: { paddingBottom: 24 },
-  header:        { backgroundColor: '#C8DFF5', paddingBottom: 24, overflow: 'hidden' },
-  headerSky:     { height: 48, position: 'relative' },
-  cloud:         { position: 'absolute', backgroundColor: '#DEEEFA', borderRadius: 40, opacity: 0.8 },
-  cloudLeft:     { width: 100, height: 40, top: 8,  left: -10 },
-  cloudRight:    { width: 80,  height: 34, top: 4,  right: 20 },
-  headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 24, paddingTop: 4 },
-  welcomeText:   { fontSize: 32, fontWeight: '700', color: '#1E3A5F', lineHeight: 38 },
-  userName:      { fontSize: 32, fontWeight: '700', color: '#1E3A5F', lineHeight: 38 },
-  profileButton: { alignItems: 'center', marginTop: 4 },
-  profileLabel:  { fontSize: 12, color: '#4A7BB5', marginTop: 2, fontWeight: '500' },
-  section:       { margin: 16, borderWidth: 1.5, borderColor: '#B0CCEE', borderRadius: 16, padding: 16, backgroundColor: '#F5F9FF' },
-  sectionLabel:  { position: 'absolute', top: -10, left: 16, backgroundColor: '#F5F9FF', paddingHorizontal: 8, fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
-  entryCard:     { borderRadius: 12, padding: 16, marginBottom: 12 },
-  morningCard:   { backgroundColor: '#F5C96A' },
-  eveningCard:   { backgroundColor: '#7EB0E0' },
-  entryCardInner:{ alignItems: 'center' },
-  entryTitle:    { fontSize: 20, fontWeight: '700', marginBottom: 10 },
-  statusBadge:   { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.55)' },
-  statusTextComplete: { fontSize: 13, fontWeight: '600', color: '#7A4800' },
-  statusTextPending:  { fontSize: 13, fontWeight: '600', color: '#1E4A8A' },
-  instructionsCard:   { marginHorizontal: 16, marginBottom: 16, borderWidth: 1.5, borderColor: '#B0CCEE', borderRadius: 16, padding: 20, backgroundColor: '#F5F9FF', alignItems: 'center' },
-  instructionsTitle:  { fontSize: 18, fontWeight: '700', color: '#1E3A5F', marginBottom: 6 },
-  instructionsBody:   { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
-  bottomRow:          { flexDirection: 'row', marginHorizontal: 16, gap: 12 },
-  bottomCard:         { flex: 1, borderRadius: 16, padding: 20, alignItems: 'center', justifyContent: 'center', minHeight: 110, borderWidth: 1.5 },
-  bottomCardActive:   { backgroundColor: '#F5F9FF', borderColor: '#B0CCEE' },
-  bottomCardLocked:   { backgroundColor: '#F0F0F0', borderColor: '#D0D0D0' },
-  lockedIconStack:    { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 4 },
-  bottomCardLabel:       { fontSize: 14, fontWeight: '700', color: '#4A7BB5', marginTop: 8 },
-  bottomCardLabelLocked: { fontSize: 14, fontWeight: '600', color: '#94A3B8' },
-  bottomCardHint:        { fontSize: 11, color: '#B0CCEE', marginTop: 4, textAlign: 'center' },
+  scrollContent: { paddingBottom: 32, minHeight: H },
+
+  header: { paddingTop: 50, paddingBottom: 12 },
+  headerContent: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'flex-start', paddingHorizontal: 20,
+  },
+  welcomeContainer: { flex: 1, marginRight: 12 },
+  welcomeText: { fontSize: 34, color: '#1A3A5C', lineHeight: 40 },
+  userName:    { fontSize: 34, color: '#1A3A5C', lineHeight: 40 },
+  profileButton: { alignItems: 'center', paddingTop: 4 },
+  profileLabel:  { fontSize: 12, color: '#4A7BB5', marginTop: 2 },
+
+  body: { paddingHorizontal: 16, paddingTop: 12, gap: 14 },
+
+  section: {
+    borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
+    padding: 14, paddingTop: 20, backgroundColor: 'rgba(255,255,255,0.92)', position: 'relative',
+  },
+  sectionLabel: {
+    position: 'absolute', top: -11, left: 14,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    paddingHorizontal: 8, fontSize: 13, color: '#4A7BB5',
+  },
+
+  entryCard:       { borderRadius: 14, padding: 18, marginBottom: 10 },
+  entryCardLocked: { opacity: 0.85 },
+  entryTitleRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 },
+  entryTitle:      { fontSize: 20, fontFamily: 'Afacad-Bold', textAlign: 'center' },
+  statusBadge: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'center',
+  },
+  statusText: { fontSize: 13, fontFamily: 'Afacad-Medium' },
+  lockedMsg:  { fontSize: 13, fontFamily: 'Afacad-Regular', color: '#1A3D6E', textAlign: 'center', lineHeight: 19 },
+
+  instructionsCard: {
+    borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
+    padding: 20, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center',
+  },
+  instructionsTitle: { fontSize: 18, color: '#1A3A5C', marginBottom: 6 },
+  instructionsBody:  { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
+
+  bottomRow: { flexDirection: 'row', gap: 12 },
+  bottomCard: {
+    flex: 1, borderRadius: 18, padding: 20,
+    alignItems: 'center', justifyContent: 'center', minHeight: 115, borderWidth: 1.5,
+  },
+  bottomCardActive: { backgroundColor: 'rgba(255,255,255,0.92)', borderColor: '#A8C8E8' },
+  bottomCardLocked: { backgroundColor: 'rgba(235,235,235,0.92)', borderColor: '#D0D0D0' },
+  lockedStack:           { flexDirection: 'row', alignItems: 'flex-end', gap: 2, marginBottom: 4 },
+  bottomCardLabel:       { fontSize: 14, color: '#4A7BB5', marginTop: 8 },
+  bottomCardLabelLocked: { fontSize: 14, color: '#94A3B8', marginTop: 4 },
+  bottomCardHint:        { fontSize: 11, color: '#B0C8D8', marginTop: 3, textAlign: 'center' },
 });
