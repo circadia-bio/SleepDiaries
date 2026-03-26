@@ -1,7 +1,5 @@
 # 🌙 Sleep Diaries
 
-![](assets/images/logo.png)
-
 ![](header.png)
 
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
@@ -330,6 +328,8 @@ Contributions are welcome. If you are adapting this for a research study and wan
 ---
 
 ## 📄 Licence
+
+![](assets/images/logo.png)
 
 Copyright © Circadia Lab — Lucas França & Mario Leocadio-Miguel
 
