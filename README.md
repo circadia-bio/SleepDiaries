@@ -1,14 +1,18 @@
 # 🌙 Sleep Diaries
 
+![](assets/images/logo.png)
+
 ![](header.png)
 
-An open-source, research-grade sleep diary mobile app built with React Native and Expo. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
+An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
+
+🌐 **Web app:** _link coming soon_
 
 ---
 
 ## 📖 What is Sleep Diaries?
 
-Sleep Diaries is a cross-platform mobile app (iOS & Android) that guides users through structured morning and evening questionnaires to track their sleep patterns over time. It is based on consensus sleep diary methodology used in clinical sleep research.
+Sleep Diaries is a cross-platform app (iOS, Android, and web) that guides users through structured morning and evening questionnaires to track their sleep patterns over time. It is based on consensus sleep diary methodology used in clinical sleep research.
 
 The app is intentionally simple and modular — the question sets, input types, themes, and data storage can all be customised without touching the core navigation or UI logic.
 
@@ -28,6 +32,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
 - 📱 **iOS & Android** — single codebase via React Native + Expo
+- 🌐 **Web** — responsive web app hosted via Netlify, constrained to a mobile-phone layout on desktop
 
 ---
 
@@ -89,6 +94,26 @@ npx expo start
 ```
 
 Then press `i` for iOS simulator, `a` for Android emulator, or scan the QR code with Expo Go on your phone.
+
+### Running on web (development)
+
+```bash
+npx expo start --web
+```
+
+### Deploying to the web (Netlify)
+
+```bash
+# Export the web build
+npx expo export -p web --output-dir docs --clear
+
+# Run the deploy script (handles font paths and redirects)
+npm run deploy
+```
+
+Then drag the `docs/` folder to [Netlify Drop](https://app.netlify.com/drop), or connect your repository for automatic deployments.
+
+🌐 **Live web app:** _link coming soon_
 
 ---
 
@@ -249,11 +274,11 @@ The final report (unlocked after 3 morning entries) automatically computes:
 
 ## 👥 Authors
 
-**Northumbria University**
+**Northumbria University — Circadia Lab**
 
 | Role | Names |
 |------|-------|
-| Principal Investigators & Supervisors | Lucas França, Mario Miguel |
+| Principal Investigators | Lucas França, Mario Leocadio-Miguel |
 | Development | Lucas França |
 | Design | Bri Baehl, Jacob Howard, Frederic Kussow, Yuliana Luna Colón |
 
@@ -306,7 +331,11 @@ Contributions are welcome. If you are adapting this for a research study and wan
 
 ## 📄 Licence
 
-See [LICENSE](./LICENSE) for details.
+Copyright © Circadia Lab — Lucas França & Mario Leocadio-Miguel
+
+Released under the [MIT License](./LICENSE).
+
+Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 
 ---
 
@@ -318,5 +347,6 @@ See [LICENSE](./LICENSE) for details.
 - [x] Final report with sleep metrics
 - [x] Push notification reminders (morning + evening)
 - [x] Data export (CSV / JSON)
+- [x] Web app (Netlify)
 - [ ] Backend API integration
 - [ ] Multi-language support
