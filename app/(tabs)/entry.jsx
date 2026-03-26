@@ -1,53 +1,69 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState, useCallback } from 'react';
+import { View, Image, TouchableOpacity, StyleSheet, Platform, ImageBackground } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useInsets } from '../../theme/useInsets';
+import { loadTodayStatus } from '../../storage/storage';
+
+const CARD_IMAGES = {
+  morningPending:   require('../../assets/images/morning_pending.png'),
+  morningCompleted: require('../../assets/images/morning_completed.png'),
+  eveningLocked:    require('../../assets/images/evening_locked.png'),
+  eveningPending:   require('../../assets/images/evening_pending.png'),
+  eveningCompleted: require('../../assets/images/evening_completed.png'),
+};
 
 export default function EntryTab() {
   const router = useRouter();
+  const insets = useInsets();
+  const [morningCompleted, setMorningCompleted] = useState(false);
+  const [eveningCompleted, setEveningCompleted] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTodayStatus().then((status) => {
+        setMorningCompleted(status.morningCompleted);
+        setEveningCompleted(status.eveningCompleted);
+      });
+    }, [])
+  );
+
+  const eveningLocked = !morningCompleted;
+
+  const morningImage = morningCompleted ? CARD_IMAGES.morningCompleted : CARD_IMAGES.morningPending;
+  const eveningImage = eveningLocked
+    ? CARD_IMAGES.eveningLocked
+    : eveningCompleted ? CARD_IMAGES.eveningCompleted : CARD_IMAGES.eveningPending;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>New Entry</Text>
-        <Text style={styles.subtitle}>Which entry would you like to complete?</Text>
-
+    <View style={styles.root}>
+      <ImageBackground
+        source={require('../../assets/images/homepage-bg.png')}
+        style={StyleSheet.absoluteFill}
+        imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
+        resizeMode="cover"
+      />
+      <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity
-          style={[styles.card, styles.morningCard]}
           onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
-          activeOpacity={0.85}
+          activeOpacity={0.9}
         >
-          <Ionicons name="sunny-outline" size={36} color="#C25E00" />
-          <Text style={styles.morningTitle}>Morning Entry</Text>
-          <Text style={styles.morningSub}>About last night's sleep</Text>
+          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.card, styles.eveningCard]}
-          onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
-          activeOpacity={0.85}
+          onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
+          activeOpacity={eveningLocked ? 1 : 0.9}
+          disabled={eveningLocked}
         >
-          <Ionicons name="moon-outline" size={36} color="#1E4A8A" />
-          <Text style={styles.eveningTitle}>Evening Entry</Text>
-          <Text style={styles.eveningSub}>About today's activities</Text>
+          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea:  { flex: 1, backgroundColor: '#EEF5FF' },
-  container: { flex: 1, paddingHorizontal: 24, paddingTop: 48, gap: 16 },
-  title:     { fontSize: 28, fontWeight: '800', color: '#1E3A5F', marginBottom: 4 },
-  subtitle:  { fontSize: 15, color: '#4A7BB5', marginBottom: 16 },
-
-  card: { borderRadius: 16, padding: 28, alignItems: 'center', gap: 8 },
-  morningCard: { backgroundColor: '#F5C96A' },
-  eveningCard: { backgroundColor: '#7EB0E0' },
-
-  morningTitle: { fontSize: 22, fontWeight: '800', color: '#C25E00' },
-  morningSub:   { fontSize: 14, color: '#7A4800' },
-  eveningTitle: { fontSize: 22, fontWeight: '800', color: '#1E4A8A' },
-  eveningSub:   { fontSize: 14, color: '#2A5A8A' },
+  root:      { flex: 1 },
+  container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120 },
+  cardImage: { width: '100%', height: 110, borderRadius: 14 },
 });
