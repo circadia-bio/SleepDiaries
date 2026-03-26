@@ -13,4 +13,7 @@ mkdir -p docs/fonts
 cp node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf docs/fonts/Ionicons.ttf
 echo "Copied Ionicons font with hash: $FONT_HASH"
 
+# Copy social preview image
+cp assets/images/social.png docs/social.png
+
 echo "✅ Done — drag docs/ to Netlify"
