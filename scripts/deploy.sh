@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-/opt/homebrew/bin/npx expo export -p web --output-dir docs --clear
+npx expo export -p web --output-dir docs --clear
 touch docs/.nojekyll
 cp docs/index.html docs/404.html
 # Get font hash for redirect rule

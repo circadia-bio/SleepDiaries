@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
@@ -309,6 +309,12 @@ export default function QuestionnaireScreen() {
     return true;
   };
 
+  useEffect(() => {
+    if (!done) return;
+    const timer = setTimeout(() => router.replace('/(tabs)/home'), 2500);
+    return () => clearTimeout(timer);
+  }, [done]);
+
   const handleNext = async () => {
     if (!canProceed()) return;
     if (currentIndex < total - 1) {
@@ -316,7 +322,6 @@ export default function QuestionnaireScreen() {
     } else {
       await saveEntry(entryType, answers);
       setDone(true);
-      setTimeout(() => router.replace('/(tabs)/home'), 2500);
     }
   };
 
@@ -324,8 +329,6 @@ export default function QuestionnaireScreen() {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
     else router.back();
   };
-
-  if (!question && !done) return null;
 
   if (done) {
     const isMorning = entryType === 'morning';
@@ -346,6 +349,8 @@ export default function QuestionnaireScreen() {
       </TouchableOpacity>
     );
   }
+
+  if (!question) return null;
 
   return (
     <ImageBackground
