@@ -33,6 +33,7 @@ export default function LoginScreen() {
     <ImageBackground
       source={require('../assets/images/login-bg.png')}
       style={styles.root}
+      imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
       resizeMode="cover"
     >
       <KeyboardAvoidingView

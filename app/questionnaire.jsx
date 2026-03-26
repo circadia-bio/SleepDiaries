@@ -333,6 +333,7 @@ export default function QuestionnaireScreen() {
     <ImageBackground
       source={require('../assets/images/questionnaire-bg.png')}
       style={styles.root}
+      imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
       resizeMode="cover"
     >
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
