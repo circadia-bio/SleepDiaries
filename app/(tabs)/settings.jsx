@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Switch, Alert,
+  SafeAreaView, ScrollView, Switch, Alert, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,54 +86,53 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Settings</Text>
 
-        {/* Accessibility */}
-        <Text style={styles.sectionHeader}>Accessibility</Text>
-        <View style={styles.card}>
-          <Row label="Bigger Text" icon="text-outline"
-            right={<Switch value={biggerText} onValueChange={setBiggerText} trackColor={{ true: '#4A7BB5' }} />} />
-        </View>
+        {/* Native-only sections */}
+        {Platform.OS !== 'web' && (
+          <>
+            <Text style={styles.sectionHeader}>Accessibility</Text>
+            <View style={styles.card}>
+              <Row label="Bigger Text" icon="text-outline"
+                right={<Switch value={biggerText} onValueChange={setBiggerText} trackColor={{ true: '#4A7BB5' }} />} />
+            </View>
 
-        {/* Language */}
-        <Text style={styles.sectionHeader}>Language</Text>
-        <View style={styles.card}>
-          <Row label="Choose Language" icon="language-outline"
-            right={
-              <View style={styles.rowRight}>
-                <Text style={styles.rowValue}>English</Text>
-                <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
-              </View>
-            }
-          />
-        </View>
+            <Text style={styles.sectionHeader}>Language</Text>
+            <View style={styles.card}>
+              <Row label="Choose Language" icon="language-outline"
+                right={
+                  <View style={styles.rowRight}>
+                    <Text style={styles.rowValue}>English</Text>
+                    <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+                  </View>
+                }
+              />
+            </View>
 
-        {/* Notifications */}
-        <Text style={styles.sectionHeader}>Notifications</Text>
-        <View style={styles.card}>
-          <Row label="Daily Reminders" icon="notifications-outline"
-            right={
-              <Switch value={notifications} onValueChange={handleNotificationsToggle} trackColor={{ true: '#4A7BB5' }} />
-            }
-          />
-          <Text style={styles.cardHint}>
-            Morning reminder at 8:00 AM and evening reminder at 9:00 PM every day.
-          </Text>
-          {notifications && (
-            <TouchableOpacity style={styles.testBtn} onPress={sendTestNotification}>
-              <Ionicons name="notifications-outline" size={14} color="#4A7BB5" />
-              <Text style={styles.testBtnText}>Send test notification</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+            <Text style={styles.sectionHeader}>Notifications</Text>
+            <View style={styles.card}>
+              <Row label="Daily Reminders" icon="notifications-outline"
+                right={<Switch value={notifications} onValueChange={handleNotificationsToggle} trackColor={{ true: '#4A7BB5' }} />}
+              />
+              <Text style={styles.cardHint}>
+                Morning reminder at 8:00 AM and evening reminder at 9:00 PM every day.
+              </Text>
+              {notifications && (
+                <TouchableOpacity style={styles.testBtn} onPress={sendTestNotification}>
+                  <Ionicons name="notifications-outline" size={14} color="#4A7BB5" />
+                  <Text style={styles.testBtnText}>Send test notification</Text>
+                </TouchableOpacity>
+              )}
+            </View>
 
-        {/* Text to Speech */}
-        <Text style={styles.sectionHeader}>Text to Speech</Text>
-        <View style={styles.card}>
-          <Row label="Text to Speech" icon="volume-medium-outline"
-            right={<Switch value={textToSpeech} onValueChange={setTextToSpeech} trackColor={{ true: '#4A7BB5' }} />} />
-          <Text style={styles.cardHint}>Read questions aloud through the speaker.</Text>
-        </View>
+            <Text style={styles.sectionHeader}>Text to Speech</Text>
+            <View style={styles.card}>
+              <Row label="Text to Speech" icon="volume-medium-outline"
+                right={<Switch value={textToSpeech} onValueChange={setTextToSpeech} trackColor={{ true: '#4A7BB5' }} />} />
+              <Text style={styles.cardHint}>Read questions aloud through the speaker.</Text>
+            </View>
+          </>
+        )}
 
-        {/* Data */}
+        {/* Data — always visible */}
         <Text style={styles.sectionHeader}>Data</Text>
         <View style={styles.card}>
           <Row
@@ -145,19 +144,23 @@ export default function SettingsScreen() {
           <Text style={styles.cardHint}>Export your entries as CSV or JSON for research use.</Text>
         </View>
 
-        {/* Account */}
-        <Text style={styles.sectionHeader}>Account</Text>
-        <View style={styles.card}>
-          <Row label="Log Out" icon="log-out-outline" onPress={handleLogout} right={null} />
-          <View style={styles.divider} />
-          <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
-            <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
-            <Text style={[styles.rowLabel, { color: '#C0392B' }]}>Delete Account</Text>
-          </TouchableOpacity>
-          <Text style={styles.cardHint}>
-            Deleting your account may delete your data. Be certain this is an action you want to take.
-          </Text>
-        </View>
+        {/* Account — native only */}
+        {Platform.OS !== 'web' && (
+          <>
+            <Text style={styles.sectionHeader}>Account</Text>
+            <View style={styles.card}>
+              <Row label="Log Out" icon="log-out-outline" onPress={handleLogout} right={null} />
+              <View style={styles.divider} />
+              <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
+                <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
+                <Text style={[styles.rowLabel, { color: '#C0392B' }]}>Delete Account</Text>
+              </TouchableOpacity>
+              <Text style={styles.cardHint}>
+                Deleting your account may delete your data. Be certain this is an action you want to take.
+              </Text>
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
