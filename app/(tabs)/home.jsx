@@ -13,11 +13,14 @@ import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 const { height: H } = Dimensions.get('window');
 
 const CARD_IMAGES = {
-  morningPending:   require('../../assets/images/morning_pending.png'),
-  morningCompleted: require('../../assets/images/morning_completed.png'),
-  eveningLocked:    require('../../assets/images/evening_locked.png'),
-  eveningPending:   require('../../assets/images/evening_pending.png'),
-  eveningCompleted: require('../../assets/images/evening_completed.png'),
+  morningPending:      require('../../assets/images/morning_pending.png'),
+  morningCompleted:    require('../../assets/images/morning_completed.png'),
+  eveningLocked:       require('../../assets/images/evening_locked.png'),
+  eveningPending:      require('../../assets/images/evening_pending.png'),
+  eveningCompleted:    require('../../assets/images/evening_completed.png'),
+  finalReport:         require('../../assets/images/final-report.png'),
+  finalReportLocked:   require('../../assets/images/final-report-locked.png'),
+  pastEntries:         require('../../assets/images/past-entries.png'),
 };
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
@@ -114,33 +117,31 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
-            <TouchableOpacity style={[styles.bottomCard, styles.bottomCardActive]}
-              onPress={() => router.push('/past-entries')} activeOpacity={0.8}>
-              <Ionicons name="time" size={36} color="#4A7BB5" />
-              <Text style={[styles.bottomCardLabel, { fontFamily: FONTS.body }]}>Past Entries</Text>
+            {/* Past Entries */}
+            <TouchableOpacity
+              style={styles.bottomCard}
+              onPress={() => router.push('/past-entries')}
+              activeOpacity={0.8}
+            >
+              <Image source={CARD_IMAGES.pastEntries} style={styles.bottomCardImage} resizeMode="contain" />
             </TouchableOpacity>
 
+            {/* Final Report */}
             <TouchableOpacity
-              style={[styles.bottomCard, reportUnlocked ? styles.bottomCardActive : styles.bottomCardLocked]}
+              style={styles.bottomCard}
               onPress={() => reportUnlocked && router.push('/final-report')}
-              activeOpacity={reportUnlocked ? 0.8 : 1} disabled={!reportUnlocked}
+              activeOpacity={reportUnlocked ? 0.8 : 1}
+              disabled={!reportUnlocked}
             >
-              {reportUnlocked ? (
-                <>
-                  <Ionicons name="clipboard" size={36} color="#4A7BB5" />
-                  <Text style={[styles.bottomCardLabel, { fontFamily: FONTS.body }]}>Final Report</Text>
-                </>
-              ) : (
-                <>
-                  <View style={styles.lockedStack}>
-                    <Ionicons name="lock-closed" size={18} color="#94A3B8" />
-                    <Ionicons name="clipboard-outline" size={32} color="#94A3B8" />
-                  </View>
-                  <Text style={[styles.bottomCardLabelLocked, { fontFamily: FONTS.bodyMedium }]}>Final Report</Text>
-                  <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
-                    {MIN_ENTRIES_FOR_REPORT - morningCount} more {(MIN_ENTRIES_FOR_REPORT - morningCount) === 1 ? 'entry' : 'entries'} needed
-                  </Text>
-                </>
+              <Image
+                source={reportUnlocked ? CARD_IMAGES.finalReport : CARD_IMAGES.finalReportLocked}
+                style={styles.bottomCardImage}
+                resizeMode="contain"
+              />
+              {!reportUnlocked && (
+                <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
+                  {MIN_ENTRIES_FOR_REPORT - morningCount} more {(MIN_ENTRIES_FOR_REPORT - morningCount) === 1 ? 'entry' : 'entries'} needed
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -189,15 +190,8 @@ const styles = StyleSheet.create({
   instructionsTitle: { fontSize: 18, color: '#1A3A5C', marginBottom: 6 },
   instructionsBody:  { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
 
-  bottomRow: { flexDirection: 'row', gap: 12 },
-  bottomCard: {
-    flex: 1, borderRadius: 18, padding: 20,
-    alignItems: 'center', justifyContent: 'center', minHeight: 115, borderWidth: 1.5,
-  },
-  bottomCardActive: { backgroundColor: 'rgba(255,255,255,0.92)', borderColor: '#A8C8E8' },
-  bottomCardLocked: { backgroundColor: 'rgba(235,235,235,0.92)', borderColor: '#D0D0D0' },
-  lockedStack:           { flexDirection: 'row', alignItems: 'flex-end', gap: 2, marginBottom: 4 },
-  bottomCardLabel:       { fontSize: 14, color: '#4A7BB5', marginTop: 8 },
-  bottomCardLabelLocked: { fontSize: 14, color: '#94A3B8', marginTop: 4 },
-  bottomCardHint:        { fontSize: 11, color: '#B0C8D8', marginTop: 3, textAlign: 'center' },
+  bottomRow:       { flexDirection: 'row', gap: 12 },
+  bottomCard:      { flex: 1, alignItems: 'center' },
+  bottomCardImage: { width: '100%', height: 115 },
+  bottomCardHint:  { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
 });

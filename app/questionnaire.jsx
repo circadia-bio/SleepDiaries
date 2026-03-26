@@ -2,13 +2,20 @@ import React, { useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Alert, ImageBackground,
+  Platform, Alert, ImageBackground, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
 import { saveEntry } from '../storage/storage';
+
+const BUTTON_IMAGES = {
+  backDay:   require('../assets/images/back-day.png'),
+  nextDay:   require('../assets/images/next-day.png'),
+  backNight: require('../assets/images/back-night.png'),
+  nextNight: require('../assets/images/next-night.png'),
+};
 
 const THEME = {
   morning: {
@@ -351,15 +358,16 @@ export default function QuestionnaireScreen() {
 
         {/* ── Nav buttons ── */}
         <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
-          <TouchableOpacity style={[styles.backBtn, { borderColor: c.primary }]} onPress={handleBack} activeOpacity={0.8}>
-            <Ionicons name="arrow-back" size={18} color={c.primary} />
-            <Text style={[styles.backBtnText, { color: c.primary }]}>Back</Text>
+          <TouchableOpacity onPress={handleBack} activeOpacity={0.8} style={styles.navBtn}>
+            <Image source={theme === 'morning' ? BUTTON_IMAGES.backDay : BUTTON_IMAGES.backNight} style={styles.navBtnImage} resizeMode="contain" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.nextBtn, { backgroundColor: canProceed() ? c.primary : '#ccc' }]}
-            onPress={handleNext} activeOpacity={0.8} disabled={!canProceed()}>
-            <Text style={styles.nextBtnText}>{currentIndex === total - 1 ? 'Finish' : 'Next'}</Text>
-            <Ionicons name="arrow-forward" size={18} color="#fff" />
+            onPress={handleNext}
+            activeOpacity={canProceed() ? 0.8 : 1}
+            disabled={!canProceed()}
+            style={[styles.navBtn, !canProceed() && styles.navBtnDisabled]}
+          >
+            <Image source={theme === 'morning' ? BUTTON_IMAGES.nextDay : BUTTON_IMAGES.nextNight} style={styles.navBtnImage} resizeMode="contain" />
           </TouchableOpacity>
         </View>
 
@@ -445,9 +453,8 @@ const styles = StyleSheet.create({
   addMedBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 14, gap: 8 },
   addMedBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   freeText:      { width: '100%', borderWidth: 1.5, borderRadius: 12, padding: 14, fontSize: 16, minHeight: 120 },
-  navRow:        { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12, gap: 16 },
-  backBtn:       { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderRadius: 28, paddingHorizontal: 24, paddingVertical: 12, gap: 6 },
-  backBtnText:   { fontSize: 16, fontWeight: '700' },
-  nextBtn:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 28, paddingVertical: 14, gap: 8 },
-  nextBtnText:   { color: '#fff', fontSize: 16, fontWeight: '700' },
+  navRow:         { flexDirection: 'row', paddingHorizontal: 36, paddingTop: 12, gap: 4 },
+  navBtn:         { flex: 1, height: 52 },
+  navBtnDisabled: { opacity: 0.4 },
+  navBtnImage:    { width: '100%', height: '100%' },
 });
