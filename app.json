@@ -29,7 +29,8 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/favicon.png",
-      "template": "./web/index.html"
+      "template": "./web/index.html",
+      "publicPath": "/SleepDiaries"
     }
   }
 }
