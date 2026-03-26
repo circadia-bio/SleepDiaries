@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, Dimensions, ImageBackground,
+  StyleSheet, StatusBar, Dimensions, ImageBackground, Image,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,42 +12,30 @@ import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 
 const { height: H } = Dimensions.get('window');
 
-const EntryCard = ({ type, completed, morningDone, onPress }) => {
-  const isMorning  = type === 'morning';
-  const isLocked   = !isMorning && !morningDone;
-  const titleColor = isMorning ? '#C25E00' : '#1A3D6E';
-  const bgColor    = isMorning ? '#F5C96A' : '#7EB0E0';
+const CARD_IMAGES = {
+  morningPending:   require('../../assets/images/morning_pending.png'),
+  morningCompleted: require('../../assets/images/morning_completed.png'),
+  eveningLocked:    require('../../assets/images/evening_locked.png'),
+  eveningPending:   require('../../assets/images/evening_pending.png'),
+  eveningCompleted: require('../../assets/images/evening_completed.png'),
+};
 
-  const statusLabel = completed
-    ? `${isMorning ? 'Morning' : 'Evening'} Entry Completed`
-    : isLocked
-    ? 'Complete a Morning Entry first\nbefore an Evening Entry.'
-    : `New Action Item: Complete ${isMorning ? 'Morning' : 'Evening'} Entry`;
+const EntryCard = ({ type, completed, morningDone, onPress }) => {
+  const isMorning = type === 'morning';
+  const isLocked  = !isMorning && !morningDone;
+
+  let image;
+  if (isMorning) {
+    image = completed ? CARD_IMAGES.morningCompleted : CARD_IMAGES.morningPending;
+  } else {
+    image = isLocked   ? CARD_IMAGES.eveningLocked
+          : completed  ? CARD_IMAGES.eveningCompleted
+          : CARD_IMAGES.eveningPending;
+  }
 
   return (
-    <TouchableOpacity
-      style={[styles.entryCard, { backgroundColor: bgColor }, isLocked && styles.entryCardLocked]}
-      onPress={onPress}
-      activeOpacity={isLocked ? 1 : 0.85}
-      disabled={isLocked}
-    >
-      <View style={styles.entryTitleRow}>
-        <Text style={[styles.entryTitle, { color: titleColor }]}>
-          {isMorning ? 'Morning Entry' : 'Evening Entry'}
-        </Text>
-        <Ionicons name={isMorning ? 'sunny' : 'moon'} size={22} color={titleColor} />
-      </View>
-      {!isLocked ? (
-        <View style={styles.statusBadge}>
-          <Ionicons
-            name={completed ? 'checkmark-circle-outline' : 'alert-circle-outline'}
-            size={14} color={titleColor}
-          />
-          <Text style={[styles.statusText, { color: titleColor }]}> {statusLabel}</Text>
-        </View>
-      ) : (
-        <Text style={styles.lockedMsg}>{statusLabel}</Text>
-      )}
+    <TouchableOpacity onPress={onPress} activeOpacity={isLocked ? 1 : 0.9} disabled={isLocked}>
+      <Image source={image} style={styles.entryCardImage} resizeMode="stretch" />
     </TouchableOpacity>
   );
 };
@@ -108,13 +96,14 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.body}>
-
           <View style={styles.section}>
             <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>New Entry</Text>
-            <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
-              onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
-            <EntryCard type="evening" completed={eveningCompleted} morningDone={morningCompleted}
-              onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} />
+            <View style={styles.cardsContainer}>
+              <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
+                onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
+              <EntryCard type="evening" completed={eveningCompleted} morningDone={morningCompleted}
+                onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} />
+            </View>
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8}>
@@ -155,7 +144,6 @@ export default function HomeScreen() {
               )}
             </TouchableOpacity>
           </View>
-
         </View>
       </ScrollView>
     </View>
@@ -165,7 +153,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root:          { flex: 1 },
   scrollView:    { flex: 1 },
-  scrollContent: { paddingBottom: 32, minHeight: H },
+  scrollContent: { paddingBottom: 120, minHeight: H },
 
   header: { paddingTop: 50, paddingBottom: 12 },
   headerContent: {
@@ -182,7 +170,8 @@ const styles = StyleSheet.create({
 
   section: {
     borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
-    padding: 14, paddingTop: 20, backgroundColor: 'rgba(255,255,255,0.92)', position: 'relative',
+    paddingHorizontal: 10, paddingTop: 20, paddingBottom: 10,
+    backgroundColor: 'rgba(255,255,255,0.92)', position: 'relative',
   },
   sectionLabel: {
     position: 'absolute', top: -11, left: 14,
@@ -190,17 +179,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, fontSize: 13, color: '#4A7BB5',
   },
 
-  entryCard:       { borderRadius: 14, padding: 18, marginBottom: 10 },
-  entryCardLocked: { opacity: 0.85 },
-  entryTitleRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 },
-  entryTitle:      { fontSize: 20, fontFamily: 'Afacad-Bold', textAlign: 'center' },
-  statusBadge: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'center',
-  },
-  statusText: { fontSize: 13, fontFamily: 'Afacad-Medium' },
-  lockedMsg:  { fontSize: 13, fontFamily: 'Afacad-Regular', color: '#1A3D6E', textAlign: 'center', lineHeight: 19 },
+  cardsContainer: { gap: 8 },
+  entryCardImage: { width: '100%', height: 110, borderRadius: 14 },
 
   instructionsCard: {
     borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
