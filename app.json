@@ -23,18 +23,14 @@
     },
     "scheme": "sleep-diaries",
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://circadia-bio.github.io/SleepDiaries"
-        }
-      ]
+      "expo-router"
     ],
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/favicon.png",
-      "template": "./web/index.html"
+      "template": "./web/index.html",
+      "baseUrl": "/SleepDiaries"
     }
   }
 }
