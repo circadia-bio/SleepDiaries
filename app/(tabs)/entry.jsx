@@ -43,6 +43,7 @@ export default function EntryTab() {
         resizeMode="cover"
       />
       <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
+        <View style={styles.spacer} />
         <TouchableOpacity
           onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
           activeOpacity={0.9}
@@ -65,5 +66,6 @@ export default function EntryTab() {
 const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120 },
+  spacer:    { flex: 0.4 },
   cardImage: { width: '100%', height: 110, borderRadius: 14 },
 });
