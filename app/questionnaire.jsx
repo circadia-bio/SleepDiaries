@@ -288,6 +288,7 @@ export default function QuestionnaireScreen() {
 
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [done, setDone]                 = useState(false);
 
   const flow     = buildFlow(allQuestions, answers);
   const total    = flow.length;
@@ -314,11 +315,8 @@ export default function QuestionnaireScreen() {
       setCurrentIndex(currentIndex + 1);
     } else {
       await saveEntry(entryType, answers);
-      Alert.alert(
-        'Entry complete!',
-        `Your ${entryType} entry has been saved.`,
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      setDone(true);
+      setTimeout(() => router.replace('/(tabs)/home'), 2500);
     }
   };
 
@@ -327,7 +325,27 @@ export default function QuestionnaireScreen() {
     else router.back();
   };
 
-  if (!question) return null;
+  if (!question && !done) return null;
+
+  if (done) {
+    const isMorning = entryType === 'morning';
+    return (
+      <TouchableOpacity
+        style={styles.splashContainer}
+        activeOpacity={1}
+        onPress={() => router.replace('/(tabs)/home')}
+      >
+        <Image
+          source={isMorning
+            ? require('../assets/images/splash-end-morning.png')
+            : require('../assets/images/splash-end-night.png')
+          }
+          style={styles.splashImage}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <ImageBackground
@@ -459,4 +477,13 @@ const styles = StyleSheet.create({
   navBtn:         { flex: 1, height: 52 },
   navBtnDisabled: { opacity: 0.4 },
   navBtnImage:    { width: '100%', height: '100%' },
+
+  splashContainer: {
+    flex: 1,
+    backgroundColor: '#C8DFF5',
+  },
+  splashImage: {
+    width: '100%',
+    height: '100%',
+  },
 });
