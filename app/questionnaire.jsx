@@ -279,7 +279,8 @@ const ProgressBar = ({ current, total, theme }) => {
 
 export default function QuestionnaireScreen() {
   const router   = useRouter();
-  const insets   = useSafeAreaInsets();
+  const rawInsets = useSafeAreaInsets();
+  const insets   = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { entryType = 'morning' } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';

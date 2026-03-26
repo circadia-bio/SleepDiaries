@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { View, StyleSheet, Platform } from 'react-native';
 import { loadName } from '../storage/storage';
 
 export default function RootLayout() {
@@ -26,7 +27,7 @@ export default function RootLayout() {
   // Don't block on fonts — if they fail or take too long, render anyway
   if (!checked) return null;
 
-  return (
+  const content = (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
@@ -36,4 +37,21 @@ export default function RootLayout() {
       <Stack.Screen name="final-report"   options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
+
+  // On web desktop, constrain to phone width
+  if (Platform.OS === 'web') {
+    return <View style={styles.webWrapper}>{content}</View>;
+  }
+
+  return content;
 }
+
+const styles = StyleSheet.create({
+  webWrapper: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 390,
+    alignSelf: 'center',
+    overflow: 'hidden',
+  },
+});

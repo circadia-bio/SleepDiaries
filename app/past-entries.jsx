@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  StyleSheet, ActivityIndicator, useWindowDimensions,
+  StyleSheet, ActivityIndicator, useWindowDimensions, Platform,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -126,7 +126,8 @@ const buildListItems = (grouped, dates) => {
 
 export default function PastEntriesScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const rawInsets = useSafeAreaInsets();
+  const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { height: windowHeight } = useWindowDimensions();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);

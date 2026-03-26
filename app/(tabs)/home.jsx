@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
+import { useInsets } from '../../theme/useInsets';
 import { FONTS } from '../../theme/typography';
 import { loadName, loadTodayStatus, loadEntries } from '../../storage/storage';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
@@ -45,7 +46,7 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const insets = useInsets();
 
   const [userName, setUserName]                 = useState('');
   const [morningCompleted, setMorningCompleted] = useState(false);
@@ -76,7 +77,8 @@ export default function HomeScreen() {
 
       <ImageBackground
         source={require('../../assets/images/homepage-bg.png')}
-        style={StyleSheet.absoluteFill}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
         resizeMode="cover"
       />
 

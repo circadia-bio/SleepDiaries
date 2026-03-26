@@ -1,20 +1,27 @@
-import * as Notifications from 'expo-notifications';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NOTIFICATIONS_ENABLED_KEY = 'notifications_enabled';
 const MORNING_HOUR = 8;
 const EVENING_HOUR = 21;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// Notifications are not supported on web
+const isWeb = Platform.OS === 'web';
+
+let Notifications = null;
+if (!isWeb) {
+  Notifications = require('expo-notifications');
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 export const requestNotificationPermission = async () => {
+  if (isWeb) return false;
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('sleep-diaries', {
       name: 'Sleep Diaries Reminders',
@@ -29,54 +36,34 @@ export const requestNotificationPermission = async () => {
 };
 
 export const scheduleReminders = async () => {
+  if (isWeb) return false;
   await cancelReminders();
   const granted = await requestNotificationPermission();
   if (!granted) return false;
-
-  // Morning reminder — every day at 08:00
   await Notifications.scheduleNotificationAsync({
     identifier: 'morning-reminder',
-    content: {
-      title: '🌅 Good morning!',
-      body: "Don't forget to complete your morning sleep diary entry.",
-      sound: true,
-    },
-    trigger: {
-      type: 'daily',
-      hour: MORNING_HOUR,
-      minute: 0,
-    },
+    content: { title: '🌅 Good morning!', body: "Don't forget to complete your morning sleep diary entry.", sound: true },
+    trigger: { type: 'daily', hour: MORNING_HOUR, minute: 0 },
   });
-
-  // Evening reminder — every day at 21:00
   await Notifications.scheduleNotificationAsync({
     identifier: 'evening-reminder',
-    content: {
-      title: '🌙 Good evening!',
-      body: 'Time to complete your evening sleep diary entry.',
-      sound: true,
-    },
-    trigger: {
-      type: 'daily',
-      hour: EVENING_HOUR,
-      minute: 0,
-    },
+    content: { title: '🌙 Good evening!', body: 'Time to complete your evening sleep diary entry.', sound: true },
+    trigger: { type: 'daily', hour: EVENING_HOUR, minute: 0 },
   });
-
   return true;
 };
 
 export const cancelReminders = async () => {
+  if (isWeb) return;
   await Notifications.cancelScheduledNotificationAsync('morning-reminder');
   await Notifications.cancelScheduledNotificationAsync('evening-reminder');
 };
 
 export const saveNotificationsEnabled = async (enabled) => {
   await AsyncStorage.setItem(NOTIFICATIONS_ENABLED_KEY, JSON.stringify(enabled));
-  if (enabled) {
-    await scheduleReminders();
-  } else {
-    await cancelReminders();
+  if (!isWeb) {
+    if (enabled) await scheduleReminders();
+    else await cancelReminders();
   }
 };
 
@@ -85,17 +72,10 @@ export const loadNotificationsEnabled = async () => {
   return raw !== null ? JSON.parse(raw) : true;
 };
 
-// Test notification — fires after 5 seconds
 export const sendTestNotification = async () => {
+  if (isWeb) return;
   await Notifications.scheduleNotificationAsync({
-    content: {
-      title: '🌙 Sleep Diaries',
-      body: 'Notifications are working correctly!',
-    },
-    trigger: {
-      type: 'timeInterval',
-      seconds: 5,
-      repeats: false,
-    },
+    content: { title: '🌙 Sleep Diaries', body: 'Notifications are working correctly!' },
+    trigger: { type: 'timeInterval', seconds: 5, repeats: false },
   });
 };

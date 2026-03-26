@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#C8DFF5" />
+    <meta name="description" content="Sleep Diaries — Research Sleep Diary App" />
+    <title>Sleep Diaries</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        background-color: #1A3A5C;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 24px 0;
+        overflow-y: auto;
+      }
+
+      #root {
+        width: 390px;
+        max-width: 390px;
+        min-height: 844px;
+        height: auto;
+        position: relative;
+        overflow: hidden;
+        border-radius: 44px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        flex-shrink: 0;
+        contain: layout;
+      }
+
+      /* On mobile screens, fill the full viewport */
+      @media (max-width: 430px) {
+        html, body {
+          background-color: transparent;
+          padding: 0;
+          align-items: stretch;
+        }
+        #root {
+          width: 100vw;
+          min-height: 100vh;
+          border-radius: 0;
+          box-shadow: none;
+        }
+      }
+    </style>
+    <script>
+      // Clamp Dimensions.get('window').width to 390px on desktop web
+      // so React Native components using Dimensions behave as if on a phone.
+      if (typeof window !== 'undefined' && window.innerWidth > 430) {
+        const PHONE_W = 390;
+        const PHONE_H = 844;
+        Object.defineProperty(window, '__phoneWidth',  { value: PHONE_W });
+        Object.defineProperty(window, '__phoneHeight', { value: PHONE_H });
+        // Patch the getter that Expo/RN uses internally
+        const _orig = window.innerWidth;
+        try {
+          Object.defineProperty(window, 'innerWidth',  { get: () => PHONE_W, configurable: true });
+          Object.defineProperty(window, 'innerHeight', { get: () => PHONE_H, configurable: true });
+        } catch(e) {}
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

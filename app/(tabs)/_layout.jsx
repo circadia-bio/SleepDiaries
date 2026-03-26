@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width: W } = Dimensions.get('window');
+const W = 390; // Always use phone width — web wrapper constrains layout
 
 // Images are 1183x292 — ratio 4.051
 const IMAGE_RATIO = 1183 / 292;
