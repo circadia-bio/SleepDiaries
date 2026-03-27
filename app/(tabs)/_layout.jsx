@@ -13,7 +13,7 @@
  * scales correctly on both native and the web phone-frame layout.
  */
 import { Tabs } from 'expo-router';
-import { View, Image, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Images are 1183x292 — ratio 4.051
@@ -31,16 +31,16 @@ function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { width: W } = useWindowDimensions();
   const TAB_IMAGE_HEIGHT = W / IMAGE_RATIO;
-  // On web PWA, extend the tab bar background into the bottom safe area
-  const extraBottom = Platform.OS === 'web' ? insets.bottom : 0;
 
   return (
-    <View style={[styles.container, { paddingBottom: extraBottom, backgroundColor: '#C8DFF5' }]}>
+    <View style={[styles.container, { backgroundColor: '#EEF5FF' }]}>
       <Image
         source={image}
         style={{ width: W, height: TAB_IMAGE_HEIGHT }}
         resizeMode="stretch"
       />
+      {/* Fill the safe area below the image with the tab bar's background colour */}
+      <View style={{ height: insets.bottom, backgroundColor: '#EEF5FF', width: W }} />
       <View style={[styles.tapRow, { height: TAB_IMAGE_HEIGHT }]}>
         {state.routes.map((route, index) => (
           <TouchableOpacity

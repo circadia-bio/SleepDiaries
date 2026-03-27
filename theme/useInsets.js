@@ -24,9 +24,8 @@ export function useInsets() {
   if (Platform.OS === 'web') {
     const isStandalone =
       typeof window !== 'undefined' && window.navigator.standalone === true;
-    // On PWA: ignore all safe area insets so content bleeds edge to edge
-    if (isStandalone) return { top: 0, bottom: 0, left: 0, right: 0 };
-    // On desktop browser: use fixed top inset for the phone frame
+    // On installed PWA use real device insets; on desktop use fixed frame offset
+    if (isStandalone) return insets;
     return { ...insets, top: WEB_TOP_INSET };
   }
   return insets;
