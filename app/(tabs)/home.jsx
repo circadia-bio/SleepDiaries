@@ -15,7 +15,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, Dimensions, ImageBackground, Image,
+  StyleSheet, StatusBar, ImageBackground, Image, useWindowDimensions,
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,8 +25,6 @@ import { FONTS } from '../../theme/typography';
 import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../../storage/storage';
 import InstructionsModal from '../InstructionsModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
-
-const { height: H } = Dimensions.get('window');
 
 const CARD_IMAGES = {
   morningPending:      require('../../assets/images/morning_pending.png'),
@@ -62,6 +60,7 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useInsets();
+  const { height: H } = useWindowDimensions();
   const { showInstructions: showInstructionsParam } = useLocalSearchParams();
 
   const [userName, setUserName]                 = useState('');
@@ -103,7 +102,7 @@ export default function HomeScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8, minHeight: H }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -180,7 +179,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root:          { flex: 1 },
   scrollView:    { flex: 1 },
-  scrollContent: { paddingBottom: 120, minHeight: H },
+  scrollContent: { paddingBottom: 120 },
 
   header: { paddingTop: 50, paddingBottom: 12 },
   headerContent: {
