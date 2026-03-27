@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, StatusBar, Dimensions, ImageBackground, Image,
 } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useInsets } from '../../theme/useInsets';
@@ -48,6 +48,7 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useInsets();
+  const { showInstructions: showInstructionsParam } = useLocalSearchParams();
 
   const [userName, setUserName]                 = useState('');
   const [morningCompleted, setMorningCompleted] = useState(false);
@@ -68,7 +69,8 @@ export default function HomeScreen() {
         setEveningCompleted(status.eveningCompleted);
         setMorningCount(mCount);
         setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
-        if (!seen) setShowInstructions(true);
+        // Show on first login (via param) or if not yet seen on return visits
+        if (!seen && (name || showInstructionsParam === '1')) setShowInstructions(true);
       };
       load();
     }, [])

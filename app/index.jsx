@@ -26,7 +26,7 @@ export default function LoginScreen() {
     setLoading(true);
     await saveName(name.trim());
     setLoading(false);
-    router.replace('/(tabs)/home');
+    router.replace({ pathname: '/(tabs)/home', params: { showInstructions: '1' } });
   };
 
   return (
