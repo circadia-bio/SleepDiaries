@@ -12,7 +12,7 @@
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { View, Image, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
 
@@ -59,8 +59,7 @@ export default function RootLayout() {
   const router  = useRouter();
   // checked: true once font + name check + image preload are all complete
   const [checked, setChecked] = useState(false);
-  // showSplash: true on PWA launch, fades out after 1.5s
-  const [showSplash, setShowSplash] = useState(isStandalone);
+
 
   // Load all four custom font variants. Fonts must be loaded before
   // any Text component using fontFamily renders.
@@ -84,12 +83,19 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  // Hide the in-app splash after 1.5s
+  // Hide the CSS splash div (injected by deploy.sh) once React is ready
   useEffect(() => {
-    if (!showSplash) return;
-    const t = setTimeout(() => setShowSplash(false), 1500);
+    if (!isStandalone) return;
+    const el = document.getElementById('pwa-splash');
+    if (!el) return;
+    // Small delay so the transition feels intentional
+    const t = setTimeout(() => {
+      el.style.transition = 'opacity 0.4s ease';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 400);
+    }, 300);
     return () => clearTimeout(t);
-  }, [showSplash]);
+  }, []);
 
   // Don't block on fonts — if they fail or take too long, render anyway
   if (!checked) return null;
@@ -110,15 +116,6 @@ export default function RootLayout() {
     return (
       <View style={styles.webWrapper}>
         {content}
-        {showSplash && (
-          <View style={styles.splash}>
-            <Image
-              source={require('../assets/splash-icon.png')}
-              style={styles.splashIcon}
-              resizeMode="contain"
-            />
-          </View>
-        )}
       </View>
     );
   }
@@ -133,17 +130,5 @@ const styles = StyleSheet.create({
     maxWidth: 390,
     alignSelf: 'center',
     overflow: 'hidden',
-  },
-  // In-app splash — overlays everything, shown on PWA launch
-  splash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#C8DFF5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 9999,
-  },
-  splashIcon: {
-    width: '50%',
-    height: '50%',
   },
 });
