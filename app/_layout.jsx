@@ -138,8 +138,11 @@ const styles = StyleSheet.create({
   },
   // Mobile PWA: fill the full screen edge to edge
   webWrapperMobile: {
-    flex: 1,
-    width: '100%',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     overflow: 'hidden',
   },
 });

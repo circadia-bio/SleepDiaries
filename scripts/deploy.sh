@@ -49,13 +49,29 @@ const globalCSS = `
     padding: 0;
   }
   @media all and (display-mode: standalone) {
-    html, body, #root {
-      width: 100% !important;
-      max-width: 100% !important;
-      height: 100% !important;
-    }
-    body {
+    html, body {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      overflow: hidden;
+      padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      box-sizing: border-box;
+    }
+    #root {
+      width: 100% !important;
+      max-width: none !important;
+      height: 100% !important;
+      position: fixed !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+    /* Make background images fill properly */
+    #root img[src*="bg"], #root img[src*="background"] {
+      object-fit: cover !important;
+      width: 100% !important;
+      height: 100% !important;
     }
   }
 </style>`;
