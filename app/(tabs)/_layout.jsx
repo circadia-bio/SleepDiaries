@@ -33,14 +33,12 @@ function CustomTabBar({ state, navigation }) {
   const TAB_IMAGE_HEIGHT = W / IMAGE_RATIO;
 
   return (
-    <View style={[styles.container, { backgroundColor: '#EEF5FF' }]}>
+    <View style={styles.container}>
       <Image
         source={image}
-        style={{ width: W, height: TAB_IMAGE_HEIGHT }}
+        style={{ width: W, height: TAB_IMAGE_HEIGHT + insets.bottom }}
         resizeMode="stretch"
       />
-      {/* Fill the safe area below the image with the tab bar's background colour */}
-      <View style={{ height: insets.bottom, backgroundColor: '#EEF5FF', width: W }} />
       <View style={[styles.tapRow, { height: TAB_IMAGE_HEIGHT }]}>
         {state.routes.map((route, index) => (
           <TouchableOpacity
