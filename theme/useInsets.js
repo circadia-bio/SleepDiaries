@@ -22,6 +22,11 @@ const WEB_TOP_INSET = 59;
 export function useInsets() {
   const insets = useSafeAreaInsets();
   if (Platform.OS === 'web') {
+    // On installed PWA (standalone), use the real safe area inset from the device.
+    // On desktop browser, use the fixed value to position content below the frame top.
+    const isStandalone =
+      typeof window !== 'undefined' && window.navigator.standalone === true;
+    if (isStandalone) return insets;
     return { ...insets, top: WEB_TOP_INSET };
   }
   return insets;
