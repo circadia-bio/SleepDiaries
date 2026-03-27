@@ -1,4 +1,22 @@
-<!DOCTYPE html><html  lang="en"><head><title data-rh="true"></title><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}html{background:#C8DFF5;}body{background:#C8DFF5;padding-bottom:env(safe-area-inset-bottom);}</style><style id="react-native-stylesheet">[stylesheet-group="0"]{}
+<!DOCTYPE html><html  lang="en"><head><title data-rh="true"></title><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<style id="pwa-global">
+  html, body {
+    background: #C8DFF5;
+    margin: 0;
+    padding: 0;
+  }
+  @media all and (display-mode: standalone) {
+    html, body, #root {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+    }
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+</style>
+<style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}</style><style id="react-native-stylesheet">[stylesheet-group="0"]{}
 body{margin:0;}
 button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0;}
 html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0);}
@@ -318,8 +336,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 @keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><style id="expo-generated-fonts">@font-face{font-family:"Livvic-Bold";src:url("/assets/assets/fonts/Livvic-Bold.d63ac4d2714fb5ae27c9de483c9e6509.ttf");font-display:auto}
 @font-face{font-family:"Afacad-Bold";src:url("/assets/assets/fonts/Afacad-Bold.259ea7431d6c89ffdcf5afaac9b44a2a.ttf");font-display:auto}
 @font-face{font-family:"Afacad-Medium";src:url("/assets/assets/fonts/Afacad-Medium.0ffb8a8cf2b74a6eddbe1408814ac950.ttf");font-display:auto}
-@font-face{font-family:"Afacad-Regular";src:url("/assets/assets/fonts/Afacad-Regular.e81a6f9d8f55bfec94268c14e30f1ea3.ttf");font-display:auto}</style><link rel="preload" href="/assets/assets/fonts/Livvic-Bold.d63ac4d2714fb5ae27c9de483c9e6509.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Bold.259ea7431d6c89ffdcf5afaac9b44a2a.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Medium.0ffb8a8cf2b74a6eddbe1408814ac950.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Regular.e81a6f9d8f55bfec94268c14e30f1ea3.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="icon" href="/favicon.ico" />
-<link rel="manifest" href="/manifest.json" />
+@font-face{font-family:"Afacad-Regular";src:url("/assets/assets/fonts/Afacad-Regular.e81a6f9d8f55bfec94268c14e30f1ea3.ttf");font-display:auto}</style><link rel="preload" href="/assets/assets/fonts/Livvic-Bold.d63ac4d2714fb5ae27c9de483c9e6509.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Bold.259ea7431d6c89ffdcf5afaac9b44a2a.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Medium.0ffb8a8cf2b74a6eddbe1408814ac950.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/assets/fonts/Afacad-Regular.e81a6f9d8f55bfec94268c14e30f1ea3.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="icon" href="/favicon.ico" /><link rel="manifest" href="/manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Sleep Diaries" />
@@ -332,7 +349,8 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 <link rel="apple-touch-startup-image" href="/splashscreens/iphone_x.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
 <link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
 <link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js");});}</script></head><body>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js");});}</script>
+</head><body>
 <style>
   #pwa-splash {
     display: none;
@@ -342,18 +360,12 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
     z-index: 99999;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
   }
-  #pwa-splash img {
-    width: 40vw;
-    max-width: 180px;
-  }
-  /* Only show when running as installed PWA */
+  #pwa-splash img { width: 160px; height: 160px; object-fit: contain; }
   @media all and (display-mode: standalone) {
     #pwa-splash { display: flex; }
   }
 </style>
-<div id="pwa-splash">
-  <img src="/icons/icon-192.png" alt="Sleep Diaries" />
-</div><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><!--/$--></div></div><script src="/_expo/static/js/web/entry-901e2313a5750183ef40af0b7316333f.js" defer></script>
+<div id="pwa-splash"><img src="/icons/icon-192.png" alt="" /></div>
+<div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><!--/$--></div></div><script src="/_expo/static/js/web/entry-901e2313a5750183ef40af0b7316333f.js" defer></script>
 </body></html>

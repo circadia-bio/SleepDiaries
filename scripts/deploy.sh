@@ -11,25 +11,59 @@ node << 'NODESCRIPT'
 const fs = require('fs');
 let html = fs.readFileSync('docs/index.html', 'utf8');
 
-// PWA meta + splash link tags
-const metaTags = `
-<link rel="manifest" href="/manifest.json" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Sleep Diaries" />
-<link rel="apple-touch-icon" href="/icons/icon-192.png" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_16_pro.png" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro_max.png" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro.png" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_14_plus.png" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_14.png" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_x.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-<link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js");});}<\/script>`;
+// 1. viewport-fit=cover so content fills behind notch and home indicator
+html = html.replace(
+  'width=device-width, initial-scale=1, shrink-to-fit=no',
+  'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover'
+);
 
-// Instant CSS splash — visible from first paint, removed by React after 1.5s
-const splashDiv = `
+// 2. PWA meta tags + splash links + service worker
+const metaTags = [
+  '<link rel="manifest" href="/manifest.json" />',
+  '<meta name="apple-mobile-web-app-capable" content="yes" />',
+  '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />',
+  '<meta name="apple-mobile-web-app-title" content="Sleep Diaries" />',
+  '<link rel="apple-touch-icon" href="/icons/icon-192.png" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_16_pro.png" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro_max.png" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro.png" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_14_plus.png" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_14.png" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_x.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
+  '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
+  '<script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js");});}<\/script>',
+].join('\n');
+html = html.replace('</head>', metaTags + '\n</head>');
+
+// 3. Inject global CSS:
+//    - Fill the entire background with the app sky blue
+//    - On mobile PWA (standalone), make #root fill the full screen width
+//      (on desktop it stays 390px via React Native's webWrapper style)
+//    - Extend safe-area padding so nothing hides behind the home indicator
+const globalCSS = `
+<style id="pwa-global">
+  html, body {
+    background: #C8DFF5;
+    margin: 0;
+    padding: 0;
+  }
+  @media all and (display-mode: standalone) {
+    html, body, #root {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+    }
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+</style>`;
+html = html.replace('<style id="expo-reset">', globalCSS + '\n<style id="expo-reset">');
+
+// 4. Instant CSS splash screen — shown from first paint via display-mode media query,
+//    dismissed by React (_layout.jsx) once the app has loaded
+const splashHTML = `
 <style>
   #pwa-splash {
     display: none;
@@ -39,39 +73,18 @@ const splashDiv = `
     z-index: 99999;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
   }
-  #pwa-splash img {
-    width: 40vw;
-    max-width: 180px;
-  }
-  /* Only show when running as installed PWA */
+  #pwa-splash img { width: 160px; height: 160px; object-fit: contain; }
   @media all and (display-mode: standalone) {
     #pwa-splash { display: flex; }
   }
 </style>
-<div id="pwa-splash">
-  <img src="/icons/icon-192.png" alt="Sleep Diaries" />
-</div>`;
-
-html = html.replace('</head>', metaTags + '</head>');
-// Fix viewport to cover the notch and safe areas
-html = html.replace(
-  'width=device-width, initial-scale=1, shrink-to-fit=no',
-  'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover'
-);
-
-// Fill safe areas with the app background colour on all edges
-html = html.replace(
-  '</style><style id="react-native-stylesheet">',
-  'html{background:#C8DFF5;}body{background:#C8DFF5;padding-bottom:env(safe-area-inset-bottom);}</style><style id="react-native-stylesheet">'
-);
-
-html = html.replace('<div id="root">', splashDiv + '<div id="root">');
+<div id="pwa-splash"><img src="/icons/icon-192.png" alt="" /></div>`;
+html = html.replace('<div id="root">', splashHTML + '\n<div id="root">');
 
 fs.writeFileSync('docs/index.html', html);
 fs.writeFileSync('docs/404.html', html);
-console.log('PWA tags and instant splash injected.');
+console.log('✅ PWA injection complete.');
 NODESCRIPT
 # Get font hash for redirect rule
 FONT_HASH=$(grep -o 'Ionicons\.[a-f0-9]*\.ttf' docs/_expo/static/js/web/*.js | head -1 | grep -o '[a-f0-9]\{32\}')
