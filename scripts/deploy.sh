@@ -16,4 +16,13 @@ echo "Copied Ionicons font with hash: $FONT_HASH"
 # Copy social preview image
 cp assets/images/social.png docs/social.png
 
+# Copy PWA files
+cp web/manifest.json docs/manifest.json
+cp web/sw.js docs/sw.js
+
+# Copy PWA icons
+mkdir -p docs/icons
+cp assets/icon.png docs/icons/icon-192.png
+cp assets/icon.png docs/icons/icon-512.png
+
 echo "✅ Done — drag docs/ to Netlify"

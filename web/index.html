@@ -4,6 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="theme-color" content="#C8DFF5" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Sleep Diaries" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
     <title>Sleep Diaries</title>
     <meta name="description" content="🌙 Open-source sleep diary app for clinical research — built with React Native &amp; Expo. Morning &amp; evening questionnaires, sleep metrics, and data export (CSV/JSON)." />
@@ -86,5 +91,12 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
   </body>
 </html>
