@@ -92,12 +92,14 @@
         const PHONE_H = 844;
         Object.defineProperty(window, '__phoneWidth',  { value: PHONE_W });
         Object.defineProperty(window, '__phoneHeight', { value: PHONE_H });
-        // Patch the getter that Expo/RN uses internally
-        const _orig = window.innerWidth;
-        try {
-          Object.defineProperty(window, 'innerWidth',  { get: () => PHONE_W, configurable: true });
-          Object.defineProperty(window, 'innerHeight', { get: () => PHONE_H, configurable: true });
-        } catch(e) {}
+        // Only clamp dimensions on desktop, not on mobile PWA
+        const isStandalone = window.navigator.standalone === true;
+        if (!isStandalone) {
+          try {
+            Object.defineProperty(window, 'innerWidth',  { get: () => PHONE_W, configurable: true });
+            Object.defineProperty(window, 'innerHeight', { get: () => PHONE_H, configurable: true });
+          } catch(e) {}
+        }
       }
     </script>
   </head>

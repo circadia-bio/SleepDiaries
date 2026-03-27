@@ -111,10 +111,14 @@ export default function RootLayout() {
     </Stack>
   );
 
-  // On web desktop, constrain to phone width
+  // On web desktop, constrain to phone width.
+  // On mobile PWA (standalone), fill the full screen width instead.
   if (Platform.OS === 'web') {
+    const wrapperStyle = isStandalone
+      ? styles.webWrapperMobile
+      : styles.webWrapper;
     return (
-      <View style={styles.webWrapper}>
+      <View style={wrapperStyle}>
         {content}
       </View>
     );
@@ -124,11 +128,18 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  // Desktop: centred phone frame
   webWrapper: {
     flex: 1,
     width: '100%',
     maxWidth: 390,
     alignSelf: 'center',
+    overflow: 'hidden',
+  },
+  // Mobile PWA: fill the full screen edge to edge
+  webWrapperMobile: {
+    flex: 1,
+    width: '100%',
     overflow: 'hidden',
   },
 });
