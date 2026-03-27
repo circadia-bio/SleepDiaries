@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import {
-  Modal, Image, TouchableOpacity,
-  StyleSheet, Dimensions, Platform,
+  Modal, View, Image, TouchableOpacity,
+  StyleSheet, Platform,
 } from 'react-native';
 import { markInstructionsSeen } from '../storage/storage';
-
-const { width: W, height: H } = Dimensions.get('window');
 
 const SLIDES = [
   require('../assets/images/instructions-1.png'),
@@ -15,11 +13,6 @@ const SLIDES = [
   require('../assets/images/instructions-5.png'),
   require('../assets/images/instructions-6.png'),
 ];
-
-const CLOSE_ZONE       = { top: 0.05, bottom: 0.13, right: 0.45 };
-const GET_STARTED_ZONE = { top: 0.73, bottom: 0.86 };
-const NEXT_ZONE        = { top: 0.73, bottom: 0.86, left: 0.5 };
-const BACK_ZONE        = { top: 0.73, bottom: 0.86, right: 0.5 };
 
 export default function InstructionsModal({ visible, onClose }) {
   const [index, setIndex] = useState(0);
@@ -35,27 +28,6 @@ export default function InstructionsModal({ visible, onClose }) {
   const handleNext = () => { if (isLast) handleClose(); else setIndex(index + 1); };
   const handleBack = () => { if (index > 0) setIndex(index - 1); };
 
-  const handleTap = (evt) => {
-    const { locationX: x, locationY: y } = evt.nativeEvent;
-    const rx = x / W;
-    const ry = y / H;
-
-    if (ry >= CLOSE_ZONE.top && ry <= CLOSE_ZONE.bottom && rx <= CLOSE_ZONE.right) {
-      handleClose(); return;
-    }
-    if (isFirst && ry >= GET_STARTED_ZONE.top && ry <= GET_STARTED_ZONE.bottom) {
-      handleNext(); return;
-    }
-    if (!isFirst && ry >= NEXT_ZONE.top && ry <= NEXT_ZONE.bottom && rx >= NEXT_ZONE.left) {
-      handleNext(); return;
-    }
-    if (!isFirst && ry >= BACK_ZONE.top && ry <= BACK_ZONE.bottom && rx <= BACK_ZONE.right) {
-      handleBack(); return;
-    }
-    if (rx > 0.5) handleNext();
-    else if (!isFirst) handleBack();
-  };
-
   return (
     <Modal
       visible={visible}
@@ -64,18 +36,46 @@ export default function InstructionsModal({ visible, onClose }) {
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <TouchableOpacity style={styles.container} activeOpacity={1} onPress={handleTap}>
+      <View style={styles.container}>
         <Image
           source={SLIDES[index]}
           style={styles.image}
           resizeMode={Platform.OS === 'web' ? 'contain' : 'cover'}
         />
-      </TouchableOpacity>
+
+        {/* Close button — top-left */}
+        <TouchableOpacity style={styles.closeZone} onPress={handleClose} />
+
+        {/* First slide: full-width Get Started button */}
+        {isFirst && (
+          <TouchableOpacity style={styles.getStartedZone} onPress={handleNext} />
+        )}
+
+        {/* Other slides: Back (left) and Next (right) buttons */}
+        {!isFirst && (
+          <>
+            <TouchableOpacity style={styles.backZone} onPress={handleBack} />
+            <TouchableOpacity style={styles.nextZone} onPress={handleNext} />
+          </>
+        )}
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EEF5FC' },
-  image:     { width: '100%', height: '100%' },
+  container:      { flex: 1, backgroundColor: '#EEF5FC' },
+  image:          { width: '100%', height: '100%', position: 'absolute' },
+
+  // Close: top-left corner, ~12% tall, ~45% wide
+  closeZone:      { position: 'absolute', top: '5%', left: 0, width: '45%', height: '8%' },
+
+  // Get Started: centered button ~73-86% down
+  getStartedZone: { position: 'absolute', bottom: '14%', left: '10%', right: '10%', height: '13%' },
+
+  // Back: left half of button row
+  backZone:       { position: 'absolute', bottom: '14%', left: '5%', width: '40%', height: '13%' },
+
+  // Next: right half of button row
+  nextZone:       { position: 'absolute', bottom: '14%', right: '5%', width: '40%', height: '13%' },
 });
