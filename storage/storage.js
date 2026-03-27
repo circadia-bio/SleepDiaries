@@ -2,8 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const KEYS = {
-  USER_NAME: 'user_name',
-  ENTRIES:   'entries',
+  USER_NAME:            'user_name',
+  ENTRIES:              'entries',
+  SEEN_INSTRUCTIONS:    'seen_instructions',
 };
 
 // ─── User name ────────────────────────────────────────────────────────────────
@@ -55,7 +56,17 @@ export const loadTodayStatus = async () => {
 };
 
 export const clearAll = async () => {
-  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.ENTRIES]);
+  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS]);
+};
+
+// ─── Instructions ──────────────────────────────────────────────────────────────
+export const hasSeenInstructions = async () => {
+  const val = await AsyncStorage.getItem(KEYS.SEEN_INSTRUCTIONS);
+  return val === 'true';
+};
+
+export const markInstructionsSeen = async () => {
+  await AsyncStorage.setItem(KEYS.SEEN_INSTRUCTIONS, 'true');
 };
 
 // ─── Data export ──────────────────────────────────────────────────────────────

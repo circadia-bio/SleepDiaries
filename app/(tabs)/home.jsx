@@ -8,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useInsets } from '../../theme/useInsets';
 import { FONTS } from '../../theme/typography';
-import { loadName, loadTodayStatus, loadEntries } from '../../storage/storage';
+import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../../storage/storage';
+import InstructionsModal from '../InstructionsModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 
 const { height: H } = Dimensions.get('window');
@@ -53,12 +54,13 @@ export default function HomeScreen() {
   const [eveningCompleted, setEveningCompleted] = useState(false);
   const [reportUnlocked, setReportUnlocked]     = useState(false);
   const [morningCount, setMorningCount]         = useState(0);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
-        const [name, status, allEntries] = await Promise.all([
-          loadName(), loadTodayStatus(), loadEntries(),
+        const [name, status, allEntries, seen] = await Promise.all([
+          loadName(), loadTodayStatus(), loadEntries(), hasSeenInstructions(),
         ]);
         const mCount = allEntries.filter((e) => e.type === 'morning').length;
         setUserName(name ?? '');
@@ -66,6 +68,7 @@ export default function HomeScreen() {
         setEveningCompleted(status.eveningCompleted);
         setMorningCount(mCount);
         setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
+        if (!seen) setShowInstructions(true);
       };
       load();
     }, [])
@@ -111,7 +114,7 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
             <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>Instructions</Text>
             <Text style={[styles.instructionsBody,  { fontFamily: FONTS.bodyRegular }]}>
               Click here to learn more about sleep diaries and additional information.
@@ -149,6 +152,11 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <InstructionsModal
+        visible={showInstructions}
+        onClose={() => setShowInstructions(false)}
+      />
     </View>
   );
 }
