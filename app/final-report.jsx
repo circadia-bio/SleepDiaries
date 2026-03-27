@@ -1,3 +1,21 @@
+/**
+ * app/final-report.jsx — Sleep metrics summary report
+ *
+ * Unlocks after MIN_ENTRIES_FOR_REPORT (3) morning entries have been saved.
+ * Computes the following metrics from all morning entry answers:
+ *
+ *   • Total sleep time (TST)        — time in bed − SOL − WASO
+ *   • Sleep efficiency              — TST ÷ time in bed × 100%
+ *   • Sleep onset latency (SOL)     — time to fall asleep
+ *   • Wake after sleep onset (WASO) — time awake during the night
+ *   • Sleep quality & restedness    — average 1–5 ratings
+ *   • Night wakings                 — average count per night
+ *   • Early waking                  — % of nights woken before planned
+ *   • Alcohol intake                — average drinks reported the evening before
+ *
+ * The report can be shared as plain text via the native share sheet.
+ * MIN_ENTRIES_FOR_REPORT is exported so home.jsx can show the unlock hint.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,

@@ -1,3 +1,17 @@
+/**
+ * app/(tabs)/settings.jsx — Settings screen
+ *
+ * Sections visible on all platforms:
+ *   - Data: export entries as CSV or JSON.
+ *   - About: logo, copyright, licence, design credits, website link.
+ *
+ * Sections visible on iOS / Android only (hidden on web):
+ *   - Accessibility: bigger text toggle.
+ *   - Language: language selection.
+ *   - Notifications: daily reminder toggle + test notification.
+ *   - Text to Speech: read questions aloud toggle.
+ *   - Account: log out and delete account.
+ */
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Image, TouchableOpacity, StyleSheet,

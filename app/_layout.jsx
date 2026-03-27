@@ -1,3 +1,14 @@
+/**
+ * app/_layout.jsx — Root layout
+ *
+ * The entry point for all navigation. Responsibilities:
+ *   1. Load custom fonts (Livvic, Afacad) via expo-font.
+ *   2. Preload every image asset so screens render instantly with no flash.
+ *   3. Check AsyncStorage for a saved user name — if found, skip the login
+ *      screen and route directly to the home tab.
+ *   4. On web desktop, wrap the entire app in a 390px-wide centred container
+ *      so it renders as a phone-shaped frame rather than filling the browser.
+ */
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
@@ -5,6 +16,8 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
 
+// All image assets are listed here so they can be preloaded in parallel
+// before any screen renders, avoiding lazy-load flashes on first paint.
 const IMAGE_ASSETS = [
   require('../assets/images/homepage-bg.png'),
   require('../assets/images/login-bg.png'),
@@ -37,8 +50,11 @@ const IMAGE_ASSETS = [
 
 export default function RootLayout() {
   const router  = useRouter();
+  // checked: true once font + name check + image preload are all complete
   const [checked, setChecked] = useState(false);
 
+  // Load all four custom font variants. Fonts must be loaded before
+  // any Text component using fontFamily renders.
   const [fontsLoaded, fontError] = useFonts({
     'Livvic-Bold':    require('../assets/fonts/Livvic-Bold.ttf'),
     'Afacad-Bold':    require('../assets/fonts/Afacad-Bold.ttf'),

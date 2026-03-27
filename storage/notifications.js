@@ -1,3 +1,16 @@
+/**
+ * storage/notifications.js — Push notification scheduling
+ *
+ * Schedules two daily reminders via expo-notifications:
+ *   - Morning: 8:00 AM — prompt to complete the morning diary entry
+ *   - Evening: 9:00 PM — prompt to complete the evening diary entry
+ *
+ * Notifications are not available on web; all functions are no-ops when
+ * Platform.OS === 'web' so the same code works across all platforms.
+ *
+ * The enabled/disabled preference is persisted in AsyncStorage separately
+ * from the rest of the app data so it survives entry history being cleared.
+ */
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

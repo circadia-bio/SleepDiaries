@@ -1,3 +1,17 @@
+/**
+ * app/(tabs)/home.jsx — Home screen
+ *
+ * The main dashboard shown after login. Displays:
+ *   - Personalised welcome heading.
+ *   - Morning and evening entry cards (pending / completed / locked states).
+ *   - Instructions button that opens the InstructionsModal.
+ *   - Past Entries and Final Report shortcuts.
+ *
+ * On focus, reloads today’s status from storage so card states always
+ * reflect the latest entries. On first visit after login (detected via
+ * the showInstructions route param or hasSeenInstructions flag), opens
+ * the instructions modal automatically.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,

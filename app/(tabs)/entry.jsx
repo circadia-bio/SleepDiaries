@@ -1,3 +1,11 @@
+/**
+ * app/(tabs)/entry.jsx — Entry tab
+ *
+ * Mirrors the entry card section from the home screen as a dedicated tab.
+ * Shows the same morning / evening card images (pending, completed, locked)
+ * and refreshes their state every time the tab is focused.
+ * The evening entry is disabled until the morning entry is complete.
+ */
 import React, { useState, useCallback } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Platform, ImageBackground } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';

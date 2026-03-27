@@ -1,3 +1,20 @@
+/**
+ * app/questionnaire.jsx — Step-by-step questionnaire screen
+ *
+ * Drives both the morning (13 questions) and evening (5 questions) entries.
+ * The entry type is passed as a route param: { entryType: 'morning' | 'evening' }.
+ *
+ * Key behaviours:
+ *   - buildFlow() computes the visible question sequence at runtime, inserting
+ *     conditional follow-up questions based on previous answers.
+ *   - Each question type renders a dedicated input component (TimeInput,
+ *     DurationInput, YesNoInput, RatingInput, NumberInput, MedicationInput,
+ *     TextInputField).
+ *   - canProceed() blocks the Next button until required questions are answered.
+ *   - On final question, saves the entry and shows a themed completion splash
+ *     screen, then auto-navigates home after 2.5 seconds.
+ *   - Amber theme for morning entries, blue for evening entries.
+ */
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,

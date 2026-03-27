@@ -1,3 +1,19 @@
+/**
+ * app/InstructionsModal.jsx — Instructions slideshow modal
+ *
+ * A full-screen modal that steps through 6 instructional images.
+ * Shown automatically on first login and accessible any time via
+ * the Instructions button on the home screen.
+ *
+ * Navigation is handled by invisible TouchableOpacity zones overlaid
+ * on top of the image, positioned to match the button artwork:
+ *   - Close (top-left)    — dismisses and marks instructions as seen
+ *   - Get Started (slide 1 only) — advances to slide 2
+ *   - Back / Next (slides 2–6)  — navigate between slides
+ *
+ * Once closed (by any route), markInstructionsSeen() is called so the
+ * modal will not auto-show again on subsequent app opens.
+ */
 import React, { useState } from 'react';
 import {
   Modal, View, Image, TouchableOpacity,

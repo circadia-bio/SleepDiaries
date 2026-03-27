@@ -1,3 +1,25 @@
+/**
+ * storage/storage.js — AsyncStorage helpers
+ *
+ * All persistent data for the app is stored locally on the device using
+ * @react-native-async-storage/async-storage. No data is ever sent to a server.
+ *
+ * Stored keys:
+ *   user_name         — participant’s name string
+ *   entries           — JSON array of entry objects
+ *   seen_instructions — 'true' once the instructions modal has been dismissed
+ *
+ * Entry object shape:
+ *   {
+ *     id:          '{date}-{type}',   e.g. '2024-01-15-morning'
+ *     type:        'morning' | 'evening'
+ *     date:        'YYYY-MM-DD'
+ *     completedAt: ISO timestamp string
+ *     answers:     { [questionId]: value, ... }
+ *   }
+ *
+ * Also exports CSV and JSON export helpers used by the export screen.
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────

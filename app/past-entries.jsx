@@ -1,3 +1,14 @@
+/**
+ * app/past-entries.jsx — Past entries history screen
+ *
+ * Loads all saved entries from AsyncStorage and displays them in reverse
+ * chronological order, grouped by date. Each day shows morning entries
+ * before evening entries. Tapping a card expands it to reveal all
+ * question-answer pairs for that entry.
+ *
+ * Answer formatting is handled per question type (time, duration, yes/no,
+ * rating, number, medication, text) so values display in a human-readable form.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,

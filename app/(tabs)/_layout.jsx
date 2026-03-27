@@ -1,8 +1,24 @@
+/**
+ * app/(tabs)/_layout.jsx — Tab bar layout
+ *
+ * Configures the three main tabs (Home, Entry, Settings) and renders a
+ * custom tab bar using full-width image assets instead of the default
+ * React Native tab bar.
+ *
+ * The tab bar image switches based on the active route, so each tab has
+ * its own highlighted artwork (taskbar-1/2/3.png). Invisible TouchableOpacity
+ * zones sit over each third of the image to handle tab presses.
+ *
+ * Width is hardcoded to 390px (standard phone width) so the tab bar image
+ * scales correctly on both native and the web phone-frame layout.
+ */
 import { Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const W = 390; // Always use phone width — web wrapper constrains layout
+// Fixed at 390px — on web the root wrapper constrains the layout to this width,
+// and on native the phone screen is assumed to be standard iPhone width.
+const W = 390;
 
 // Images are 1183x292 — ratio 4.051
 const IMAGE_RATIO = 1183 / 292;

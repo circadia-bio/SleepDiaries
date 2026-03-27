@@ -1,3 +1,11 @@
+/**
+ * app/index.jsx — Login / onboarding screen
+ *
+ * Shown only on first launch (before a name has been saved).
+ * The user enters their name, which is persisted to AsyncStorage.
+ * On submit, navigates to the home tab and passes a flag to trigger
+ * the instructions modal automatically on first run.
+ */
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
