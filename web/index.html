@@ -90,11 +90,11 @@
       if (typeof window !== 'undefined' && window.innerWidth > 430) {
         const PHONE_W = 390;
         const PHONE_H = 844;
-        Object.defineProperty(window, '__phoneWidth',  { value: PHONE_W });
-        Object.defineProperty(window, '__phoneHeight', { value: PHONE_H });
-        // Only clamp dimensions on desktop, not on mobile PWA
         const isStandalone = window.navigator.standalone === true;
+        // On desktop browser only: clamp to phone frame dimensions
         if (!isStandalone) {
+          Object.defineProperty(window, '__phoneWidth',  { value: PHONE_W });
+          Object.defineProperty(window, '__phoneHeight', { value: PHONE_H });
           try {
             Object.defineProperty(window, 'innerWidth',  { get: () => PHONE_W, configurable: true });
             Object.defineProperty(window, 'innerHeight', { get: () => PHONE_H, configurable: true });
