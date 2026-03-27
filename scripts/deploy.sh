@@ -3,6 +3,18 @@ set -e
 npx expo export -p web --output-dir docs --clear
 touch docs/.nojekyll
 cp docs/index.html docs/404.html
+
+# Inject PWA meta tags into the Expo-generated index.html
+PWA_TAGS='<link rel="manifest" href="/manifest.json" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><meta name="apple-mobile-web-app-title" content="Sleep Diaries" /><link rel="apple-touch-icon" href="/icons/icon-192.png" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro_max.png" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro.png" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_16_pro.png" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_14_plus.png" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_14.png" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_x.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" /><link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" /><script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js");});}<\/script>'
+echo "Injecting PWA tags..."
+node -e "
+  const fs = require('fs');
+  const html = fs.readFileSync('docs/index.html', 'utf8');
+  const tags = '$PWA_TAGS';
+  fs.writeFileSync('docs/index.html', html.replace('</head>', tags + '</head>'));
+  fs.writeFileSync('docs/404.html', html.replace('</head>', tags + '</head>'));
+  console.log('PWA tags injected.');
+"
 # Get font hash for redirect rule
 FONT_HASH=$(grep -o 'Ionicons\.[a-f0-9]*\.ttf' docs/_expo/static/js/web/*.js | head -1 | grep -o '[a-f0-9]\{32\}')
 
@@ -22,7 +34,13 @@ cp web/sw.js docs/sw.js
 
 # Copy PWA icons
 mkdir -p docs/icons
-cp assets/icon.png docs/icons/icon-192.png
-cp assets/icon.png docs/icons/icon-512.png
+cp web/icons/icon-192.png docs/icons/icon-192.png
+cp web/icons/icon-512.png docs/icons/icon-512.png
+
+# Copy iPhone/iPad splash screens
+mkdir -p docs/splashscreens
+cp web/splashscreens/*.png docs/splashscreens/
+# iphone_16_pro uses same dimensions as iphone_15_pro
+cp web/splashscreens/iphone_15_pro.png docs/splashscreens/iphone_16_pro.png
 
 echo "✅ Done — drag docs/ to Netlify"
