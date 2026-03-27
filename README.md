@@ -30,7 +30,8 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
 - 📱 **iOS & Android** — single codebase via React Native + Expo
-- 🌐 **Web** — responsive web app hosted, constrained to a mobile-phone layout on desktop
+- 🌐 **Web** — Progressive Web App (PWA) installable on any device, hosted via Netlify
+- 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
 
 ---
 
@@ -112,6 +113,31 @@ npm run deploy
 It will be in the `docs/` folder.
 
 🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
+
+---
+
+## 📲 Installing as an App
+
+Sleep Diaries is a Progressive Web App (PWA) — it can be installed directly to your home screen from the browser, with no App Store required. Once installed it runs full-screen, works offline, and behaves like a native app.
+
+### iOS (Safari)
+1. Open [sleepdiaries.circadia-lab.uk](https://sleepdiaries.circadia-lab.uk) in **Safari**
+2. Tap the **Share** button (box with arrow pointing up)
+3. Scroll down and tap **Add to Home Screen**
+4. Tap **Add** — the app icon will appear on your home screen
+
+> Note: PWA installation on iOS only works in Safari, not Chrome or Firefox.
+
+### Android (Chrome)
+1. Open [sleepdiaries.circadia-lab.uk](https://sleepdiaries.circadia-lab.uk) in **Chrome**
+2. Tap the **three-dot menu** (⋮) in the top right
+3. Tap **Add to Home screen** or **Install app**
+4. Tap **Install** — the app icon will appear on your home screen
+
+### Desktop (Chrome / Edge)
+1. Open [sleepdiaries.circadia-lab.uk](https://sleepdiaries.circadia-lab.uk)
+2. Click the **install icon** (⊕) in the address bar
+3. Click **Install**
 
 ---
 
@@ -346,5 +372,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Push notification reminders (morning + evening)
 - [x] Data export (CSV / JSON)
 - [x] Web app (Netlify)
+- [x] Progressive Web App (PWA) — installable on iOS, Android, and desktop
+- [x] Offline support via service worker
 - [ ] Backend API integration
 - [ ] Multi-language support
