@@ -55,6 +55,18 @@ const splashDiv = `
 </div>`;
 
 html = html.replace('</head>', metaTags + '</head>');
+// Fix viewport to cover the notch and safe areas
+html = html.replace(
+  'width=device-width, initial-scale=1, shrink-to-fit=no',
+  'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover'
+);
+
+// Fill safe areas with the app background colour
+html = html.replace(
+  '</style><style id="react-native-stylesheet">',
+  'html,body{background:#1A3A5C;}@supports(padding-top:env(safe-area-inset-top)){body{padding-top:0;background:#C8DFF5;}}</style><style id="react-native-stylesheet">'
+);
+
 html = html.replace('<div id="root">', splashDiv + '<div id="root">');
 
 fs.writeFileSync('docs/index.html', html);
