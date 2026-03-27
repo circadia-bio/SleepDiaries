@@ -99,7 +99,7 @@ Then press `i` for iOS simulator, `a` for Android emulator, or scan the QR code 
 npx expo start --web
 ```
 
-### Deploying to the web (Netlify)
+### Deploying to the web
 
 ```bash
 # Export the web build
@@ -109,7 +109,7 @@ npx expo export -p web --output-dir docs --clear
 npm run deploy
 ```
 
-Then drag the `docs/` folder to [Netlify Drop](https://app.netlify.com/drop), or connect your repository for automatic deployments.
+It will be in the `docs/` folder.
 
 🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
 
@@ -271,8 +271,6 @@ The final report (unlocked after 3 morning entries) automatically computes:
 ---
 
 ## 👥 Authors
-
-**Northumbria University — Circadia Lab**
 
 | Role | Names |
 |------|-------|
