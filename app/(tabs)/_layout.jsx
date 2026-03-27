@@ -13,7 +13,7 @@
  * scales correctly on both native and the web phone-frame layout.
  */
 import { Tabs } from 'expo-router';
-import { View, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Fixed at 390px — on web the root wrapper constrains the layout to this width,
@@ -33,9 +33,12 @@ const TASKBAR_IMAGES = {
 function CustomTabBar({ state, navigation }) {
   const activeRoute = state.routes[state.index]?.name ?? 'home';
   const image = TASKBAR_IMAGES[activeRoute] ?? TASKBAR_IMAGES.home;
+  const insets = useSafeAreaInsets();
+  // On web PWA, extend the tab bar background into the bottom safe area
+  const extraBottom = Platform.OS === 'web' ? insets.bottom : 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: extraBottom, backgroundColor: '#C8DFF5' }]}>
       <Image
         source={image}
         style={{ width: W, height: TAB_IMAGE_HEIGHT }}
