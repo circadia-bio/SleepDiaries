@@ -1,0 +1,4 @@
+/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.b4eb097d35f44ed943676fd56f6bdc51.ttf  /fonts/Ionicons.ttf  200
+/assets/*  /assets/:splat  200
+/_expo/*  /_expo/:splat  200
+/*  /index.html  200

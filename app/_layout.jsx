@@ -52,6 +52,7 @@ const IMAGE_ASSETS = [
   require('../assets/images/next-day.png'),
   require('../assets/images/next-night.png'),
   require('../assets/images/logo.png'),
+  require('../assets/splash-icon.png'),
 ];
 
 export default function RootLayout() {
@@ -112,7 +113,7 @@ export default function RootLayout() {
         {showSplash && (
           <View style={styles.splash}>
             <Image
-              source={require('../assets/images/splash-icon.png')}
+              source={require('../assets/splash-icon.png')}
               style={styles.splashIcon}
               resizeMode="contain"
             />
