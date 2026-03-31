@@ -29,6 +29,9 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📤 **Data export** — CSV and JSON export via native share sheet
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
+- 👤 **Profile** — editable name and research code, summary stats, quick actions
+- 📈 **Entry tab stats** — streak, entry counts, average sleep time, efficiency and quality
+- 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device, hosted via Netlify
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
@@ -46,25 +49,37 @@ The app is intentionally simple and modular — the question sets, input types, 
 ```
 SleepDiaries/
 ├── app/                        # expo-router file-based navigation
-│   ├── _layout.jsx             # Root stack navigator
-│   ├── index.jsx               # Onboarding / name entry screen
+│   ├── _layout.jsx             # Root stack navigator + asset preloading + PWA splash
+│   ├── index.jsx               # Onboarding / name entry screen (+ research code)
 │   ├── questionnaire.jsx       # Step-by-step questionnaire (morning or evening)
 │   ├── past-entries.jsx        # Scrollable entry history
 │   ├── final-report.jsx        # Sleep metrics summary report
-│   ├── export.jsx              # CSV / JSON data export
+│   ├── export.jsx              # CSV / JSON export + JSON import
+│   ├── InstructionsModal.jsx   # Full-screen instructions slideshow
+│   ├── ProfileModal.jsx        # Profile sheet (name, research code, stats)
 │   └── (tabs)/                 # Tab bar screens
-│       ├── _layout.jsx         # Tab bar configuration
+│       ├── _layout.jsx         # Custom image-based tab bar
 │       ├── home.jsx            # Home screen
-│       ├── entry.jsx           # Entry type chooser
+│       ├── entry.jsx           # Entry tab with sleep stats dashboard
 │       └── settings.jsx        # Settings
 ├── data/
 │   └── questions.js            # ⭐ All question definitions — start here to customise
 ├── storage/
-│   ├── storage.js              # AsyncStorage helpers + CSV/JSON export
+│   ├── storage.js              # AsyncStorage helpers + CSV/JSON export + import
 │   └── notifications.js        # Push notification scheduling
-├── assets/                     # App icons and splash screen
+├── theme/
+│   ├── typography.js           # Font constants (Livvic, Afacad)
+│   └── useInsets.js            # Cross-platform safe area hook
+├── web/
+│   ├── manifest.json           # PWA manifest
+│   ├── sw.js                   # Service worker (offline support)
+│   ├── icons/                  # PWA icons (192px, 512px)
+│   └── splashscreens/          # iPhone/iPad splash screens
+├── scripts/
+│   └── deploy.sh               # Web export + PWA injection + Netlify prep
+├── assets/                     # App icons, splash, and image assets
+├── netlify.toml                # Netlify build configuration
 ├── app.json                    # Expo configuration
-├── babel.config.js             # Babel configuration
 └── package.json                # Dependencies
 ```
 
@@ -266,13 +281,13 @@ The app uses [expo-router](https://expo.github.io/router/) with file-based routi
 
 ```
 index.jsx           → Onboarding (shown on first launch, skipped if name saved)
-(tabs)/home         → Main home screen
-(tabs)/entry        → Entry type chooser
+(tabs)/home         → Main home screen (+ InstructionsModal + ProfileModal)
+(tabs)/entry        → Entry tab with sleep stats dashboard
 (tabs)/settings     → Settings
 questionnaire       → Full-screen questionnaire (slides up, hides tab bar)
 past-entries        → Entry history
 final-report        → Sleep metrics report
-export              → CSV / JSON export
+export              → CSV / JSON export + JSON import
 ```
 
 ---
@@ -283,8 +298,10 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 
 ```js
 // Stored keys:
-// 'user_name'  → participant name string
-// 'entries'    → JSON array of entry objects
+// 'user_name'         → participant name string
+// 'research_code'     → optional research study identifier
+// 'entries'           → JSON array of entry objects
+// 'seen_instructions' → 'true' once the instructions modal has been dismissed
 
 // Entry structure:
 {
@@ -338,6 +355,23 @@ The onboarding screen includes an optional **research code** field. This allows 
 - Cleared when the participant logs out or deletes their account
 
 Participants leave the field blank if they are using the app independently.
+
+### Profile screen
+
+The **Profile** button on the home screen slides up a modal showing:
+
+- Editable participant name and research code
+- Summary stats: morning entries, evening entries, current streak, member since date
+- Quick actions: replay instructions, link to circadia-lab.uk
+
+### Entry tab stats
+
+The **Entry tab** shows a live stats dashboard above the entry cards:
+
+- 🔥 Current streak (consecutive days with a morning entry)
+- Morning and evening entry counts
+- Days in study
+- Average sleep time, sleep efficiency, and sleep quality
 
 ### Adapting for your study
 
@@ -428,5 +462,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Offline support via service worker
 - [x] JSON import with merge/replace
 - [x] Optional research code for study participants
+- [x] Profile screen with editable participant info and stats
+- [x] Entry tab sleep stats dashboard
 - [ ] Backend API integration
 - [ ] Multi-language support
