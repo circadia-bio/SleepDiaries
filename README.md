@@ -116,6 +116,47 @@ It will be in the `docs/` folder.
 
 ---
 
+## 📥 Importing Data
+
+Entries exported as JSON from Sleep Diaries can be imported back into the app — useful for restoring a backup, transferring data between devices, or migrating participants between study phases.
+
+### How to import
+
+1. Go to **Settings → Export Data**
+2. Scroll to **Import from JSON** at the bottom
+3. Tap it and select your `.json` file from Files
+4. If you already have entries on the device, you will be asked how to handle the conflict:
+
+| Option | What it does |
+|--------|--------------|
+| **Merge** | Keeps all existing entries and adds any new ones from the file. Duplicate entries (same date and type) are skipped. |
+| **Replace** | Deletes all existing entries and replaces them with the imported ones. Requires a second confirmation. |
+
+### File format
+
+The import expects a JSON file previously exported by Sleep Diaries. The file must contain an `entries` array. A `participant` name and `researchCode` at the top level are optional and not imported (only the entries are).
+
+```json
+{
+  "participant": "Lucas",
+  "researchCode": "STUDY-001",
+  "exportedAt": "2025-01-15T10:30:00Z",
+  "entries": [
+    {
+      "id": "2025-01-14-morning",
+      "type": "morning",
+      "date": "2025-01-14",
+      "completedAt": "2025-01-14T08:22:00Z",
+      "answers": { ... }
+    }
+  ]
+}
+```
+
+> Import is not available on the web version of the app.
+
+---
+
 ## 📲 Installing as an App
 
 Sleep Diaries is a Progressive Web App (PWA) — it can be installed directly to your home screen from the browser, with no App Store required. Once installed it runs full-screen, works offline, and behaves like a native app.
