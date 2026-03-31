@@ -305,5 +305,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  splashImage: { width: 180, height: 180 },
+  splashImage: { width: '100%', aspectRatio: 1 },
 });
