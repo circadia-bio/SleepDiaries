@@ -287,6 +287,17 @@ The final report (unlocked after 3 morning entries) automatically computes:
 | Sleep quality | Average of 1–5 ratings |
 | Restedness | Average of 1–5 ratings |
 
+### Research code
+
+The onboarding screen includes an optional **research code** field. This allows researchers to assign a unique identifier to each participant at enrolment. The code is:
+
+- Saved locally on the device alongside the participant's name
+- Included as a `research_code` column in CSV exports
+- Included as a `researchCode` field in JSON exports
+- Cleared when the participant logs out or deletes their account
+
+Participants leave the field blank if they are using the app independently.
+
 ### Adapting for your study
 
 1. **Edit `data/questions.js`** to add, remove, or reorder questions
@@ -374,5 +385,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Web app (Netlify)
 - [x] Progressive Web App (PWA) — installable on iOS, Android, and desktop
 - [x] Offline support via service worker
+- [x] JSON import with merge/replace
+- [x] Optional research code for study participants
 - [ ] Backend API integration
 - [ ] Multi-language support
