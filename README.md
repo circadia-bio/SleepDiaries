@@ -33,7 +33,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📈 **Entry tab stats** — streak, entry counts, average sleep time, efficiency and quality
 - 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace
 - 📱 **iOS & Android** — single codebase via React Native + Expo
-- 🌐 **Web** — Progressive Web App (PWA) installable on any device, hosted via Netlify
+- 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
 
 ---
