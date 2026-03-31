@@ -157,6 +157,44 @@ export const exportToCSV = async (userName) => {
   return [headers.join(','), ...rows].join('\n');
 };
 
+// ─── Data import ────────────────────────────────────────────────────────────
+
+/**
+ * Validate that a parsed object looks like a Sleep Diaries JSON export.
+ * Returns an array of valid entries, or throws if the file is unrecognised.
+ */
+const validateImport = (parsed) => {
+  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file format.');
+  const entries = Array.isArray(parsed) ? parsed : parsed.entries;
+  if (!Array.isArray(entries)) throw new Error('No entries array found in file.');
+  const valid = entries.filter(
+    (e) => e && e.id && e.type && e.date && e.answers
+  );
+  if (valid.length === 0) throw new Error('No valid entries found in file.');
+  return valid;
+};
+
+/**
+ * Import entries from a parsed JSON object.
+ * mode: 'merge'   — keep existing entries, add new ones (existing ids win)
+ * mode: 'replace' — discard all existing entries and replace with imported ones
+ */
+export const importFromJSON = async (parsed, mode = 'merge') => {
+  const incoming = validateImport(parsed);
+  if (mode === 'replace') {
+    await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify(incoming));
+    return { imported: incoming.length, skipped: 0 };
+  }
+  // Merge: existing entries take priority (same id = keep existing)
+  const existing = await loadEntries();
+  const existingIds = new Set(existing.map((e) => e.id));
+  const toAdd = incoming.filter((e) => !existingIds.has(e.id));
+  const merged = [...existing, ...toAdd]
+    .sort((a, b) => b.date.localeCompare(a.date));
+  await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify(merged));
+  return { imported: toAdd.length, skipped: incoming.length - toAdd.length };
+};
+
 // Build a JSON export string
 export const exportToJSON = async (userName) => {
   const entries = await loadEntries();

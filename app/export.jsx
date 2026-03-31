@@ -1,17 +1,25 @@
+/**
+ * app/export.jsx — Data export and import screen
+ *
+ * Export: shares all entries as CSV or JSON via the native share sheet.
+ * Import: picks a JSON file via the document picker, then asks the user
+ *         whether to merge with or replace existing entries.
+ */
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, Share,
-  useWindowDimensions,
+  useWindowDimensions, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { exportToCSV, exportToJSON, loadName, loadEntries } from '../storage/storage';
+import * as DocumentPicker from 'expo-document-picker';
+import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from '../storage/storage';
 
 export default function ExportScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
-  const [loading, setLoading] = useState(null); // 'csv' | 'json' | null
+  const [loading, setLoading] = useState(null); // 'csv' | 'json' | 'import' | null
 
   const handleExport = async (format) => {
     setLoading(format);
@@ -37,6 +45,77 @@ export default function ExportScreen() {
       });
     } catch (e) {
       Alert.alert('Export failed', e.message);
+    }
+    setLoading(null);
+  };
+
+  const handleImport = async () => {
+    // Document picker not supported on web
+    if (Platform.OS === 'web') {
+      Alert.alert('Not supported', 'File import is not available on the web version.');
+      return;
+    }
+    setLoading('import');
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled) { setLoading(null); return; }
+
+      const uri = result.assets[0].uri;
+      const text = await fetch(uri).then((r) => r.text());
+      const parsed = JSON.parse(text);
+
+      const existing = await loadEntries();
+
+      if (existing.length === 0) {
+        // No existing data — import directly without asking
+        const { imported } = await importFromJSON(parsed, 'replace');
+        Alert.alert('Import successful', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
+      } else {
+        // Ask user how to handle conflict
+        Alert.alert(
+          'Existing data found',
+          `You already have ${existing.length} ${existing.length === 1 ? 'entry' : 'entries'}. What would you like to do?`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Merge',
+              onPress: async () => {
+                const { imported, skipped } = await importFromJSON(parsed, 'merge');
+                Alert.alert(
+                  'Merge complete',
+                  `${imported} new ${imported === 1 ? 'entry' : 'entries'} added.${skipped > 0 ? `\n${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''}`
+                );
+              },
+            },
+            {
+              text: 'Replace',
+              style: 'destructive',
+              onPress: async () => {
+                Alert.alert(
+                  'Replace all data?',
+                  'This will permanently delete all your existing entries. This cannot be undone.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Replace',
+                      style: 'destructive',
+                      onPress: async () => {
+                        const { imported } = await importFromJSON(parsed, 'replace');
+                        Alert.alert('Import complete', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
+                      },
+                    },
+                  ]
+                );
+              },
+            },
+          ]
+        );
+      }
+    } catch (e) {
+      Alert.alert('Import failed', e.message);
     }
     setLoading(null);
   };
@@ -106,6 +185,31 @@ export default function ExportScreen() {
             }
           </TouchableOpacity>
 
+          {/* Divider */}
+          <View style={styles.divider} />
+
+          {/* JSON Import */}
+          <TouchableOpacity
+            style={styles.exportCard}
+            onPress={handleImport}
+            activeOpacity={0.85}
+            disabled={!!loading}
+          >
+            <View style={[styles.exportIcon, { backgroundColor: '#FFF3E8' }]}>
+              <Ionicons name="download-outline" size={28} color="#E07A20" />
+            </View>
+            <View style={styles.exportText}>
+              <Text style={styles.exportTitle}>Import from JSON</Text>
+              <Text style={styles.exportSubtitle}>
+                Restore entries from a previously exported Sleep Diaries JSON file.
+              </Text>
+            </View>
+            {loading === 'import'
+              ? <ActivityIndicator color="#E07A20" />
+              : <Ionicons name="folder-open-outline" size={20} color="#E07A20" />
+            }
+          </TouchableOpacity>
+
           {/* Note */}
           <Text style={styles.note}>
             Your data stays on your device at all times. Exporting shares it only with the app you choose.
@@ -149,5 +253,6 @@ const styles = StyleSheet.create({
   exportTitle:    { fontSize: 16, fontWeight: '700', color: '#1E3A5F' },
   exportSubtitle: { fontSize: 13, color: '#94A3B8', lineHeight: 18 },
 
-  note: { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18, paddingHorizontal: 8 },
+  note:    { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18, paddingHorizontal: 8 },
+  divider: { height: 1, backgroundColor: '#E2EAF4', marginVertical: 4 },
 });
