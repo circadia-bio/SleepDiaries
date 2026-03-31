@@ -24,6 +24,7 @@ import { useInsets } from '../../theme/useInsets';
 import { FONTS } from '../../theme/typography';
 import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../../storage/storage';
 import InstructionsModal from '../InstructionsModal';
+import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 
 const CARD_IMAGES = {
@@ -69,6 +70,7 @@ export default function HomeScreen() {
   const [reportUnlocked, setReportUnlocked]     = useState(false);
   const [morningCount, setMorningCount]         = useState(0);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showProfile, setShowProfile]           = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,7 +113,7 @@ export default function HomeScreen() {
               <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>Welcome,</Text>
               <Text style={[styles.userName,    { fontFamily: FONTS.heading }]}>{userName}!</Text>
             </View>
-            <TouchableOpacity style={styles.profileButton}>
+            <TouchableOpacity style={styles.profileButton} onPress={() => setShowProfile(true)}>
               <Ionicons name="person-circle-outline" size={32} color="#4A7BB5" />
               <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>Profile</Text>
             </TouchableOpacity>
@@ -171,6 +173,12 @@ export default function HomeScreen() {
       <InstructionsModal
         visible={showInstructions}
         onClose={() => setShowInstructions(false)}
+      />
+
+      <ProfileModal
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+        onShowInstructions={() => setShowInstructions(true)}
       />
     </View>
   );
