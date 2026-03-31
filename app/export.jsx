@@ -5,9 +5,9 @@
  * Import: picks a JSON file via the document picker, then asks the user
  *         whether to merge with or replace existing entries.
  */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, Image, TouchableOpacity, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, Share,
   useWindowDimensions, Platform,
 } from 'react-native';
@@ -19,7 +19,15 @@ import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from
 export default function ExportScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
-  const [loading, setLoading] = useState(null); // 'csv' | 'json' | 'import' | null
+  const [loading, setLoading]     = useState(null); // 'csv' | 'json' | 'import' | null
+  const [showSplash, setShowSplash] = useState(false);
+
+  // Auto-dismiss import splash after 2.5s
+  useEffect(() => {
+    if (!showSplash) return;
+    const t = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(t);
+  }, [showSplash]);
 
   const handleExport = async (format) => {
     setLoading(format);
@@ -53,11 +61,16 @@ export default function ExportScreen() {
   const fileInputRef = useRef(null);
 
   // Shared logic once we have parsed JSON — handles merge/replace conflict resolution
+  const doImport = async (parsed, mode) => {
+    await importFromJSON(parsed, mode);
+    setShowSplash(true);
+    setLoading(null);
+  };
+
   const processImport = async (parsed) => {
     const existing = await loadEntries();
     if (existing.length === 0) {
-      const { imported } = await importFromJSON(parsed, 'replace');
-      Alert.alert('Import successful', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
+      await doImport(parsed, 'replace');
     } else {
       Alert.alert(
         'Existing data found',
@@ -66,36 +79,19 @@ export default function ExportScreen() {
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Merge',
-            onPress: async () => {
-              const { imported, skipped } = await importFromJSON(parsed, 'merge');
-              Alert.alert(
-                'Merge complete',
-                `${imported} new ${imported === 1 ? 'entry' : 'entries'} added.${
-                  skipped > 0 ? `\n${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''
-                }`
-              );
-            },
+            onPress: () => doImport(parsed, 'merge'),
           },
           {
             text: 'Replace',
             style: 'destructive',
-            onPress: async () => {
-              Alert.alert(
-                'Replace all data?',
-                'This will permanently delete all your existing entries. This cannot be undone.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Replace',
-                    style: 'destructive',
-                    onPress: async () => {
-                      const { imported } = await importFromJSON(parsed, 'replace');
-                      Alert.alert('Import complete', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
-                    },
-                  },
-                ]
-              );
-            },
+            onPress: () => Alert.alert(
+              'Replace all data?',
+              'This will permanently delete all your existing entries. This cannot be undone.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Replace', style: 'destructive', onPress: () => doImport(parsed, 'replace') },
+              ]
+            ),
           },
         ]
       );
@@ -248,6 +244,20 @@ export default function ExportScreen() {
           </Text>
         </View>
       </SafeAreaView>
+      {/* Import success splash */}
+      {showSplash && (
+        <TouchableOpacity
+          style={styles.splashOverlay}
+          activeOpacity={1}
+          onPress={() => setShowSplash(false)}
+        >
+          <Image
+            source={require('../assets/splash-icon.png')}
+            style={styles.splashImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -287,4 +297,13 @@ const styles = StyleSheet.create({
 
   note:    { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18, paddingHorizontal: 8 },
   divider: { height: 1, backgroundColor: '#E2EAF4', marginVertical: 4 },
+
+  splashOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    backgroundColor: '#C8DFF5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splashImage: { width: 180, height: 180 },
 });
