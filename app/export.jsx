@@ -244,7 +244,7 @@ export default function ExportScreen() {
           </Text>
         </View>
       </SafeAreaView>
-      {/* Import success splash */}
+      {/* Import success splash — outside root View so it covers full screen incl. safe areas */}
       {showSplash && (
         <TouchableOpacity
           style={styles.splashOverlay}
