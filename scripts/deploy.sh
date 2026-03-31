@@ -23,7 +23,21 @@ const metaTags = [
   '<meta name="apple-mobile-web-app-capable" content="yes" />',
   '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />',
   '<meta name="apple-mobile-web-app-title" content="Sleep Diaries" />',
+  '<link rel="icon" type="image/png" href="/favicon.png" />',
   '<link rel="apple-touch-icon" href="/icons/icon-192.png" />',
+  '<meta name="description" content="\uD83C\uDF19 Open-source sleep diary app for clinical research \u2014 built with React Native &amp; Expo. Morning &amp; evening questionnaires, sleep metrics, and data export (CSV/JSON)." />',
+  '<meta property="og:title" content="Sleep Diaries" />',
+  '<meta property="og:description" content="\uD83C\uDF19 Open-source sleep diary app for clinical research \u2014 built with React Native &amp; Expo. Morning &amp; evening questionnaires, sleep metrics, and data export (CSV/JSON)." />',
+  '<meta property="og:image" content="https://sleepdiaries.circadia-lab.uk/social.png" />',
+  '<meta property="og:image:width" content="1200" />',
+  '<meta property="og:image:height" content="630" />',
+  '<meta property="og:url" content="https://sleepdiaries.circadia-lab.uk" />',
+  '<meta property="og:type" content="website" />',
+  '<meta property="og:site_name" content="Sleep Diaries" />',
+  '<meta name="twitter:card" content="summary_large_image" />',
+  '<meta name="twitter:title" content="Sleep Diaries" />',
+  '<meta name="twitter:description" content="\uD83C\uDF19 Open-source sleep diary app for clinical research \u2014 built with React Native &amp; Expo. Morning &amp; evening questionnaires, sleep metrics, and data export (CSV/JSON)." />',
+  '<meta name="twitter:image" content="https://sleepdiaries.circadia-lab.uk/social.png" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_16_pro.png" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro_max.png" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_15_pro.png" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
@@ -112,8 +126,9 @@ mkdir -p docs/fonts
 cp node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf docs/fonts/Ionicons.ttf
 echo "Copied Ionicons font with hash: $FONT_HASH"
 
-# Copy social preview image
+# Copy social preview image and favicon
 cp assets/images/social.png docs/social.png
+cp assets/favicon.png docs/favicon.png
 
 # Copy PWA files
 cp web/manifest.json docs/manifest.json
