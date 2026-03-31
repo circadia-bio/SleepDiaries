@@ -58,7 +58,7 @@ export default function ExportScreen() {
     setLoading('import');
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json',
+        type: ['application/json', 'text/plain', 'text/json', '*/*'],
         copyToCacheDirectory: true,
       });
       if (result.canceled) { setLoading(null); return; }
