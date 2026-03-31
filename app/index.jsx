@@ -14,16 +14,17 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { saveName } from '../storage/storage';
+import { saveName, saveResearchCode } from '../storage/storage';
 
 const { height: H } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
-  const [name, setName]       = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [name, setName]             = useState('');
+  const [researchCode, setResearchCode] = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState('');
 
   const handleStart = async () => {
     if (!name.trim()) {
@@ -33,6 +34,7 @@ export default function LoginScreen() {
     setError('');
     setLoading(true);
     await saveName(name.trim());
+    if (researchCode.trim()) await saveResearchCode(researchCode.trim());
     setLoading(false);
     router.replace({ pathname: '/(tabs)/home', params: { showInstructions: '1' } });
   };
@@ -64,9 +66,23 @@ export default function LoginScreen() {
               onChangeText={setName}
               autoCapitalize="words"
               autoCorrect={false}
+              returnKeyType="next"
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={[styles.input, styles.inputOptional]}
+              placeholder="Research code (optional)"
+              placeholderTextColor="#A0B8D0"
+              value={researchCode}
+              onChangeText={setResearchCode}
+              autoCapitalize="none"
+              autoCorrect={false}
               returnKeyType="go"
               onSubmitEditing={handleStart}
             />
+            <Text style={styles.optionalLabel}>Optional — provided by your research team</Text>
           </View>
 
           <TouchableOpacity
@@ -114,7 +130,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
   },
-  inputWrapper: { justifyContent: 'center' },
+  inputWrapper: { justifyContent: 'center', gap: 6 },
   input: {
     backgroundColor: 'rgba(240, 247, 255, 0.92)',
     borderWidth: 1.5,
@@ -145,5 +161,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+  inputOptional: {
+    borderStyle: 'dashed',
+    borderColor: '#A0C8E8',
+  },
+  optionalLabel: {
+    fontSize: 11,
+    color: '#94A3B8',
+    paddingHorizontal: 4,
   },
 });

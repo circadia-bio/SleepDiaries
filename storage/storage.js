@@ -25,6 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const KEYS = {
   USER_NAME:            'user_name',
+  RESEARCH_CODE:        'research_code',
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
 };
@@ -36,6 +37,15 @@ export const saveName = async (name) => {
 
 export const loadName = async () => {
   return await AsyncStorage.getItem(KEYS.USER_NAME);
+};
+
+// ─── Research code ────────────────────────────────────────────────────────────
+export const saveResearchCode = async (code) => {
+  await AsyncStorage.setItem(KEYS.RESEARCH_CODE, code);
+};
+
+export const loadResearchCode = async () => {
+  return await AsyncStorage.getItem(KEYS.RESEARCH_CODE);
 };
 
 // ─── Entries ──────────────────────────────────────────────────────────────────
@@ -78,7 +88,7 @@ export const loadTodayStatus = async () => {
 };
 
 export const clearAll = async () => {
-  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS]);
+  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS]);
 };
 
 // ─── Instructions ──────────────────────────────────────────────────────────────
@@ -121,13 +131,14 @@ const flattenAnswer = (question, value) => {
 
 // Build a flat CSV string from all entries
 export const exportToCSV = async (userName) => {
+  const researchCode = await loadResearchCode();
   const entries = await loadEntries();
   if (entries.length === 0) return null;
 
   // ── Build headers ──
   const morningHeaders = MORNING_QUESTIONS.map((q) => `morning_q${q.number}_${q.id}`);
   const eveningHeaders = EVENING_QUESTIONS.map((q) => `evening_q${q.number}_${q.id}`);
-  const headers = ['participant', 'date', 'entry_type', 'completed_at', ...morningHeaders, ...eveningHeaders];
+  const headers = ['participant', 'research_code', 'date', 'entry_type', 'completed_at', ...morningHeaders, ...eveningHeaders];
 
   // ── Build rows ──
   const rows = entries.map((entry) => {
@@ -199,5 +210,11 @@ export const importFromJSON = async (parsed, mode = 'merge') => {
 export const exportToJSON = async (userName) => {
   const entries = await loadEntries();
   if (entries.length === 0) return null;
-  return JSON.stringify({ participant: userName, exportedAt: new Date().toISOString(), entries }, null, 2);
+  const researchCode = await loadResearchCode();
+  return JSON.stringify({
+    participant: userName,
+    researchCode: researchCode ?? null,
+    exportedAt: new Date().toISOString(),
+    entries,
+  }, null, 2);
 };
