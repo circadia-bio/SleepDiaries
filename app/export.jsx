@@ -5,7 +5,7 @@
  * Import: picks a JSON file via the document picker, then asks the user
  *         whether to merge with or replace existing entries.
  */
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, Share,
@@ -49,75 +49,96 @@ export default function ExportScreen() {
     setLoading(null);
   };
 
-  const handleImport = async () => {
-    // Document picker not supported on web
-    if (Platform.OS === 'web') {
-      Alert.alert('Not supported', 'File import is not available on the web version.');
-      return;
+  // Ref for the hidden web file input
+  const fileInputRef = useRef(null);
+
+  // Shared logic once we have parsed JSON — handles merge/replace conflict resolution
+  const processImport = async (parsed) => {
+    const existing = await loadEntries();
+    if (existing.length === 0) {
+      const { imported } = await importFromJSON(parsed, 'replace');
+      Alert.alert('Import successful', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
+    } else {
+      Alert.alert(
+        'Existing data found',
+        `You already have ${existing.length} ${existing.length === 1 ? 'entry' : 'entries'}. What would you like to do?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Merge',
+            onPress: async () => {
+              const { imported, skipped } = await importFromJSON(parsed, 'merge');
+              Alert.alert(
+                'Merge complete',
+                `${imported} new ${imported === 1 ? 'entry' : 'entries'} added.${
+                  skipped > 0 ? `\n${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''
+                }`
+              );
+            },
+          },
+          {
+            text: 'Replace',
+            style: 'destructive',
+            onPress: async () => {
+              Alert.alert(
+                'Replace all data?',
+                'This will permanently delete all your existing entries. This cannot be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Replace',
+                    style: 'destructive',
+                    onPress: async () => {
+                      const { imported } = await importFromJSON(parsed, 'replace');
+                      Alert.alert('Import complete', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
+                    },
+                  },
+                ]
+              );
+            },
+          },
+        ]
+      );
     }
+    setLoading(null);
+  };
+
+  // Web: handle file selected from hidden <input type="file">
+  const handleWebFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) { setLoading(null); return; }
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      await processImport(parsed);
+    } catch (err) {
+      Alert.alert('Import failed', err.message);
+      setLoading(null);
+    }
+    // Reset the input so the same file can be picked again
+    e.target.value = '';
+  };
+
+  const handleImport = async () => {
     setLoading('import');
+    if (Platform.OS === 'web') {
+      // Trigger the hidden file input
+      fileInputRef.current?.click();
+      return; // loading cleared in handleWebFileChange
+    }
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/json', 'text/plain', 'text/json', '*/*'],
         copyToCacheDirectory: true,
       });
       if (result.canceled) { setLoading(null); return; }
-
-      const uri = result.assets[0].uri;
-      const text = await fetch(uri).then((r) => r.text());
+      const text = await fetch(result.assets[0].uri).then((r) => r.text());
       const parsed = JSON.parse(text);
-
-      const existing = await loadEntries();
-
-      if (existing.length === 0) {
-        // No existing data — import directly without asking
-        const { imported } = await importFromJSON(parsed, 'replace');
-        Alert.alert('Import successful', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
-      } else {
-        // Ask user how to handle conflict
-        Alert.alert(
-          'Existing data found',
-          `You already have ${existing.length} ${existing.length === 1 ? 'entry' : 'entries'}. What would you like to do?`,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Merge',
-              onPress: async () => {
-                const { imported, skipped } = await importFromJSON(parsed, 'merge');
-                Alert.alert(
-                  'Merge complete',
-                  `${imported} new ${imported === 1 ? 'entry' : 'entries'} added.${skipped > 0 ? `\n${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''}`
-                );
-              },
-            },
-            {
-              text: 'Replace',
-              style: 'destructive',
-              onPress: async () => {
-                Alert.alert(
-                  'Replace all data?',
-                  'This will permanently delete all your existing entries. This cannot be undone.',
-                  [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                      text: 'Replace',
-                      style: 'destructive',
-                      onPress: async () => {
-                        const { imported } = await importFromJSON(parsed, 'replace');
-                        Alert.alert('Import complete', `${imported} ${imported === 1 ? 'entry' : 'entries'} imported.`);
-                      },
-                    },
-                  ]
-                );
-              },
-            },
-          ]
-        );
-      }
+      await processImport(parsed);
     } catch (e) {
       Alert.alert('Import failed', e.message);
+      setLoading(null);
     }
-    setLoading(null);
   };
 
   return (
@@ -209,6 +230,17 @@ export default function ExportScreen() {
               : <Ionicons name="folder-open-outline" size={20} color="#E07A20" />
             }
           </TouchableOpacity>
+
+          {/* Hidden file input for web import */}
+          {Platform.OS === 'web' && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json,text/plain"
+              style={{ display: 'none' }}
+              onChange={handleWebFileChange}
+            />
+          )}
 
           {/* Note */}
           <Text style={styles.note}>

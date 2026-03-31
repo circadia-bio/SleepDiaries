@@ -153,7 +153,7 @@ The import expects a JSON file previously exported by Sleep Diaries. The file mu
 }
 ```
 
-> Import is not available on the web version of the app.
+> On the web version, tapping Import opens your browser's file picker instead of the native Files app.
 
 ---
 
