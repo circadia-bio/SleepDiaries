@@ -23,6 +23,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { loadEntries, loadName } from '../storage/storage';
 
@@ -155,6 +157,8 @@ const Section = ({ title, children }) => (
 export default function FinalReportScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
+  const rawInsets = useSafeAreaInsets();
+  const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const [metrics, setMetrics]   = useState(null);
   const [userName, setUserName] = useState('');
   const [dateRange, setDateRange] = useState('');
@@ -201,7 +205,7 @@ export default function FinalReportScreen() {
   return (
     <View style={[styles.root, { minHeight: height }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
         </TouchableOpacity>
