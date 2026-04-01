@@ -456,7 +456,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Final report with sleep metrics
 - [x] Push notification reminders (morning + evening)
 - [x] Data export (CSV / JSON)
-- [x] Web app (Netlify)
+- [x] Web app
 - [x] Progressive Web App (PWA) — installable on iOS, Android, and desktop
 - [x] Offline support via service worker
 - [x] JSON import with merge/replace
