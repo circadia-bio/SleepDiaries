@@ -12,6 +12,7 @@ import {
   useWindowDimensions, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from '../storage/storage';
@@ -19,6 +20,8 @@ import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from
 export default function ExportScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
+  const rawInsets = useSafeAreaInsets();
+  const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const [loading, setLoading]     = useState(null); // 'csv' | 'json' | 'import' | null
   const [showSplash, setShowSplash] = useState(false);
 
@@ -141,7 +144,7 @@ export default function ExportScreen() {
     <View style={[styles.root, { minHeight: height }]}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
           </TouchableOpacity>
