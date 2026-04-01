@@ -25,12 +25,12 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 🎨 **Dual themes** — amber for morning entries, blue for evening entries
 - 💾 **Local persistence** — all entries saved to device storage via AsyncStorage
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
-- 📊 **Final report** — auto-unlocks after 3 morning entries, computes sleep metrics
+- 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics
 - 📤 **Data export** — CSV and JSON export via native share sheet
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
 - 👤 **Profile** — editable name and research code, summary stats, quick actions
-- 📈 **Entry tab stats** — streak, entry counts, average sleep time, efficiency and quality
+- 📈 **Entry tab stats** — streak, entry counts, days in study (sleep metrics unlock after 14 morning entries)
 - 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
@@ -76,9 +76,9 @@ SleepDiaries/
 │   ├── icons/                  # PWA icons (192px, 512px)
 │   └── splashscreens/          # iPhone/iPad splash screens
 ├── scripts/
-│   └── deploy.sh               # Web export + PWA injection + Netlify prep
+│   └── deploy.sh               # Web export + PWA injection + deploy prep
 ├── assets/                     # App icons, splash, and image assets
-├── netlify.toml                # Netlify build configuration
+├── netlify.toml                # CI/CD build configuration
 ├── app.json                    # Expo configuration
 └── package.json                # Dependencies
 ```
@@ -118,14 +118,10 @@ npx expo start --web
 ### Deploying to the web
 
 ```bash
-# Export the web build
-npx expo export -p web --output-dir docs --clear
-
-# Run the deploy script (handles font paths and redirects)
 npm run deploy
 ```
 
-It will be in the `docs/` folder.
+This runs the deploy script which exports the web build, injects PWA tags, copies assets, and outputs everything to the `docs/` folder. The repository is configured for automatic deployment on every push to `main`.
 
 🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
 
@@ -334,7 +330,7 @@ This app implements the **Consensus Sleep Diary (CSD)** — a standardised instr
 
 ### Final report metrics
 
-The final report (unlocked after 3 morning entries) automatically computes:
+The final report (unlocked after 14 morning entries) automatically computes:
 
 | Metric | Formula |
 |--------|---------|
@@ -369,15 +365,16 @@ The **Profile** button on the home screen slides up a modal showing:
 The **Entry tab** shows a live stats dashboard above the entry cards:
 
 - 🔥 Current streak (consecutive days with a morning entry)
-- Morning and evening entry counts
-- Days in study
-- Average sleep time, sleep efficiency, and sleep quality
+- Morning entries, evening entries, and days in study (always visible)
+- Average sleep time, sleep efficiency, and sleep quality (unlock after 14 morning entries)
+
+Before 14 entries a lock hint shows the number of entries remaining.
 
 ### Adapting for your study
 
 1. **Edit `data/questions.js`** to add, remove, or reorder questions
 2. **Add new input types** in `app/questionnaire.jsx`
-3. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `app/final-report.jsx`
+3. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `app/final-report.jsx` (currently 14)
 4. **Connect a backend** — replace the `AsyncStorage` calls in `storage/storage.js` with API calls
 
 ---
@@ -434,6 +431,8 @@ Contributions are welcome. If you are adapting this for a research study and wan
 | `react-native-safe-area-context` | 5.6.2 | Safe area handling |
 | `react-native-screens` | 4.23.0 | Native screen management |
 | `babel-preset-expo` | ~55.0.0 | Babel transpilation |
+| `expo-document-picker` | ~55.0.0 | JSON file import |
+| `expo-asset` | ~55.0.0 | Asset preloading at startup |
 
 ---
 
@@ -464,5 +463,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Optional research code for study participants
 - [x] Profile screen with editable participant info and stats
 - [x] Entry tab sleep stats dashboard
+- [x] Sleep metrics glossary in Profile
+- [x] Automatic deployment via CI/CD
 - [ ] Backend API integration
 - [ ] Multi-language support
