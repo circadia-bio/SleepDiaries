@@ -27,7 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { loadEntries, loadName } from '../storage/storage';
 
 // ─── Minimum entries needed to unlock ─────────────────────────────────────────
-export const MIN_ENTRIES_FOR_REPORT = 3;
+export const MIN_ENTRIES_FOR_REPORT = 14;
 
 // ─── Time helpers ─────────────────────────────────────────────────────────────
 const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);

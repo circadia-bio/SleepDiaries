@@ -3,9 +3,9 @@
  *
  * Shows a stats dashboard above the entry cards:
  *   - Current streak (full-width banner)
- *   - Row 1: Morning entries | Evening entries | Days in study
- *   - Row 2: Avg sleep time | Sleep efficiency | Avg sleep quality
+ *   - Row: Morning entries | Evening entries | Days in study
  * Then the morning and evening entry cards below.
+ * Stats unlock after MIN_STATS_ENTRIES (14) morning entries.
  */
 import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Platform, ImageBackground } from 'react-native';
@@ -81,9 +81,11 @@ const computeStats = (entries) => {
 };
 
 // ─── Stat box component ───────────────────────────────────────────────────────
+const MIN_STATS_ENTRIES = 14;
+
 const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statBox}>
-    <Ionicons name={icon} size={18} color={color} />
+    <Ionicons name={icon} size={22} color={color} />
     <Text style={[styles.statValue, { color }]}>{value}</Text>
     <Text style={styles.statLabel}>{label}</Text>
   </View>
@@ -145,18 +147,22 @@ export default function EntryTab() {
         </View>
 
         {/* ── Row 1: counts ── */}
+        {/* Counts always visible */}
         <View style={styles.statRow}>
           <StatBox icon="sunny-outline"    value={s?.morningCount ?? '—'} label="Morning entries" color="#E07A20" />
           <StatBox icon="moon-outline"     value={s?.eveningCount ?? '—'} label="Evening entries" color="#2A6CB5" />
           <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label="Days in study"   color="#4A7BB5" />
         </View>
 
-        {/* ── Row 2: sleep stats ── */}
-        <View style={styles.statRow}>
-          <StatBox icon="time-outline"        value={formatMinutes(s?.avgSleep)}                                       label="Avg sleep time"    color="#4A7BB5" />
-          <StatBox icon="speedometer-outline" value={s?.avgEff != null ? `${Math.round(s.avgEff)}%` : '—'}            label="Sleep efficiency" color={s?.avgEff >= 85 ? '#2E7D32' : '#C25E00'} />
-          <StatBox icon="star-outline"        value={s?.avgQuality != null ? s.avgQuality.toFixed(1) + '/5' : '—'}   label="Avg quality"       color="#E07A20" />
-        </View>
+        {/* Sleep stats unlock hint — shown until MIN_STATS_ENTRIES reached */}
+        {s && s.morningCount < MIN_STATS_ENTRIES && (
+          <View style={styles.statsUnlockHint}>
+            <Ionicons name="lock-closed-outline" size={16} color="#94A3B8" />
+            <Text style={styles.statsUnlockText}>
+              Sleep stats unlock after {MIN_STATS_ENTRIES} morning entries — {MIN_STATS_ENTRIES - s.morningCount} to go
+            </Text>
+          </View>
+        )}
 
         {/* ── Entry cards ── */}
         <TouchableOpacity
@@ -209,9 +215,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#A8C8E8',
     alignItems: 'center',
-    paddingVertical: 12,
-    gap: 4,
+    paddingVertical: 14,
+    gap: 5,
   },
   statValue: { fontSize: 15, fontWeight: '800' },
   statLabel: { fontSize: 10, color: '#94A3B8', textAlign: 'center' },
+
+  statsUnlockHint: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 12, borderWidth: 1, borderColor: '#A8C8E8',
+    paddingHorizontal: 14, paddingVertical: 10,
+  },
+  statsUnlockText: { fontSize: 12, color: '#94A3B8', flex: 1 },
 });
