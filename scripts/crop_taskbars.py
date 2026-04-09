@@ -1,8 +1,8 @@
 """
-scripts/crop_taskbars.py — Centre-crop taskbar images to 1183×292
+scripts/crop_taskbars.py — Crop taskbar images to 1306×415
 
-Matches the original EN canvas size. Run whenever new taskbar images
-are exported at a larger size.
+Run this if you re-export taskbars at a larger canvas size.
+Centre-crops to the target dimensions.
 
 Usage:
     python3 scripts/crop_taskbars.py
@@ -11,8 +11,8 @@ Usage:
 from PIL import Image
 import os
 
-TARGET_W = 1183
-TARGET_H = 292
+TARGET_W = 1306
+TARGET_H = 415
 IMAGES_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images')
 FILES = ['taskbar-1.png', 'taskbar-2.png', 'taskbar-3.png']
 

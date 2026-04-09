@@ -9,8 +9,7 @@
  * EN  → assets/images/          (original files, default fallback)
  * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size)
  *
- * Taskbar images are icon-only (no text) and are therefore shared
- * across all locales — no pt-BR variants needed.
+ * The tab bar is rendered in code (Ionicons) — no taskbar image assets needed.
  *
  * Usage:
  *   import IMAGES from '../../assets/images';
@@ -42,11 +41,6 @@ const eveningLocked = isPtBR
   ? require('./pt-BR/evening_locked.png')
   : require('./evening_locked.png');
 
-// ─── Taskbar — icon-only, shared across all locales ──────────────────────────
-const taskbar1 = require('./taskbar-1.png');
-const taskbar2 = require('./taskbar-2.png');
-const taskbar3 = require('./taskbar-3.png');
-
 // ─── Non-translated images ────────────────────────────────────────────────────
 const finalReport       = require('./final-report.png');
 const finalReportLocked = require('./final-report-locked.png');
@@ -64,9 +58,6 @@ const IMAGES = {
   eveningPending,
   eveningCompleted,
   eveningLocked,
-  taskbar1,
-  taskbar2,
-  taskbar3,
   finalReport,
   finalReportLocked,
   pastEntries,
