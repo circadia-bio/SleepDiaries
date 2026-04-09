@@ -1,9 +1,8 @@
 """
-scripts/crop_taskbars.py — Centre-crop PT-BR taskbar images to match EN canvas
+scripts/crop_taskbars.py — Centre-crop taskbar images to 1183×292
 
-EN taskbar size: 1183 × 292
-PT-BR taskbars are larger and need to be cropped to the same dimensions
-with the crop window centred on the image.
+Matches the original EN canvas size. Run whenever new taskbar images
+are exported at a larger size.
 
 Usage:
     python3 scripts/crop_taskbars.py
@@ -14,11 +13,15 @@ import os
 
 TARGET_W = 1183
 TARGET_H = 292
-PT_BR_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'pt-BR')
+IMAGES_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images')
 FILES = ['taskbar-1.png', 'taskbar-2.png', 'taskbar-3.png']
 
 for name in FILES:
-    path = os.path.join(PT_BR_DIR, name)
+    path = os.path.join(IMAGES_DIR, name)
+    if not os.path.exists(path):
+        print(f'{name}: not found, skipping.')
+        continue
+
     img = Image.open(path)
     w, h = img.size
 
@@ -27,8 +30,7 @@ for name in FILES:
         continue
 
     if w < TARGET_W or h < TARGET_H:
-        print(f'{name}: WARNING — source ({w}×{h}) is smaller than target '
-              f'({TARGET_W}×{TARGET_H}). Skipping.')
+        print(f'{name}: WARNING — source ({w}×{h}) smaller than target ({TARGET_W}×{TARGET_H}), skipping.')
         continue
 
     left   = (w - TARGET_W) // 2
@@ -38,6 +40,6 @@ for name in FILES:
 
     cropped = img.crop((left, top, right, bottom))
     cropped.save(path)
-    print(f'{name}: {w}×{h} → cropped to {cropped.size[0]}×{cropped.size[1]}, saved.')
+    print(f'{name}: {w}×{h} → {cropped.size[0]}×{cropped.size[1]}, saved.')
 
 print('Done.')

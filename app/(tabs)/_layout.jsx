@@ -9,15 +9,15 @@
  * its own highlighted artwork (taskbar-1/2/3.png). Invisible TouchableOpacity
  * zones sit over each third of the image to handle tab presses.
  *
- * Width is hardcoded to 390px (standard phone width) so the tab bar image
- * scales correctly on both native and the web phone-frame layout.
+ * Taskbar images are icon-only and shared across all locales.
+ * Canvas size: 1183 × 292 — ratio 4.051
  */
 import { Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import IMAGES from '../../assets/images';
 
-// Images are 1183x292 — ratio 4.051
+// Images are 1183×292 — ratio 4.051
 const IMAGE_RATIO = 1183 / 292;
 
 function CustomTabBar({ state, navigation }) {
@@ -35,7 +35,7 @@ function CustomTabBar({ state, navigation }) {
               : IMAGES.taskbar3;
 
   return (
-    <View style={[styles.container, { width: W }]}>
+    <View style={styles.container}>
       <Image
         source={image}
         style={{ width: W, height: TAB_IMAGE_HEIGHT, marginTop: insets.bottom }}
@@ -81,7 +81,6 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
-    overflow: 'hidden',
     position: 'absolute',
     bottom: 0,
     left: 0,

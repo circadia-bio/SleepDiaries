@@ -7,7 +7,10 @@
  * is selected once at module load time based on the detected locale.
  *
  * EN  → assets/images/          (original files, default fallback)
- * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size 1183×292)
+ * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size)
+ *
+ * Taskbar images are icon-only (no text) and are therefore shared
+ * across all locales — no pt-BR variants needed.
  *
  * Usage:
  *   import IMAGES from '../../assets/images';
@@ -18,7 +21,7 @@ import { locale } from '../../i18n';
 
 const isPtBR = locale === 'pt-BR' || locale === 'pt';
 
-// ─── Entry cards ──────────────────────────────────────────────────────────────
+// ─── Entry cards (locale-specific) ───────────────────────────────────────────
 const morningPending = isPtBR
   ? require('./pt-BR/morning_pending.png')
   : require('./morning_pending.png');
@@ -39,20 +42,12 @@ const eveningLocked = isPtBR
   ? require('./pt-BR/evening_locked.png')
   : require('./evening_locked.png');
 
-// ─── Taskbar ─────────────────────────────────────────────────────────────────
-const taskbar1 = isPtBR
-  ? require('./pt-BR/taskbar-1.png')
-  : require('./taskbar-1.png');
+// ─── Taskbar — icon-only, shared across all locales ──────────────────────────
+const taskbar1 = require('./taskbar-1.png');
+const taskbar2 = require('./taskbar-2.png');
+const taskbar3 = require('./taskbar-3.png');
 
-const taskbar2 = isPtBR
-  ? require('./pt-BR/taskbar-2.png')
-  : require('./taskbar-2.png');
-
-const taskbar3 = isPtBR
-  ? require('./pt-BR/taskbar-3.png')
-  : require('./taskbar-3.png');
-
-// ─── Non-translated images (no locale variants needed) ────────────────────────
+// ─── Non-translated images ────────────────────────────────────────────────────
 const finalReport       = require('./final-report.png');
 const finalReportLocked = require('./final-report-locked.png');
 const pastEntries       = require('./past-entries.png');
