@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { loadEntries } from '../storage/storage';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
+import { FONTS } from '../theme/typography';
 import t, { locale } from '../i18n';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -55,8 +56,8 @@ const AnswerRow = ({ question, value, isMorning }) => {
   if (formatted === '—' && question.optional) return null;
   return (
     <View style={styles.answerRow}>
-      <Text style={styles.answerQuestion}>{question.number}. {question.text}</Text>
-      <Text style={[styles.answerValue, { color }]}>{formatted}</Text>
+      <Text style={[styles.answerQuestion, { fontFamily: FONTS.bodyMedium }]}>{question.number}. {question.text}</Text>
+      <Text style={[styles.answerValue, { color, fontFamily: FONTS.body }]}>{formatted}</Text>
     </View>
   );
 };
@@ -79,12 +80,12 @@ const EntryCard = ({ entry }) => {
       >
         <View style={styles.cardHeaderLeft}>
           <Ionicons name={isMorning ? 'sunny-outline' : 'moon-outline'} size={18} color={primaryColor} />
-          <Text style={[styles.cardType, { color: primaryColor }]}>
+          <Text style={[styles.cardType, { color: primaryColor, fontFamily: FONTS.body }]}>
             {isMorning ? t('pastEntries.morningEntry') : t('pastEntries.eveningEntry')}
           </Text>
         </View>
         <View style={styles.cardHeaderRight}>
-          <Text style={[styles.cardTime, { color: primaryColor }]}>{formatTime(entry.completedAt)}</Text>
+          <Text style={[styles.cardTime, { color: primaryColor, fontFamily: FONTS.bodyMedium }]}>{formatTime(entry.completedAt)}</Text>
           <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={primaryColor} />
         </View>
       </TouchableOpacity>
@@ -157,7 +158,7 @@ export default function PastEntriesScreen() {
 
   const renderItem = ({ item }) => {
     if (item.type === 'date') {
-      return <Text style={styles.dateLabel}>{formatDate(item.date)}</Text>;
+      return <Text style={[styles.dateLabel, { fontFamily: FONTS.body }]}>{formatDate(item.date)}</Text>;
     }
     return <EntryCard entry={item.entry} />;
   };
@@ -168,7 +169,7 @@ export default function PastEntriesScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
         </TouchableOpacity>
-        <Text style={styles.title}>{t('pastEntries.title')}</Text>
+        <Text style={[styles.title, { fontFamily: FONTS.heading }]}>{t('pastEntries.title')}</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -179,8 +180,8 @@ export default function PastEntriesScreen() {
       ) : entries.length === 0 ? (
         <View style={[styles.centred, { height: listHeight }]}>
           <Ionicons name="moon-outline" size={48} color="#B0CCEE" />
-          <Text style={styles.emptyTitle}>{t('pastEntries.emptyTitle')}</Text>
-          <Text style={styles.emptySubtitle}>{t('pastEntries.emptySubtitle')}</Text>
+          <Text style={[styles.emptyTitle, { fontFamily: FONTS.heading }]}>{t('pastEntries.emptyTitle')}</Text>
+          <Text style={[styles.emptySubtitle, { fontFamily: FONTS.body }]}>{t('pastEntries.emptySubtitle')}</Text>
         </View>
       ) : (
         <FlatList
@@ -204,23 +205,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF5FF',
   },
   backBtn: { padding: 4 },
-  title:   { fontSize: 18, fontWeight: '700', color: '#1E3A5F' },
+  title:   { fontSize: 20, color: '#1E3A5F' },
   listContent: { padding: 16, gap: 10 },
   centred: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12 },
-  emptyTitle:    { fontSize: 18, fontWeight: '700', color: '#4A7BB5', textAlign: 'center' },
-  emptySubtitle: { fontSize: 14, color: '#94A3B8', textAlign: 'center', lineHeight: 20 },
+  emptyTitle:    { fontSize: 20, color: '#4A7BB5', textAlign: 'center' },
+  emptySubtitle: { fontSize: 16, color: '#94A3B8', textAlign: 'center', lineHeight: 22 },
   dateLabel: {
-    fontSize: 13, fontWeight: '700', color: '#4A7BB5',
+    fontSize: 14, color: '#4A7BB5',
     textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 16, marginBottom: 4,
   },
   card:            { borderRadius: 14, borderWidth: 1.5, overflow: 'hidden', marginBottom: 4 },
   cardHeader:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   cardHeaderLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  cardType:        { fontSize: 15, fontWeight: '700' },
-  cardTime:        { fontSize: 13, fontWeight: '500' },
+  cardType:        { fontSize: 16 },
+  cardTime:        { fontSize: 15 },
   cardBody:        { paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
-  answerRow:      { gap: 2 },
-  answerQuestion: { fontSize: 12, color: '#94A3B8', lineHeight: 16 },
-  answerValue:    { fontSize: 14, fontWeight: '600' },
+  answerRow:      { gap: 4 },
+  answerQuestion: { fontSize: 14, color: '#94A3B8', lineHeight: 20 },
+  answerValue:    { fontSize: 16, lineHeight: 22 },
 });

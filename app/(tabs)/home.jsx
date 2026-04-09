@@ -1,16 +1,5 @@
 /**
  * app/(tabs)/home.jsx — Home screen
- *
- * The main dashboard shown after login. Displays:
- *   - Personalised welcome heading.
- *   - Morning and evening entry cards (pending / completed / locked states).
- *   - Instructions button that opens the InstructionsModal.
- *   - Past Entries and Final Report shortcuts.
- *
- * On focus, reloads today's status from storage so card states always
- * reflect the latest entries. On first visit after login (detected via
- * the showInstructions route param or hasSeenInstructions flag), opens
- * the instructions modal automatically.
  */
 import React, { useState, useCallback } from 'react';
 import {
@@ -108,7 +97,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity style={styles.profileButton} onPress={() => setShowProfile(true)}>
               <Ionicons name="person-circle-outline" size={32} color="#4A7BB5" />
-              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>{t('home.profile')}</Text>
+              <Text style={[styles.profileLabel, { fontFamily: FONTS.body }]}>{t('home.profile')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -125,14 +114,13 @@ export default function HomeScreen() {
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
-            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>{t('home.instructionsTitle')}</Text>
-            <Text style={[styles.instructionsBody,  { fontFamily: FONTS.bodyRegular }]}>
+            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.heading }]}>{t('home.instructionsTitle')}</Text>
+            <Text style={[styles.instructionsBody, { fontFamily: FONTS.body }]}>
               {t('home.instructionsBody')}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
-            {/* Past Entries */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => router.push('/past-entries')}
@@ -141,7 +129,6 @@ export default function HomeScreen() {
               <PastEntriesCard />
             </TouchableOpacity>
 
-            {/* Final Report */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => reportUnlocked && router.push('/final-report')}
@@ -150,7 +137,7 @@ export default function HomeScreen() {
             >
               <FinalReportCard unlocked={reportUnlocked} />
               {!reportUnlocked && (
-                <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
+                <Text style={[styles.bottomCardHint, { fontFamily: FONTS.body }]}>
                   {t('home.entriesNeeded', { count: remaining })}
                 </Text>
               )}
@@ -159,16 +146,8 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      <InstructionsModal
-        visible={showInstructions}
-        onClose={() => setShowInstructions(false)}
-      />
-
-      <ProfileModal
-        visible={showProfile}
-        onClose={() => setShowProfile(false)}
-        onShowInstructions={() => setShowInstructions(true)}
-      />
+      <InstructionsModal visible={showInstructions} onClose={() => setShowInstructions(false)} />
+      <ProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onShowInstructions={() => setShowInstructions(true)} />
     </View>
   );
 }
@@ -187,7 +166,7 @@ const styles = StyleSheet.create({
   welcomeText: { fontSize: 34, color: '#1A3A5C', lineHeight: 40 },
   userName:    { fontSize: 34, color: '#1A3A5C', lineHeight: 40 },
   profileButton: { alignItems: 'center', paddingTop: 4 },
-  profileLabel:  { fontSize: 12, color: '#4A7BB5', marginTop: 2 },
+  profileLabel:  { fontSize: 14, color: '#4A7BB5', marginTop: 2 },
 
   body: { paddingHorizontal: 16, paddingTop: 12, gap: 14 },
 
@@ -199,7 +178,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     position: 'absolute', top: -11, left: 14,
     backgroundColor: 'rgba(255,255,255,0.92)',
-    paddingHorizontal: 8, fontSize: 13, color: '#4A7BB5',
+    paddingHorizontal: 8, fontSize: 15, color: '#4A7BB5',
   },
 
   cardsContainer: { gap: 8 },
@@ -209,10 +188,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
     padding: 20, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center',
   },
-  instructionsTitle: { fontSize: 18, color: '#1A3A5C', marginBottom: 6 },
-  instructionsBody:  { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
+  instructionsTitle: { fontSize: 20, color: '#1A3A5C', marginBottom: 6 },
+  instructionsBody:  { fontSize: 15, color: '#4A7BB5', textAlign: 'center', lineHeight: 22 },
 
   bottomRow:      { flexDirection: 'row', gap: 12 },
   bottomCard:     { flex: 1 },
-  bottomCardHint: { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
+  bottomCardHint: { fontSize: 13, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
 });
