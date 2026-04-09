@@ -27,17 +27,7 @@ import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 import t from '../../i18n';
-
-const CARD_IMAGES = {
-  morningPending:      require('../../assets/images/morning_pending.png'),
-  morningCompleted:    require('../../assets/images/morning_completed.png'),
-  eveningLocked:       require('../../assets/images/evening_locked.png'),
-  eveningPending:      require('../../assets/images/evening_pending.png'),
-  eveningCompleted:    require('../../assets/images/evening_completed.png'),
-  finalReport:         require('../../assets/images/final-report.png'),
-  finalReportLocked:   require('../../assets/images/final-report-locked.png'),
-  pastEntries:         require('../../assets/images/past-entries.png'),
-};
+import IMAGES from '../../assets/images';
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
@@ -45,11 +35,11 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
 
   let image;
   if (isMorning) {
-    image = completed ? CARD_IMAGES.morningCompleted : CARD_IMAGES.morningPending;
+    image = completed ? IMAGES.morningCompleted : IMAGES.morningPending;
   } else {
-    image = isLocked   ? CARD_IMAGES.eveningLocked
-          : completed  ? CARD_IMAGES.eveningCompleted
-          : CARD_IMAGES.eveningPending;
+    image = isLocked  ? IMAGES.eveningLocked
+          : completed ? IMAGES.eveningCompleted
+          : IMAGES.eveningPending;
   }
 
   return (
@@ -98,7 +88,7 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
       <ImageBackground
-        source={require('../../assets/images/homepage-bg.png')}
+        source={IMAGES.homepageBg}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
         resizeMode="cover"
@@ -141,16 +131,14 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
-            {/* Past Entries */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => router.push('/past-entries')}
               activeOpacity={0.8}
             >
-              <Image source={CARD_IMAGES.pastEntries} style={styles.bottomCardImage} resizeMode="contain" />
+              <Image source={IMAGES.pastEntries} style={styles.bottomCardImage} resizeMode="contain" />
             </TouchableOpacity>
 
-            {/* Final Report */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => reportUnlocked && router.push('/final-report')}
@@ -158,7 +146,7 @@ export default function HomeScreen() {
               disabled={!reportUnlocked}
             >
               <Image
-                source={reportUnlocked ? CARD_IMAGES.finalReport : CARD_IMAGES.finalReportLocked}
+                source={reportUnlocked ? IMAGES.finalReport : IMAGES.finalReportLocked}
                 style={styles.bottomCardImage}
                 resizeMode="contain"
               />

@@ -15,11 +15,9 @@ import { useInsets } from '../../theme/useInsets';
 import { loadTodayStatus, loadEntries } from '../../storage/storage';
 import { FONTS } from '../../theme/typography';
 import t from '../../i18n';
+import IMAGES from '../../assets/images';
 
 // ─── Stat helpers ─────────────────────────────────────────────────────────────
-
-const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);
-const durationToMinutes = (d) => (d ? d.hours * 60 + d.minutes : 0);
 
 const computeStats = (entries) => {
   const morningEntries = entries.filter((e) => e.type === 'morning');
@@ -59,14 +57,6 @@ const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
   </View>
 );
 
-const CARD_IMAGES = {
-  morningPending:   require('../../assets/images/morning_pending.png'),
-  morningCompleted: require('../../assets/images/morning_completed.png'),
-  eveningLocked:    require('../../assets/images/evening_locked.png'),
-  eveningPending:   require('../../assets/images/evening_pending.png'),
-  eveningCompleted: require('../../assets/images/evening_completed.png'),
-};
-
 export default function EntryTab() {
   const router = useRouter();
   const insets = useInsets();
@@ -88,18 +78,18 @@ export default function EntryTab() {
 
   const eveningLocked = !morningCompleted;
 
-  const morningImage = morningCompleted ? CARD_IMAGES.morningCompleted : CARD_IMAGES.morningPending;
+  const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
   const eveningImage = eveningLocked
-    ? CARD_IMAGES.eveningLocked
-    : eveningCompleted ? CARD_IMAGES.eveningCompleted : CARD_IMAGES.eveningPending;
+    ? IMAGES.eveningLocked
+    : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
 
   const s = stats;
-  const streakUnit = t('profile.statStreakUnit'); // "days" / "dias"
+  const streakUnit = t('profile.statStreakUnit');
 
   return (
     <View style={styles.root}>
       <ImageBackground
-        source={require('../../assets/images/homepage-bg.png')}
+        source={IMAGES.homepageBg}
         style={StyleSheet.absoluteFill}
         imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
         resizeMode="cover"

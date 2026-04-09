@@ -15,26 +15,23 @@
 import { Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import IMAGES from '../../assets/images';
 
 // Images are 1183x292 — ratio 4.051
 const IMAGE_RATIO = 1183 / 292;
 
-const TASKBAR_IMAGES = {
-  home:     require('../../assets/images/taskbar-1.png'),
-  entry:    require('../../assets/images/taskbar-2.png'),
-  settings: require('../../assets/images/taskbar-3.png'),
-};
-
 function CustomTabBar({ state, navigation }) {
   const activeRoute = state.routes[state.index]?.name ?? 'home';
-  const image = TASKBAR_IMAGES[activeRoute] ?? TASKBAR_IMAGES.home;
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
-  // On desktop web, cap to 390px phone frame; on native/PWA use real width
   const isStandalone = Platform.OS === 'web' &&
     typeof window !== 'undefined' && window.navigator.standalone === true;
   const W = (Platform.OS === 'web' && !isStandalone) ? Math.min(screenW, 390) : screenW;
   const TAB_IMAGE_HEIGHT = W / IMAGE_RATIO;
+
+  const image = activeRoute === 'home'     ? IMAGES.taskbar1
+              : activeRoute === 'entry'    ? IMAGES.taskbar2
+              : IMAGES.taskbar3;
 
   return (
     <View style={styles.container}>
