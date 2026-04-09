@@ -9,7 +9,9 @@
  * EN  → assets/images/          (original files, default fallback)
  * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size)
  *
- * The tab bar is rendered in code (Ionicons) — no taskbar image assets needed.
+ * The tab bar is rendered in code (Ionicons) — no taskbar assets needed.
+ * Past Entries and Final Report cards are rendered in code (BottomCards.jsx)
+ * — no past-entries.png / final-report.png assets needed.
  *
  * Usage:
  *   import IMAGES from '../../assets/images';
@@ -42,15 +44,12 @@ const eveningLocked = isPtBR
   : require('./evening_locked.png');
 
 // ─── Non-translated images ────────────────────────────────────────────────────
-const finalReport       = require('./final-report.png');
-const finalReportLocked = require('./final-report-locked.png');
-const pastEntries       = require('./past-entries.png');
-const homepageBg        = require('./homepage-bg.png');
-const loginBg           = require('./login-bg.png');
-const questionnaireBg   = require('./questionnaire-bg.png');
-const splashEndMorning  = require('./splash-end-morning.png');
-const splashEndNight    = require('./splash-end-night.png');
-const logo              = require('./logo.png');
+const homepageBg       = require('./homepage-bg.png');
+const loginBg          = require('./login-bg.png');
+const questionnaireBg  = require('./questionnaire-bg.png');
+const splashEndMorning = require('./splash-end-morning.png');
+const splashEndNight   = require('./splash-end-night.png');
+const logo             = require('./logo.png');
 
 const IMAGES = {
   morningPending,
@@ -58,9 +57,6 @@ const IMAGES = {
   eveningPending,
   eveningCompleted,
   eveningLocked,
-  finalReport,
-  finalReportLocked,
-  pastEntries,
   homepageBg,
   loginBg,
   questionnaireBg,

@@ -28,6 +28,7 @@ import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
+import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
@@ -131,25 +132,23 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
+            {/* Past Entries */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => router.push('/past-entries')}
               activeOpacity={0.8}
             >
-              <Image source={IMAGES.pastEntries} style={styles.bottomCardImage} resizeMode="contain" />
+              <PastEntriesCard />
             </TouchableOpacity>
 
+            {/* Final Report */}
             <TouchableOpacity
               style={styles.bottomCard}
               onPress={() => reportUnlocked && router.push('/final-report')}
               activeOpacity={reportUnlocked ? 0.8 : 1}
               disabled={!reportUnlocked}
             >
-              <Image
-                source={reportUnlocked ? IMAGES.finalReport : IMAGES.finalReportLocked}
-                style={styles.bottomCardImage}
-                resizeMode="contain"
-              />
+              <FinalReportCard unlocked={reportUnlocked} />
               {!reportUnlocked && (
                 <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
                   {t('home.entriesNeeded', { count: remaining })}
@@ -213,8 +212,7 @@ const styles = StyleSheet.create({
   instructionsTitle: { fontSize: 18, color: '#1A3A5C', marginBottom: 6 },
   instructionsBody:  { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
 
-  bottomRow:       { flexDirection: 'row', gap: 12 },
-  bottomCard:      { flex: 1, alignItems: 'center' },
-  bottomCardImage: { width: '100%', height: 115 },
-  bottomCardHint:  { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
+  bottomRow:      { flexDirection: 'row', gap: 12 },
+  bottomCard:     { flex: 1 },
+  bottomCardHint: { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
 });
