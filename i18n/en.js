@@ -220,4 +220,38 @@ export default {
     hrs:                'hrs',
     min:                'min',
   },
+
+  // ── Instructions slideshow ────────────────────────────────────────────────
+  instructions: {
+    close:      'Close',
+    getStarted: 'Get Started',
+    back:       'Back',
+    next:       'Next',
+    slides: [
+      {
+        title: 'What is a Sleep Diary?',
+        body:  'A sleep diary is designed to gather information about your daily sleep patterns.',
+      },
+      {
+        title: 'How often and when do I fill out the sleep diary?',
+        body:  'It is necessary for you to complete your sleep diary every day (once after waking, once before bed). If possible, the sleep diary should be completed within one hour of getting out of bed in the morning. The Night Time Sleep Diary questions can be completed before you go to bed at night.',
+      },
+      {
+        title: 'What should I do if I miss a day?',
+        body:  'If you forget to fill in the diary or are unable to finish it, leave the diary blank for that day.',
+      },
+      {
+        title: 'What if something unusual affects my sleep or how I feel in the daytime?',
+        body:  'If your sleep or daytime functioning is affected by some unusual event (such as an illness, or an emergency) you may make brief notes on your diary.',
+      },
+      {
+        title: 'What do the words "bed" and "day" mean on the diary?',
+        body:  'This diary can be used for people who are awake or asleep at unusual times. In the sleep diary, the word "day" is the time when you choose or are required to be awake. The term "bed" means the place where you usually sleep.',
+      },
+      {
+        title: 'Will answering these questions about my sleep keep me awake?',
+        body:  'This is not usually a problem. You should not worry about giving exact times, and you should not watch the clock. Just give your best estimate.',
+      },
+    ],
+  },
 };

@@ -220,4 +220,38 @@ export default {
     hrs:                'h',
     min:                'min',
   },
+
+  // ── Instructions slideshow ────────────────────────────────────────────────
+  instructions: {
+    close:      'Fechar',
+    getStarted: 'Começar',
+    back:       'Voltar',
+    next:       'Próximo',
+    slides: [
+      {
+        title: 'O que é um Diário de Sono?',
+        body:  'Um diário de sono é desenvolvido para recolher informações sobre seus padrões diários de sono.',
+      },
+      {
+        title: 'Com que frequência e quando devo preencher o diário de sono?',
+        body:  'É necessário preencher o diário de sono todos os dias (uma vez ao acordar, uma vez antes de dormir). Se possível, o diário deve ser preenchido até uma hora após se levantar pela manhã. As perguntas noturnas podem ser respondidas antes de dormir.',
+      },
+      {
+        title: 'O que devo fazer se não preencher o diário num dia?',
+        body:  'Se esquecer de preencher o diário ou não conseguir terminá-lo, deixe-o em branco para esse dia.',
+      },
+      {
+        title: 'E se algo incomum afectar o meu sono ou como me sinto durante o dia?',
+        body:  'Se o seu sono ou funcionamento diurno for afectado por algum acontecimento incomum (como uma doença ou emergência), você pode fazer breves anotações no diário.',
+      },
+      {
+        title: 'O que significam as palavras "cama" e "dia" no diário?',
+        body:  'Este diário pode ser utilizado por pessoas que estão acordadas ou dormindo em horários incomuns. No diário de sono, "dia" é o momento em que você opta ou é obrigado a estar acordado. O termo "cama" refere-se ao lugar onde você normalmente dorme.',
+      },
+      {
+        title: 'Responder a estas perguntas sobre o meu sono vai me manter acordado?',
+        body:  'Isso geralmente não é um problema. Não se preocupe em fornecer horários exactos e não fique olhando para o relógio. Dê apenas a sua melhor estimativa.',
+      },
+    ],
+  },
 };

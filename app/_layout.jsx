@@ -25,6 +25,7 @@ const isStandalone =
 //   - taskbar images (tab bar uses Ionicons)
 //   - past-entries, final-report, final-report-locked (BottomCards.jsx)
 //   - back-day, back-night, next-day, next-night (NavButtons.jsx)
+//   - instructions-1..6 (InstructionsModal.jsx is now fully coded)
 const IMAGE_ASSETS = [
   require('../assets/images/homepage-bg.png'),
   require('../assets/images/login-bg.png'),
@@ -36,12 +37,6 @@ const IMAGE_ASSETS = [
   require('../assets/images/evening_locked.png'),
   require('../assets/images/splash-end-morning.png'),
   require('../assets/images/splash-end-night.png'),
-  require('../assets/images/instructions-1.png'),
-  require('../assets/images/instructions-2.png'),
-  require('../assets/images/instructions-3.png'),
-  require('../assets/images/instructions-4.png'),
-  require('../assets/images/instructions-5.png'),
-  require('../assets/images/instructions-6.png'),
   require('../assets/images/logo.png'),
   require('../assets/splash-icon.png'),
 ];
