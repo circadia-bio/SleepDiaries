@@ -1,7 +1,7 @@
 /**
  * app/final-report.jsx — Sleep metrics summary report
  *
- * Unlocks after MIN_ENTRIES_FOR_REPORT (3) morning entries have been saved.
+ * Unlocks after MIN_ENTRIES_FOR_REPORT (14) morning entries have been saved.
  * Computes the following metrics from all morning entry answers:
  *
  *   • Total sleep time (TST)        — time in bed − SOL − WASO
@@ -27,6 +27,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { loadEntries, loadName } from '../storage/storage';
+import t from '../i18n';
 
 // ─── Minimum entries needed to unlock ─────────────────────────────────────────
 export const MIN_ENTRIES_FOR_REPORT = 14;
@@ -48,71 +49,57 @@ const pct = (n, d) => (d > 0 ? Math.round((n / d) * 100) : null);
 
 // ─── Compute sleep metrics from morning entries ───────────────────────────────
 const computeMetrics = (morningEntries) => {
-  const sleepDurations   = [];
-  const sleepEfficiency  = [];
-  const sleepOnsetLatency= [];
-  const waso             = []; // wake after sleep onset
-  const qualityRatings   = [];
-  const restednessRatings= [];
-  const nightWakingCount = [];
-  const alcoholDrinks    = [];
-  const earlyWaking      = [];
+  const sleepDurations    = [];
+  const sleepEfficiency   = [];
+  const sleepOnsetLatency = [];
+  const waso              = [];
+  const qualityRatings    = [];
+  const restednessRatings = [];
+  const nightWakingCount  = [];
+  const alcoholDrinks     = [];
+  const earlyWaking       = [];
 
   for (const entry of morningEntries) {
     const a = entry.answers;
     if (!a) continue;
 
-    // Sleep onset latency (mq3)
-    const sol = durationToMinutes(a.mq3);
-    sleepOnsetLatency.push(sol);
-
-    // WASO — wake after sleep onset (mq5)
+    const sol      = durationToMinutes(a.mq3);
     const wasoMins = durationToMinutes(a.mq5);
+    sleepOnsetLatency.push(sol);
     waso.push(wasoMins);
 
-    // Bed time → get-up time = total time in bed
     const bedTime  = timeToMinutes(a.mq1);
     const riseTime = timeToMinutes(a.mq7);
     if (bedTime !== null && riseTime !== null) {
-      // Handle crossing midnight
       let tib = riseTime - bedTime;
       if (tib < 0) tib += 24 * 60;
-
-      // Total sleep time = TIB - SOL - WASO
       const tst = tib - sol - wasoMins;
       sleepDurations.push(Math.max(0, tst));
-
-      // Sleep efficiency = TST / TIB × 100
       const eff = pct(Math.max(0, tst), tib);
       if (eff !== null) sleepEfficiency.push(eff);
     }
 
-    // Quality (mq11) and restedness (mq12)
     if (a.mq11) qualityRatings.push(a.mq11);
     if (a.mq12) restednessRatings.push(a.mq12);
 
-    // Night wakings (mq4b — only if mq4 === 'yes')
     if (a.mq4 === 'yes' && a.mq4b !== undefined) nightWakingCount.push(a.mq4b);
     else if (a.mq4 === 'no') nightWakingCount.push(0);
 
-    // Alcohol (mq9)
     if (a.mq9 !== undefined) alcoholDrinks.push(a.mq9);
-
-    // Early waking (mq8)
     if (a.mq8 !== undefined) earlyWaking.push(a.mq8 === 'yes' ? 1 : 0);
   }
 
   return {
     n: morningEntries.length,
-    avgSleepDuration:    avg(sleepDurations),
-    avgSleepEfficiency:  avg(sleepEfficiency),
-    avgSleepOnsetLatency:avg(sleepOnsetLatency),
-    avgWASO:             avg(waso),
-    avgQuality:          avg(qualityRatings),
-    avgRestedness:       avg(restednessRatings),
-    avgNightWakings:     avg(nightWakingCount),
-    avgAlcohol:          avg(alcoholDrinks),
-    earlyWakingPct:      pct(earlyWaking.filter(Boolean).length, earlyWaking.length),
+    avgSleepDuration:     avg(sleepDurations),
+    avgSleepEfficiency:   avg(sleepEfficiency),
+    avgSleepOnsetLatency: avg(sleepOnsetLatency),
+    avgWASO:              avg(waso),
+    avgQuality:           avg(qualityRatings),
+    avgRestedness:        avg(restednessRatings),
+    avgNightWakings:      avg(nightWakingCount),
+    avgAlcohol:           avg(alcoholDrinks),
+    earlyWakingPct:       pct(earlyWaking.filter(Boolean).length, earlyWaking.length),
   };
 };
 
@@ -159,10 +146,10 @@ export default function FinalReportScreen() {
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const [metrics, setMetrics]   = useState(null);
-  const [userName, setUserName] = useState('');
+  const [metrics, setMetrics]     = useState(null);
+  const [userName, setUserName]   = useState('');
   const [dateRange, setDateRange] = useState('');
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading]     = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -185,22 +172,28 @@ export default function FinalReportScreen() {
   const handleShare = async () => {
     if (!metrics) return;
     const lines = [
-      `Sleep Diaries — Final Report`,
-      `Participant: ${userName}`,
-      `Period: ${dateRange}`,
-      `Entries: ${metrics.n} morning entries`,
-      ``,
-      `Average sleep duration: ${formatMinutes(metrics.avgSleepDuration)}`,
-      `Average sleep efficiency: ${metrics.avgSleepEfficiency !== null ? Math.round(metrics.avgSleepEfficiency) + '%' : '—'}`,
-      `Average sleep onset latency: ${formatMinutes(metrics.avgSleepOnsetLatency)}`,
-      `Average wake after sleep onset: ${formatMinutes(metrics.avgWASO)}`,
-      `Average night wakings: ${metrics.avgNightWakings !== null ? metrics.avgNightWakings.toFixed(1) : '—'}`,
-      `Average sleep quality: ${metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) + '/5' : '—'}`,
-      `Average restedness: ${metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) + '/5' : '—'}`,
-      `Early waking: ${metrics.earlyWakingPct !== null ? metrics.earlyWakingPct + '% of nights' : '—'}`,
+      t('report.shareHeader'),
+      `${t('report.shareParticipant')} ${userName}`,
+      `${t('report.sharePeriod')} ${dateRange}`,
+      `${t('report.shareEntries')} ${metrics.n === 1 ? t('report.morningEntries_one', { count: metrics.n }) : t('report.morningEntries_other', { count: metrics.n })}`,
+      '',
+      `${t('report.shareAvgDuration')} ${formatMinutes(metrics.avgSleepDuration)}`,
+      `${t('report.shareAvgEfficiency')} ${metrics.avgSleepEfficiency !== null ? Math.round(metrics.avgSleepEfficiency) + '%' : '—'}`,
+      `${t('report.shareAvgSOL')} ${formatMinutes(metrics.avgSleepOnsetLatency)}`,
+      `${t('report.shareAvgWASO')} ${formatMinutes(metrics.avgWASO)}`,
+      `${t('report.shareAvgWakings')} ${metrics.avgNightWakings !== null ? metrics.avgNightWakings.toFixed(1) : '—'}`,
+      `${t('report.shareAvgQuality')} ${metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) + '/5' : '—'}`,
+      `${t('report.shareAvgRestedness')} ${metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) + '/5' : '—'}`,
+      `${t('report.shareEarlyWaking')} ${metrics.earlyWakingPct !== null ? metrics.earlyWakingPct + t('report.ofNights') : '—'}`,
     ];
     await Share.share({ message: lines.join('\n') });
   };
+
+  const entriesLabel = metrics
+    ? (metrics.n === 1
+        ? t('report.morningEntries_one',   { count: metrics.n })
+        : t('report.morningEntries_other', { count: metrics.n }))
+    : '';
 
   return (
     <View style={[styles.root, { minHeight: height }]}>
@@ -209,7 +202,7 @@ export default function FinalReportScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
         </TouchableOpacity>
-        <Text style={styles.title}>Final Report</Text>
+        <Text style={styles.title}>{t('report.title')}</Text>
         <TouchableOpacity onPress={handleShare} style={styles.shareBtn} disabled={!metrics}>
           <Ionicons name="share-outline" size={22} color={metrics ? '#4A7BB5' : '#ccc'} />
         </TouchableOpacity>
@@ -222,9 +215,9 @@ export default function FinalReportScreen() {
       ) : !metrics ? (
         <View style={styles.centred}>
           <Ionicons name="moon-outline" size={48} color="#B0CCEE" />
-          <Text style={styles.emptyTitle}>Not enough data yet</Text>
+          <Text style={styles.emptyTitle}>{t('report.notEnoughTitle')}</Text>
           <Text style={styles.emptySubtitle}>
-            Complete at least {MIN_ENTRIES_FOR_REPORT} morning entries to generate your report.
+            {t('report.notEnoughSubtitle', { count: MIN_ENTRIES_FOR_REPORT })}
           </Text>
         </View>
       ) : (
@@ -233,51 +226,51 @@ export default function FinalReportScreen() {
           <View style={styles.summaryCard}>
             <Text style={styles.summaryName}>{userName}</Text>
             <Text style={styles.summaryRange}>{dateRange}</Text>
-            <Text style={styles.summaryEntries}>{metrics.n} morning entries</Text>
+            <Text style={styles.summaryEntries}>{entriesLabel}</Text>
           </View>
 
           {/* Sleep timing */}
-          <Section title="Sleep timing">
+          <Section title={t('report.sleepTiming')}>
             <MetricCard
               icon="time-outline"
-              label="Average sleep duration"
+              label={t('report.avgSleepDuration')}
               value={formatMinutes(metrics.avgSleepDuration)}
-              subtext="Total sleep time per night"
+              subtext={t('report.avgSleepDurationSub')}
               color="#4A7BB5"
             />
             <MetricCard
               icon="speedometer-outline"
-              label="Sleep efficiency"
+              label={t('report.sleepEfficiency')}
               value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'}
-              subtext="Time asleep ÷ time in bed (≥85% is healthy)"
+              subtext={t('report.sleepEfficiencySub')}
               color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'}
             />
             <MetricCard
               icon="hourglass-outline"
-              label="Sleep onset latency"
+              label={t('report.sleepOnsetLatency')}
               value={formatMinutes(metrics.avgSleepOnsetLatency)}
-              subtext="Average time to fall asleep"
+              subtext={t('report.sleepOnsetLatencySub')}
               color="#4A7BB5"
             />
             <MetricCard
               icon="moon-outline"
-              label="Wake after sleep onset"
+              label={t('report.waso')}
               value={formatMinutes(metrics.avgWASO)}
-              subtext="Average time awake during the night"
+              subtext={t('report.wasoSub')}
               color="#4A7BB5"
             />
           </Section>
 
           {/* Sleep quality */}
-          <Section title="Sleep quality">
+          <Section title={t('report.sleepQuality')}>
             <View style={styles.qualityCard}>
-              <Text style={styles.qualityLabel}>Sleep quality</Text>
+              <Text style={styles.qualityLabel}>{t('report.nightQuality')}</Text>
               {metrics.avgQuality !== null
                 ? <StarRow value={metrics.avgQuality} color="#E07A20" />
                 : <Text style={styles.metricValue}>—</Text>}
             </View>
             <View style={[styles.qualityCard, { marginTop: 10 }]}>
-              <Text style={styles.qualityLabel}>Morning restedness</Text>
+              <Text style={styles.qualityLabel}>{t('report.morningRestedness')}</Text>
               {metrics.avgRestedness !== null
                 ? <StarRow value={metrics.avgRestedness} color="#2A6CB5" />
                 : <Text style={styles.metricValue}>—</Text>}
@@ -285,37 +278,35 @@ export default function FinalReportScreen() {
           </Section>
 
           {/* Night disruptions */}
-          <Section title="Night disruptions">
+          <Section title={t('report.nightDisruptions')}>
             <MetricCard
               icon="alert-circle-outline"
-              label="Average night wakings"
-              value={metrics.avgNightWakings !== null ? metrics.avgNightWakings.toFixed(1) + ' times' : '—'}
-              subtext="Per night average"
+              label={t('report.avgNightWakings')}
+              value={metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)} ${t('report.times')}` : '—'}
+              subtext={t('report.avgNightWakingsSub')}
               color="#4A7BB5"
             />
             <MetricCard
               icon="alarm-outline"
-              label="Early waking"
-              value={metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}% of nights` : '—'}
-              subtext="Woke earlier than planned"
+              label={t('report.earlyWaking')}
+              value={metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}${t('report.ofNights')}` : '—'}
+              subtext={t('report.earlyWakingSub')}
               color="#4A7BB5"
             />
           </Section>
 
           {/* Lifestyle */}
-          <Section title="Lifestyle factors">
+          <Section title={t('report.lifestyle')}>
             <MetricCard
               icon="wine-outline"
-              label="Average alcohol intake"
-              value={metrics.avgAlcohol !== null ? metrics.avgAlcohol.toFixed(1) + ' drinks/night' : '—'}
-              subtext="Reported the evening before"
+              label={t('report.avgAlcohol')}
+              value={metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)} ${t('report.drinksNight')}` : '—'}
+              subtext={t('report.avgAlcoholSub')}
               color="#4A7BB5"
             />
           </Section>
 
-          <Text style={styles.disclaimer}>
-            This report is generated from self-reported diary data. It is intended as a research summary and not a clinical diagnosis.
-          </Text>
+          <Text style={styles.disclaimer}>{t('report.disclaimer')}</Text>
         </ScrollView>
       )}
     </View>

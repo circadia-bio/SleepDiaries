@@ -19,20 +19,16 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Alert, ImageBackground, Image,
+  Platform, ImageBackground, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry } from '../storage/storage';
-
-const BUTTON_IMAGES = {
-  backDay:   require('../assets/images/back-day.png'),
-  nextDay:   require('../assets/images/next-day.png'),
-  backNight: require('../assets/images/back-night.png'),
-  nextNight: require('../assets/images/next-night.png'),
-};
+import t from '../i18n';
+import { BackButton, NextButton } from '../components/NavButtons';
+import IMAGES from '../assets/images';
 
 const THEME = {
   morning: {
@@ -134,9 +130,9 @@ const DurationInput = ({ value, onChange, theme }) => {
   );
   return (
     <View style={styles.durationRow}>
-      <Stepper field="hours"   display={String(hours)}   unit="hrs" />
+      <Stepper field="hours"   display={String(hours)}   unit={t('questionnaire.hrs')} />
       <View style={styles.durationGap} />
-      <Stepper field="minutes" display={pad(minutes)} unit="min" />
+      <Stepper field="minutes" display={pad(minutes)} unit={t('questionnaire.min')} />
     </View>
   );
 };
@@ -152,7 +148,7 @@ const YesNoInput = ({ value, onChange, theme }) => {
             style={[styles.yesNoBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : { backgroundColor: '#fff', borderColor: c.primary }]}
             onPress={() => onChange(opt)} activeOpacity={0.8}>
             <Text style={[styles.yesNoText, { color: selected ? '#fff' : c.primary }]}>
-              {opt === 'yes' ? 'Yes' : 'No'}
+              {opt === 'yes' ? t('questionnaire.yes') : t('questionnaire.no')}
             </Text>
           </TouchableOpacity>
         );
@@ -199,21 +195,22 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
   const c = THEME[theme];
   const [expanded, setExpanded] = useState({});
   const addMed = () => {
-    const newMed = { id: Date.now(), name: 'New Medication', dose: '', times: [''] };
+    const newMed = { id: Date.now(), name: t('questionnaire.newMedication'), dose: '', times: [''] };
     onChange([...value, newMed]);
     setExpanded((e) => ({ ...e, [newMed.id]: true }));
   };
   const removeMed  = (id) => onChange(value.filter((m) => m.id !== id));
   const updateMed  = (id, field, val) => onChange(value.map((m) => (m.id === id ? { ...m, [field]: val } : m)));
   const addTime    = (id) => onChange(value.map((m) => (m.id === id ? { ...m, times: [...m.times, ''] } : m)));
-  const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((t, i) => (i === idx ? val : t)) } : m));
+  const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((tm, i) => (i === idx ? val : tm)) } : m));
   return (
     <View style={styles.medContainer}>
       {value.map((med) => (
         <View key={med.id} style={[styles.medCard, { backgroundColor: c.cardBg, borderColor: c.primaryLight }]}>
           <View style={styles.medHeader}>
             <TextInput style={[styles.medNameInput, { color: c.primary }]} value={med.name}
-              onChangeText={(t) => updateMed(med.id, 'name', t)} placeholder="Medication name" placeholderTextColor="#aaa" />
+              onChangeText={(txt) => updateMed(med.id, 'name', txt)}
+              placeholder={t('questionnaire.medNamePlaceholder')} placeholderTextColor="#aaa" />
             <View style={styles.medHeaderActions}>
               <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.medIconBtn}>
                 <Ionicons name="trash-outline" size={20} color={c.primary} />
@@ -226,22 +223,23 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
           {expanded[med.id] && (
             <View style={styles.medDetail}>
               <View style={styles.medRow}>
-                <Text style={[styles.medLabel, { color: c.primary }]}>Dose:</Text>
+                <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.dose')}</Text>
                 <TextInput style={[styles.medDoseInput, { borderColor: c.primaryLight, color: c.primary }]}
-                  value={med.dose} onChangeText={(t) => updateMed(med.id, 'dose', t)}
-                  placeholder="e.g. 5" keyboardType="numeric" placeholderTextColor="#aaa" />
-                <Text style={[styles.medLabel, { color: c.primary }]}>mg</Text>
+                  value={med.dose} onChangeText={(txt) => updateMed(med.id, 'dose', txt)}
+                  placeholder={t('questionnaire.dosePlaceholder')} keyboardType="numeric" placeholderTextColor="#aaa" />
+                <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.mgUnit')}</Text>
               </View>
-              {med.times.map((t, i) => (
+              {med.times.map((tm, i) => (
                 <View key={i} style={styles.medRow}>
-                  <Text style={[styles.medLabel, { color: c.primary }]}>Time:</Text>
+                  <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.time')}</Text>
                   <TextInput style={[styles.medTimeInput, { borderColor: c.primaryLight, color: c.primary }]}
-                    value={t} onChangeText={(v) => updateTime(med.id, i, v)} placeholder="e.g. 22:30" placeholderTextColor="#aaa" />
+                    value={tm} onChangeText={(v) => updateTime(med.id, i, v)}
+                    placeholder={t('questionnaire.timePlaceholder')} placeholderTextColor="#aaa" />
                 </View>
               ))}
               <TouchableOpacity style={[styles.addTimeBtn, { borderColor: c.primary }]} onPress={() => addTime(med.id)}>
                 <Ionicons name="add-circle-outline" size={18} color={c.primary} />
-                <Text style={[styles.addTimeBtnText, { color: c.primary }]}>Add New Time</Text>
+                <Text style={[styles.addTimeBtnText, { color: c.primary }]}>{t('questionnaire.addNewTime')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -249,7 +247,7 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
       ))}
       <TouchableOpacity style={[styles.addMedBtn, { backgroundColor: c.primary }]} onPress={addMed}>
         <Ionicons name="add" size={20} color="#fff" />
-        <Text style={styles.addMedBtnText}>Add Medicine</Text>
+        <Text style={styles.addMedBtnText}>{t('questionnaire.addMedicine')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -264,18 +262,14 @@ const TextInputField = ({ value, onChange, placeholder, theme }) => {
   );
 };
 
-// ─── Progress Bar matching Figma design ───────────────────────────────────────
 const ProgressBar = ({ current, total, theme }) => {
   const c = THEME[theme];
   const progress = current / total;
   return (
     <View style={styles.progressRow}>
-      {/* Person icon */}
       <View style={[styles.progressIcon, { borderColor: c.primary }]}>
         <Ionicons name="person-outline" size={20} color={c.primary} />
       </View>
-
-      {/* Track */}
       <View style={[styles.progressTrack, {
         borderColor: c.progressTrackBorder,
         backgroundColor: c.progressTrackBg,
@@ -285,8 +279,6 @@ const ProgressBar = ({ current, total, theme }) => {
           backgroundColor: c.progressFill,
         }]} />
       </View>
-
-      {/* Counter */}
       <Text style={[styles.progressLabel, { color: c.primary }]}>
         {current}/{total}
       </Text>
@@ -295,13 +287,12 @@ const ProgressBar = ({ current, total, theme }) => {
 };
 
 export default function QuestionnaireScreen() {
-  const router   = useRouter();
+  const router    = useRouter();
   const rawInsets = useSafeAreaInsets();
-  const insets   = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
+  const insets    = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { entryType = 'morning' } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
-  const c = THEME[theme];
 
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -356,10 +347,7 @@ export default function QuestionnaireScreen() {
         onPress={() => router.replace('/(tabs)/home')}
       >
         <Image
-          source={isMorning
-            ? require('../assets/images/splash-end-morning.png')
-            : require('../assets/images/splash-end-night.png')
-          }
+          source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
           style={styles.splashImage}
           resizeMode="cover"
         />
@@ -369,9 +357,11 @@ export default function QuestionnaireScreen() {
 
   if (!question) return null;
 
+  const c = THEME[theme];
+
   return (
     <ImageBackground
-      source={require('../assets/images/questionnaire-bg.png')}
+      source={IMAGES.questionnaireBg}
       style={styles.root}
       imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
       resizeMode="cover"
@@ -400,17 +390,8 @@ export default function QuestionnaireScreen() {
 
         {/* ── Nav buttons ── */}
         <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
-          <TouchableOpacity onPress={handleBack} activeOpacity={0.8} style={styles.navBtn}>
-            <Image source={theme === 'morning' ? BUTTON_IMAGES.backDay : BUTTON_IMAGES.backNight} style={styles.navBtnImage} resizeMode="contain" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleNext}
-            activeOpacity={canProceed() ? 0.8 : 1}
-            disabled={!canProceed()}
-            style={[styles.navBtn, !canProceed() && styles.navBtnDisabled]}
-          >
-            <Image source={theme === 'morning' ? BUTTON_IMAGES.nextDay : BUTTON_IMAGES.nextNight} style={styles.navBtnImage} resizeMode="contain" />
-          </TouchableOpacity>
+          <BackButton onPress={handleBack} theme={theme} />
+          <NextButton onPress={handleNext} theme={theme} disabled={!canProceed()} />
         </View>
 
       </KeyboardAvoidingView>
@@ -425,7 +406,6 @@ const styles = StyleSheet.create({
   questionText:  { fontSize: 26, fontWeight: '800', marginTop: 24, marginBottom: 40, lineHeight: 34 },
   inputArea:     { alignItems: 'center' },
 
-  // ── Progress bar — matches Figma design ──
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -444,7 +424,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     flex: 1,
-    height: 28,              // thick like Figma
+    height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
     overflow: 'hidden',
@@ -460,7 +440,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // ── Inputs ──
   timeRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
   stepperCol:    { alignItems: 'center', gap: 12 },
   stepBtn:       { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
@@ -495,17 +474,14 @@ const styles = StyleSheet.create({
   addMedBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 14, gap: 8 },
   addMedBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   freeText:      { width: '100%', borderWidth: 1.5, borderRadius: 12, padding: 14, fontSize: 16, minHeight: 120 },
-  navRow:         { flexDirection: 'row', paddingHorizontal: 36, paddingTop: 12, gap: 4 },
-  navBtn:         { flex: 1, height: 52 },
-  navBtnDisabled: { opacity: 0.4 },
-  navBtnImage:    { width: '100%', height: '100%' },
 
-  splashContainer: {
-    flex: 1,
-    backgroundColor: '#C8DFF5',
+  navRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 36,
+    paddingTop: 12,
+    gap: 12,
   },
-  splashImage: {
-    width: '100%',
-    height: '100%',
-  },
+
+  splashContainer: { flex: 1, backgroundColor: '#C8DFF5' },
+  splashImage:     { width: '100%', height: '100%' },
 });

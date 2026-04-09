@@ -29,12 +29,13 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📤 **Data export** — CSV and JSON export via native share sheet
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
-- 👤 **Profile** — editable name and research code, summary stats, quick actions
-- 📈 **Entry tab stats** — streak, entry counts, days in study (sleep metrics unlock after 14 morning entries)
+- 👤 **Profile** — editable name and research code, summary stats, sleep metrics glossary, quick actions
+- 📈 **Entry tab stats** — streak, entry counts, days in study
 - 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
+- 🌍 **Localisation** — full Portuguese (Brazilian) translation, locale detected automatically from device settings
 
 ---
 
@@ -55,15 +56,24 @@ SleepDiaries/
 │   ├── past-entries.jsx        # Scrollable entry history
 │   ├── final-report.jsx        # Sleep metrics summary report
 │   ├── export.jsx              # CSV / JSON export + JSON import
-│   ├── InstructionsModal.jsx   # Full-screen instructions slideshow
-│   ├── ProfileModal.jsx        # Profile sheet (name, research code, stats)
+│   ├── InstructionsModal.jsx   # Full-screen instructions slideshow (coded, no PNGs)
+│   ├── ProfileModal.jsx        # Profile sheet (name, research code, stats, glossary)
 │   └── (tabs)/                 # Tab bar screens
-│       ├── _layout.jsx         # Custom image-based tab bar
+│       ├── _layout.jsx         # Custom tab bar (Ionicons, no image assets)
 │       ├── home.jsx            # Home screen
 │       ├── entry.jsx           # Entry tab with sleep stats dashboard
 │       └── settings.jsx        # Settings
+├── components/
+│   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
+│   └── NavButtons.jsx          # Questionnaire Back / Next buttons
 ├── data/
-│   └── questions.js            # ⭐ All question definitions — start here to customise
+│   ├── questions.js            # ⭐ All question definitions — start here to customise
+│   ├── questions.pt-BR.js      # Portuguese (BR) translations of question text
+│   └── useQuestions.js         # Merges locale overrides at startup
+├── i18n/
+│   ├── index.js                # Locale detector + t() helper (interpolation, plurals)
+│   ├── en.js                   # English strings
+│   └── pt-BR.js                # Portuguese (Brazil) strings
 ├── storage/
 │   ├── storage.js              # AsyncStorage helpers + CSV/JSON export + import
 │   └── notifications.js        # Push notification scheduling
@@ -76,9 +86,15 @@ SleepDiaries/
 │   ├── icons/                  # PWA icons (192px, 512px)
 │   └── splashscreens/          # iPhone/iPad splash screens
 ├── scripts/
-│   └── deploy.sh               # Web export + PWA injection + deploy prep
-├── assets/                     # App icons, splash, and image assets
+│   ├── deploy.sh               # Web export + PWA injection + deploy prep
+│   └── crop_taskbars.py        # Utility to centre-crop taskbar image assets
+├── assets/
+│   └── images/
+│       ├── pt-BR/              # Locale-specific image assets (entry cards)
+│       └── index.js            # Locale-aware image map
 ├── netlify.toml                # CI/CD build configuration
+├── metro.config.js             # Metro bundler config (SVG support)
+├── declarations.d.ts           # TypeScript declaration for SVG imports
 ├── app.json                    # Expo configuration
 └── package.json                # Dependencies
 ```
@@ -124,6 +140,52 @@ npm run deploy
 This runs the deploy script which exports the web build, injects PWA tags, copies assets, and outputs everything to the `docs/` folder. The repository is configured for automatic deployment on every push to `main`.
 
 🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
+
+---
+
+## 🌍 Localisation
+
+The app detects the device locale at startup using `expo-localization` and selects the appropriate language automatically. No in-app language switcher is required — it just works.
+
+### Supported languages
+
+| Language | Locale code | Status |
+|----------|-------------|--------|
+| English | `en` | ✅ Complete |
+| Portuguese (Brazil) | `pt-BR` | ✅ Complete |
+
+All other locales fall back to English.
+
+### How it works
+
+All UI strings are defined in `i18n/en.js` and `i18n/pt-BR.js`. The `i18n/index.js` module resolves the correct bundle at startup and exports a `t()` helper used throughout the app:
+
+```js
+import t from '../i18n';
+
+t('login.cta')                          // "Let's go" / "Vamos lá"
+t('home.entriesNeeded', { count: 3 })   // "3 more entries needed" / "Faltam 3 registros"
+```
+
+The helper supports `{{variable}}` interpolation and automatic `_one` / `_other` pluralisation.
+
+### Question translations
+
+Question text, rating labels, units, and placeholders are defined separately in `data/questions.pt-BR.js` and merged over the base English definitions at startup by `data/useQuestions.js`. Only translatable fields are overridden — IDs, types, defaults, and conditional logic remain in `data/questions.js`.
+
+### Adding a new language
+
+1. Create `i18n/<locale>.js` following the structure of `en.js`
+2. Create `data/questions.<locale>.js` for the question text
+3. Add the locale to the `TRANSLATIONS` map in `i18n/index.js`
+4. Add the locale to the `LANGUAGE_NAMES` map in `app/(tabs)/settings.jsx`
+5. Export any locale-specific image assets to `assets/images/<locale>/`
+
+### Locale-specific image assets
+
+Entry cards (morning/evening pending, completed, locked) contain baked-in text and require locale-specific versions. These live in `assets/images/pt-BR/` and are selected at module load time by `assets/images/index.js`.
+
+The tab bar, questionnaire nav buttons, instructions slideshow, and bottom shortcut cards are all rendered in code — no locale-specific image exports are needed for these.
 
 ---
 
@@ -358,6 +420,7 @@ The **Profile** button on the home screen slides up a modal showing:
 
 - Editable participant name and research code
 - Summary stats: morning entries, evening entries, current streak, member since date
+- Sleep metrics glossary with plain-language explanations of each metric
 - Quick actions: replay instructions, link to circadia-lab.uk
 
 ### Entry tab stats
@@ -366,9 +429,6 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 - 🔥 Current streak (consecutive days with a morning entry)
 - Morning entries, evening entries, and days in study (always visible)
-- Average sleep time, sleep efficiency, and sleep quality (unlock after 14 morning entries)
-
-Before 14 entries a lock hint shows the number of entries remaining.
 
 ### Adapting for your study
 
@@ -399,7 +459,7 @@ The app design was created by exchange students — Bri Baehl, Jacob Howard, Fre
 
 ## 🤖 AI Acknowledgement
 
-Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, and the final report.
+Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, the final report, and the localisation system.
 
 ---
 
@@ -421,6 +481,7 @@ Contributions are welcome. If you are adapting this for a research study and wan
 |---------|---------|---------|
 | `expo` | ~55.0.0 | Core Expo SDK |
 | `expo-router` | ~55.0.0 | File-based navigation |
+| `expo-localization` | ~55.0.0 | Device locale detection |
 | `react-native` | 0.83.2 | Cross-platform mobile framework |
 | `react` | 19.2.0 | React framework |
 | `@expo/vector-icons` | ^15.0.2 | Ionicons icon set |
@@ -430,6 +491,8 @@ Contributions are welcome. If you are adapting this for a research study and wan
 | `react-native-paper` | ^5.12.0 | UI component library |
 | `react-native-safe-area-context` | 5.6.2 | Safe area handling |
 | `react-native-screens` | 4.23.0 | Native screen management |
+| `react-native-svg` | ~15.0.0 | SVG rendering (instructions background) |
+| `react-native-svg-transformer` | latest | SVG imports as React components |
 | `babel-preset-expo` | ~55.0.0 | Babel transpilation |
 | `expo-document-picker` | ~55.0.0 | JSON file import |
 | `expo-asset` | ~55.0.0 | Asset preloading at startup |
@@ -461,9 +524,10 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Offline support via service worker
 - [x] JSON import with merge/replace
 - [x] Optional research code for study participants
-- [x] Profile screen with editable participant info and stats
+- [x] Profile screen with editable participant info, stats, and metrics glossary
 - [x] Entry tab sleep stats dashboard
-- [x] Sleep metrics glossary in Profile
 - [x] Automatic deployment via CI/CD
+- [x] Full Portuguese (Brazil) localisation — strings, questions, and image assets
+- [x] SVG support via react-native-svg-transformer
 - [ ] Backend API integration
-- [ ] Multi-language support
+- [ ] Additional language support

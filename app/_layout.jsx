@@ -16,14 +16,16 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
 
-// Detect if running as an installed PWA on iOS (standalone mode)
 const isStandalone =
   Platform.OS === 'web' &&
   typeof window !== 'undefined' &&
   window.navigator.standalone === true;
 
-// All image assets are listed here so they can be preloaded in parallel
-// before any screen renders, avoiding lazy-load flashes on first paint.
+// Preloaded image assets. Excludes assets now rendered in code:
+//   - taskbar images (tab bar uses Ionicons)
+//   - past-entries, final-report, final-report-locked (BottomCards.jsx)
+//   - back-day, back-night, next-day, next-night (NavButtons.jsx)
+//   - instructions-1..6 (InstructionsModal.jsx is now fully coded)
 const IMAGE_ASSETS = [
   require('../assets/images/homepage-bg.png'),
   require('../assets/images/login-bg.png'),
@@ -33,36 +35,16 @@ const IMAGE_ASSETS = [
   require('../assets/images/evening_pending.png'),
   require('../assets/images/evening_completed.png'),
   require('../assets/images/evening_locked.png'),
-  require('../assets/images/taskbar-1.png'),
-  require('../assets/images/taskbar-2.png'),
-  require('../assets/images/taskbar-3.png'),
-  require('../assets/images/past-entries.png'),
-  require('../assets/images/final-report.png'),
-  require('../assets/images/final-report-locked.png'),
   require('../assets/images/splash-end-morning.png'),
   require('../assets/images/splash-end-night.png'),
-  require('../assets/images/instructions-1.png'),
-  require('../assets/images/instructions-2.png'),
-  require('../assets/images/instructions-3.png'),
-  require('../assets/images/instructions-4.png'),
-  require('../assets/images/instructions-5.png'),
-  require('../assets/images/instructions-6.png'),
-  require('../assets/images/back-day.png'),
-  require('../assets/images/back-night.png'),
-  require('../assets/images/next-day.png'),
-  require('../assets/images/next-night.png'),
   require('../assets/images/logo.png'),
   require('../assets/splash-icon.png'),
 ];
 
 export default function RootLayout() {
   const router  = useRouter();
-  // checked: true once font + name check + image preload are all complete
   const [checked, setChecked] = useState(false);
 
-
-  // Load all four custom font variants. Fonts must be loaded before
-  // any Text component using fontFamily renders.
   const [fontsLoaded, fontError] = useFonts({
     'Livvic-Bold':    require('../assets/fonts/Livvic-Bold.ttf'),
     'Afacad-Bold':    require('../assets/fonts/Afacad-Bold.ttf'),
@@ -72,10 +54,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     const prepare = async () => {
-      // Preload all images and check name in parallel
       const [name] = await Promise.all([
         loadName(),
-        Asset.loadAsync(IMAGE_ASSETS).catch(() => {}), // never block on image errors
+        Asset.loadAsync(IMAGE_ASSETS).catch(() => {}),
       ]);
       if (name) router.replace('/(tabs)/home');
       setChecked(true);
@@ -83,12 +64,10 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  // Hide the CSS splash div (injected by deploy.sh) once React is ready
   useEffect(() => {
     if (!isStandalone) return;
     const el = document.getElementById('pwa-splash');
     if (!el) return;
-    // Small delay so the transition feels intentional
     const t = setTimeout(() => {
       el.style.transition = 'opacity 0.4s ease';
       el.style.opacity = '0';
@@ -97,7 +76,6 @@ export default function RootLayout() {
     return () => clearTimeout(t);
   }, []);
 
-  // Don't block on fonts — if they fail or take too long, render anyway
   if (!checked) return null;
 
   const content = (
@@ -111,24 +89,15 @@ export default function RootLayout() {
     </Stack>
   );
 
-  // On web desktop, constrain to phone width.
-  // On mobile PWA (standalone), fill the full screen width instead.
   if (Platform.OS === 'web') {
-    const wrapperStyle = isStandalone
-      ? styles.webWrapperMobile
-      : styles.webWrapper;
-    return (
-      <View style={wrapperStyle}>
-        {content}
-      </View>
-    );
+    const wrapperStyle = isStandalone ? styles.webWrapperMobile : styles.webWrapper;
+    return <View style={wrapperStyle}>{content}</View>;
   }
 
   return content;
 }
 
 const styles = StyleSheet.create({
-  // Desktop: centred phone frame
   webWrapper: {
     flex: 1,
     width: '100%',
@@ -136,7 +105,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     overflow: 'hidden',
   },
-  // Mobile PWA: fill the full screen edge to edge
   webWrapperMobile: {
     position: 'fixed',
     top: 0,

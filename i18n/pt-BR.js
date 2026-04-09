@@ -1,0 +1,257 @@
+/**
+ * i18n/pt-BR.js — Portuguese (Brazil) strings
+ */
+export default {
+  // ── Login screen ─────────────────────────────────────────────────────────
+  login: {
+    subtitle:        'Digite seu nome para começar',
+    namePlaceholder: 'Seu nome',
+    codePlaceholder: 'Código de pesquisa (opcional)',
+    codeHint:        'Opcional — fornecido pela sua equipe de pesquisa',
+    cta:             'Vamos lá',
+    errorName:       'Por favor, digite seu nome para continuar.',
+  },
+
+  // ── Home screen ───────────────────────────────────────────────────────────
+  home: {
+    welcome:          'Bem-vindo(a),',
+    profile:          'Perfil',
+    newEntry:         'Novo Registro',
+    instructionsTitle:'Instruções',
+    instructionsBody: 'Clique aqui para saber mais sobre os diários de sono e informações adicionais.',
+    entriesNeeded_one:   'Falta {{count}} registro',
+    entriesNeeded_other: 'Faltam {{count}} registros',
+  },
+
+  // ── Entry tab ─────────────────────────────────────────────────────────────
+  entry: {
+    daysInStudy: 'Dias no estudo',
+    statsUnlock: 'As estatísticas desbloqueiam após mais {{count}} registros matinais',
+  },
+
+  // ── Profile modal ─────────────────────────────────────────────────────────
+  profile: {
+    title:           'Perfil',
+    tapToSetName:    'Toque para definir seu nome',
+    addResearchCode: 'Adicionar código de pesquisa',
+    researchCodePlaceholder: 'Código de pesquisa',
+
+    sectionSummary:  'Resumo',
+    statMorning:     'Registros matinais',
+    statEvening:     'Registros noturnos',
+    statStreak:      'Sequência atual',
+    statStreakUnit:  'dias',
+    statSince:       'Membro desde',
+    noEntries:       'Nenhum registro ainda',
+
+    sectionGlossary: 'Métricas do sono explicadas',
+    glossary: {
+      sleepDuration: {
+        title: 'Duração do Sono',
+        body:  'O tempo total que você ficou dormindo. A maioria dos adultos precisa de 7 a 9 horas por noite.',
+      },
+      sleepEfficiency: {
+        title: 'Eficiência do Sono',
+        body:  'A porcentagem do tempo na cama em que você estava realmente dormindo. Uma pontuação de 85% ou mais é considerada saudável — quanto maior, melhor.',
+      },
+      sleepOnsetLatency: {
+        title: 'Latência do Início do Sono',
+        body:  'Quanto tempo você levou para adormecer depois de deitar. Adormecer em até 30 minutos é o habitual.',
+      },
+      waso: {
+        title: 'Vigília Após o Início do Sono (WASO)',
+        body:  'O tempo total que você ficou acordado(a) depois de adormecer pela primeira vez e antes de se levantar. Quanto menor, melhor.',
+      },
+      nightWakings: {
+        title: 'Despertares Noturnos',
+        body:  'O número de vezes que você acordou durante a noite. Despertares breves e ocasionais são normais, mas interrupções frequentes podem prejudicar a qualidade do sono.',
+      },
+      sleepQuality: {
+        title: 'Qualidade do Sono',
+        body:  'Sua avaliação de como você dormiu, em uma escala de 1 a 5. Captura a sensação geral da noite além do que os números sozinhos conseguem mostrar.',
+      },
+      restedness: {
+        title: 'Sensação de Descanso',
+        body:  'O quanto você se sentiu revigorado(a) ao acordar, em uma escala de 1 a 5. Reflete se o sono foi reparador, mesmo quando a duração e a eficiência parecem boas.',
+      },
+      earlyWaking: {
+        title: 'Despertar Precoce',
+        body:  'A proporção de noites em que você acordou mais cedo do que pretendia e não conseguiu voltar a dormir. Pode ser sinal de sono perturbado ou exposição à luz de manhã cedo.',
+      },
+    },
+
+    sectionActions:     'Ações rápidas',
+    replayInstructions: 'Rever instruções',
+    website:            'circadia-lab.uk',
+  },
+
+  // ── Past entries screen ───────────────────────────────────────────────────
+  pastEntries: {
+    title:         'Registros Anteriores',
+    morningEntry:  'Registro Matinal',
+    eveningEntry:  'Registro Noturno',
+    emptyTitle:    'Nenhum registro ainda',
+    emptySubtitle: 'Complete seu primeiro registro matinal ou noturno para vê-lo aqui.',
+    answerNone:    'Nenhum registrado',
+    answerYes:     'Sim',
+    answerNo:      'Não',
+  },
+
+  // ── Export / import screen ────────────────────────────────────────────────
+  export: {
+    title:               'Exportar Dados',
+    infoText:            'Exporte todos os seus registros do diário de sono para compartilhar com um pesquisador ou importar para uma planilha.',
+    csvTitle:            'Exportar como CSV',
+    csvSubtitle:         'Uma linha por registro. Abre no Excel, Numbers ou qualquer aplicativo de planilha.',
+    jsonTitle:           'Exportar como JSON',
+    jsonSubtitle:        'Dados completos e estruturados, incluindo todas as respostas. Ideal para scripts de análise.',
+    importTitle:         'Importar de JSON',
+    importSubtitle:      'Restaure registros a partir de um arquivo JSON exportado anteriormente pelo Sleep Diaries.',
+    note:                'Seus dados ficam sempre no seu dispositivo. A exportação os compartilha apenas com o aplicativo que você escolher.',
+    noDataTitle:         'Sem dados',
+    noDataBody:          'Complete pelo menos um registro antes de exportar.',
+    exportFailTitle:     'Falha na exportação',
+    importFailTitle:     'Falha na importação',
+    existingDataTitle:   'Dados existentes encontrados',
+    existingDataBody_one:   'Você já tem {{count}} registro. O que deseja fazer?',
+    existingDataBody_other: 'Você já tem {{count}} registros. O que deseja fazer?',
+    cancel:              'Cancelar',
+    merge:               'Mesclar',
+    replace:             'Substituir',
+    replaceConfirmTitle: 'Substituir todos os dados?',
+    replaceConfirmBody:  'Isso vai excluir permanentemente todos os seus registros existentes. Essa ação não pode ser desfeita.',
+  },
+
+  // ── Final report ──────────────────────────────────────────────────────────
+  report: {
+    title:               'Relatório Final',
+    notEnoughTitle:      'Dados insuficientes',
+    notEnoughSubtitle:   'Complete pelo menos {{count}} registros matinais para gerar seu relatório.',
+    morningEntries_one:   '{{count}} registro matinal',
+    morningEntries_other: '{{count}} registros matinais',
+    sleepTiming:         'Horários do sono',
+    sleepQuality:        'Qualidade do sono',
+    nightDisruptions:    'Perturbações noturnas',
+    lifestyle:           'Fatores de estilo de vida',
+    avgSleepDuration:    'Duração média do sono',
+    avgSleepDurationSub: 'Tempo total de sono por noite',
+    sleepEfficiency:     'Eficiência do sono',
+    sleepEfficiencySub:  'Tempo dormindo ÷ tempo na cama (≥85% é saudável)',
+    sleepOnsetLatency:   'Latência do início do sono',
+    sleepOnsetLatencySub:'Tempo médio para adormecer',
+    waso:                'Vigília após o início do sono',
+    wasoSub:             'Tempo médio acordado durante a noite',
+    avgNightWakings:     'Despertares noturnos médios',
+    avgNightWakingsSub:  'Média por noite',
+    earlyWaking:         'Despertar precoce',
+    earlyWakingSub:      'Acordou mais cedo do que o planejado',
+    avgAlcohol:          'Consumo médio de álcool',
+    avgAlcoholSub:       'Relatado na noite anterior',
+    nightQuality:        'Qualidade do sono',
+    morningRestedness:   'Sensação de descanso ao acordar',
+    ofNights:            '% das noites',
+    drinksNight:         'doses/noite',
+    times:               'vezes',
+    disclaimer:          'Este relatório é gerado a partir de dados autorrelatados do diário. Tem a finalidade de ser um resumo de pesquisa e não um diagnóstico clínico.',
+    shareHeader:         'Sleep Diaries — Relatório Final',
+    shareParticipant:    'Participante:',
+    sharePeriod:         'Período:',
+    shareEntries:        'Registros:',
+    shareAvgDuration:    'Duração média do sono:',
+    shareAvgEfficiency:  'Eficiência média do sono:',
+    shareAvgSOL:         'Latência média do início do sono:',
+    shareAvgWASO:        'Vigília média após início do sono:',
+    shareAvgWakings:     'Despertares noturnos médios:',
+    shareAvgQuality:     'Qualidade média do sono:',
+    shareAvgRestedness:  'Sensação média de descanso:',
+    shareEarlyWaking:    'Despertar precoce:',
+  },
+
+  // ── Settings screen ───────────────────────────────────────────────────────
+  settings: {
+    title:                'Configurações',
+    sectionAccessibility: 'Acessibilidade',
+    biggerText:           'Texto maior',
+    sectionLanguage:      'Idioma',
+    chooseLanguage:       'Escolher idioma',
+    sectionNotifications: 'Notificações',
+    dailyReminders:       'Lembretes diários',
+    notificationsHint:    'Lembrete matinal às 8h e lembrete noturno às 21h todos os dias.',
+    permissionTitle:      'Permissão necessária',
+    permissionBody:       'Por favor, ative as notificações para o Sleep Diaries nas Configurações do seu dispositivo.',
+    remindersSetTitle:    'Lembretes ativados',
+    remindersSetBody:     'Você vai receber um lembrete matinal às 8h e um noturno às 21h todos os dias.',
+    sendTestNotif:        'Enviar notificação de teste',
+    ok:                   'OK',
+    sectionTTS:           'Texto para fala',
+    ttsLabel:             'Texto para fala',
+    ttsHint:              'Ler as perguntas em voz alta pelo alto-falante.',
+    sectionData:          'Dados',
+    exportData:           'Exportar dados',
+    exportDataHint:       'Exporte seus registros como CSV ou JSON para uso em pesquisa.',
+    sectionAbout:         'Sobre',
+    aboutDesign:          'Design',
+    sectionAccount:       'Conta',
+    logOut:               'Sair',
+    logOutTitle:          'Sair',
+    logOutBody:           'Tem certeza que quer sair?',
+    cancel:               'Cancelar',
+    deleteAccount:        'Excluir conta',
+    deleteAccountTitle:   'Excluir conta',
+    deleteAccountBody:    'Isso vai excluir permanentemente sua conta e todos os dados. Tem certeza?',
+    delete:               'Excluir',
+  },
+
+  // ── Questionnaire ─────────────────────────────────────────────────────────
+  questionnaire: {
+    back:               'Voltar',
+    next:               'Próximo',
+    yes:                'Sim',
+    no:                 'Não',
+    addMedicine:        'Adicionar Medicamento',
+    addNewTime:         'Adicionar Horário',
+    dose:               'Dose:',
+    time:               'Horário:',
+    mgUnit:             'mg',
+    dosePlaceholder:    'ex.: 5',
+    timePlaceholder:    'ex.: 22:30',
+    newMedication:      'Novo Medicamento',
+    medNamePlaceholder: 'Nome do medicamento',
+    hrs:                'h',
+    min:                'min',
+  },
+
+  // ── Instructions slideshow ────────────────────────────────────────────────
+  instructions: {
+    close:      'Fechar',
+    getStarted: 'Começar',
+    back:       'Voltar',
+    next:       'Próximo',
+    slides: [
+      {
+        title: 'O que é um Diário de Sono?',
+        body:  'Um diário de sono é desenvolvido para recolher informações sobre seus padrões diários de sono.',
+      },
+      {
+        title: 'Com que frequência e quando devo preencher o diário de sono?',
+        body:  'É necessário preencher o diário de sono todos os dias (uma vez ao acordar, uma vez antes de dormir). Se possível, o diário deve ser preenchido até uma hora após se levantar pela manhã. As perguntas noturnas podem ser respondidas antes de dormir.',
+      },
+      {
+        title: 'O que devo fazer se não preencher o diário num dia?',
+        body:  'Se esquecer de preencher o diário ou não conseguir terminá-lo, deixe-o em branco para esse dia.',
+      },
+      {
+        title: 'E se algo incomum afectar o meu sono ou como me sinto durante o dia?',
+        body:  'Se o seu sono ou funcionamento diurno for afectado por algum acontecimento incomum (como uma doença ou emergência), você pode fazer breves anotações no diário.',
+      },
+      {
+        title: 'O que significam as palavras "cama" e "dia" no diário?',
+        body:  'Este diário pode ser utilizado por pessoas que estão acordadas ou dormindo em horários incomuns. No diário de sono, "dia" é o momento em que você opta ou é obrigado a estar acordado. O termo "cama" refere-se ao lugar onde você normalmente dorme.',
+      },
+      {
+        title: 'Responder a estas perguntas sobre o meu sono vai me manter acordado?',
+        body:  'Isso geralmente não é um problema. Não se preocupe em fornecer horários exactos e não fique olhando para o relógio. Dê apenas a sua melhor estimativa.',
+      },
+    ],
+  },
+};

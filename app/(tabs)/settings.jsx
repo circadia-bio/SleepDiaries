@@ -1,16 +1,5 @@
 /**
  * app/(tabs)/settings.jsx — Settings screen
- *
- * Sections visible on all platforms:
- *   - Data: export entries as CSV or JSON.
- *   - About: logo, copyright, licence, design credits, website link.
- *
- * Sections visible on iOS / Android only (hidden on web):
- *   - Accessibility: bigger text toggle.
- *   - Language: language selection.
- *   - Notifications: daily reminder toggle + test notification.
- *   - Text to Speech: read questions aloud toggle.
- *   - Account: log out and delete account.
  */
 import React, { useState, useEffect } from 'react';
 import {
@@ -26,6 +15,15 @@ import {
   sendTestNotification,
   requestNotificationPermission,
 } from '../../storage/notifications';
+import t, { locale } from '../../i18n';
+
+// Map locale codes to their display names
+const LANGUAGE_NAMES = {
+  'en':    'English',
+  'pt-BR': 'Português (Brasil)',
+  'pt':    'Português (Brasil)',
+};
+const currentLanguageName = LANGUAGE_NAMES[locale] ?? locale;
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -42,9 +40,9 @@ export default function SettingsScreen() {
       const granted = await requestNotificationPermission();
       if (!granted) {
         Alert.alert(
-          'Permission required',
-          'Please enable notifications for Sleep Diaries in your device Settings to receive reminders.',
-          [{ text: 'OK' }]
+          t('settings.permissionTitle'),
+          t('settings.permissionBody'),
+          [{ text: t('settings.ok') }]
         );
         return;
       }
@@ -53,20 +51,20 @@ export default function SettingsScreen() {
     await saveNotificationsEnabled(value);
     if (value) {
       Alert.alert(
-        'Reminders set',
-        "You'll receive a morning reminder at 8:00 AM and an evening reminder at 9:00 PM every day.",
+        t('settings.remindersSetTitle'),
+        t('settings.remindersSetBody'),
         [
-          { text: 'Send test notification', onPress: sendTestNotification },
-          { text: 'OK' },
+          { text: t('settings.sendTestNotif'), onPress: sendTestNotification },
+          { text: t('settings.ok') },
         ]
       );
     }
   };
 
   const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: async () => {
+    Alert.alert(t('settings.logOutTitle'), t('settings.logOutBody'), [
+      { text: t('settings.cancel'), style: 'cancel' },
+      { text: t('settings.logOut'), style: 'destructive', onPress: async () => {
         await clearAll();
         router.replace('/');
       }},
@@ -75,11 +73,11 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account and all data. Are you sure?',
+      t('settings.deleteAccountTitle'),
+      t('settings.deleteAccountBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: async () => {
+        { text: t('settings.cancel'), style: 'cancel' },
+        { text: t('settings.delete'), style: 'destructive', onPress: async () => {
           await clearAll();
           router.replace('/');
         }},
@@ -98,68 +96,63 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t('settings.title')}</Text>
 
-        {/* Native-only sections */}
         {Platform.OS !== 'web' && (
           <>
-            <Text style={styles.sectionHeader}>Accessibility</Text>
+            <Text style={styles.sectionHeader}>{t('settings.sectionAccessibility')}</Text>
             <View style={styles.card}>
-              <Row label="Bigger Text" icon="text-outline"
+              <Row label={t('settings.biggerText')} icon="text-outline"
                 right={<Switch value={biggerText} onValueChange={setBiggerText} trackColor={{ true: '#4A7BB5' }} />} />
             </View>
 
-            <Text style={styles.sectionHeader}>Language</Text>
+            <Text style={styles.sectionHeader}>{t('settings.sectionLanguage')}</Text>
             <View style={styles.card}>
-              <Row label="Choose Language" icon="language-outline"
+              <Row label={t('settings.chooseLanguage')} icon="language-outline"
                 right={
                   <View style={styles.rowRight}>
-                    <Text style={styles.rowValue}>English</Text>
+                    <Text style={styles.rowValue}>{currentLanguageName}</Text>
                     <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
                   </View>
                 }
               />
             </View>
 
-            <Text style={styles.sectionHeader}>Notifications</Text>
+            <Text style={styles.sectionHeader}>{t('settings.sectionNotifications')}</Text>
             <View style={styles.card}>
-              <Row label="Daily Reminders" icon="notifications-outline"
+              <Row label={t('settings.dailyReminders')} icon="notifications-outline"
                 right={<Switch value={notifications} onValueChange={handleNotificationsToggle} trackColor={{ true: '#4A7BB5' }} />}
               />
-              <Text style={styles.cardHint}>
-                Morning reminder at 8:00 AM and evening reminder at 9:00 PM every day.
-              </Text>
+              <Text style={styles.cardHint}>{t('settings.notificationsHint')}</Text>
               {notifications && (
                 <TouchableOpacity style={styles.testBtn} onPress={sendTestNotification}>
                   <Ionicons name="notifications-outline" size={14} color="#4A7BB5" />
-                  <Text style={styles.testBtnText}>Send test notification</Text>
+                  <Text style={styles.testBtnText}>{t('settings.sendTestNotif')}</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            <Text style={styles.sectionHeader}>Text to Speech</Text>
+            <Text style={styles.sectionHeader}>{t('settings.sectionTTS')}</Text>
             <View style={styles.card}>
-              <Row label="Text to Speech" icon="volume-medium-outline"
+              <Row label={t('settings.ttsLabel')} icon="volume-medium-outline"
                 right={<Switch value={textToSpeech} onValueChange={setTextToSpeech} trackColor={{ true: '#4A7BB5' }} />} />
-              <Text style={styles.cardHint}>Read questions aloud through the speaker.</Text>
+              <Text style={styles.cardHint}>{t('settings.ttsHint')}</Text>
             </View>
           </>
         )}
 
-        {/* Data — always visible */}
-        <Text style={styles.sectionHeader}>Data</Text>
+        <Text style={styles.sectionHeader}>{t('settings.sectionData')}</Text>
         <View style={styles.card}>
           <Row
-            label="Export Data"
+            label={t('settings.exportData')}
             icon="download-outline"
             onPress={() => router.push('/export')}
             right={<Ionicons name="chevron-forward" size={16} color="#94A3B8" />}
           />
-          <Text style={styles.cardHint}>Export your entries as CSV or JSON for research use.</Text>
+          <Text style={styles.cardHint}>{t('settings.exportDataHint')}</Text>
         </View>
 
-        {/* About */}
-        <Text style={styles.sectionHeader}>About</Text>
+        <Text style={styles.sectionHeader}>{t('settings.sectionAbout')}</Text>
         <View style={[styles.card, styles.aboutCard]}>
           <Image
             source={require('../../assets/images/logo.png')}
@@ -169,7 +162,7 @@ export default function SettingsScreen() {
           <Text style={styles.aboutText}>© Circadia Lab</Text>
           <Text style={styles.aboutText}>MIT Licence</Text>
           <Text style={styles.aboutSmall}>Lucas França · Mario Leocadio-Miguel</Text>
-          <Text style={styles.aboutLabel}>Design</Text>
+          <Text style={styles.aboutLabel}>{t('settings.aboutDesign')}</Text>
           <Text style={styles.aboutSmall}>Bri Baehl · Jacob Howard</Text>
           <Text style={styles.aboutSmall}>Frederic Kussow · Yuliana Luna Colón</Text>
           <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
@@ -177,20 +170,16 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Account — native only */}
         {Platform.OS !== 'web' && (
           <>
-            <Text style={styles.sectionHeader}>Account</Text>
+            <Text style={styles.sectionHeader}>{t('settings.sectionAccount')}</Text>
             <View style={styles.card}>
-              <Row label="Log Out" icon="log-out-outline" onPress={handleLogout} right={null} />
+              <Row label={t('settings.logOut')} icon="log-out-outline" onPress={handleLogout} right={null} />
               <View style={styles.divider} />
               <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
                 <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
-                <Text style={[styles.rowLabel, { color: '#C0392B' }]}>Delete Account</Text>
+                <Text style={[styles.rowLabel, { color: '#C0392B' }]}>{t('settings.deleteAccount')}</Text>
               </TouchableOpacity>
-              <Text style={styles.cardHint}>
-                Deleting your account may delete your data. Be certain this is an action you want to take.
-              </Text>
             </View>
           </>
         )}
@@ -213,7 +202,6 @@ const styles = StyleSheet.create({
   cardHint: { fontSize: 12, color: '#94A3B8', paddingBottom: 12, lineHeight: 18 },
   testBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14 },
   testBtnText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
-
   aboutCard:  { alignItems: 'center', paddingVertical: 20, gap: 4 },
   logo:       { width: 160, height: 60, marginBottom: 8 },
   aboutText:  { fontSize: 14, color: '#1E3A5F', fontWeight: '600' },

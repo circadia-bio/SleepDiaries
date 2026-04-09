@@ -1,56 +1,45 @@
 /**
  * app/(tabs)/_layout.jsx — Tab bar layout
  *
- * Configures the three main tabs (Home, Entry, Settings) and renders a
- * custom tab bar using full-width image assets instead of the default
- * React Native tab bar.
- *
- * The tab bar image switches based on the active route, so each tab has
- * its own highlighted artwork (taskbar-1/2/3.png). Invisible TouchableOpacity
- * zones sit over each third of the image to handle tab presses.
- *
- * Width is hardcoded to 390px (standard phone width) so the tab bar image
- * scales correctly on both native and the web phone-frame layout.
+ * Custom tab bar rendered entirely in code using Ionicons.
+ * No image assets — works identically across all locales.
  */
 import { Tabs } from 'expo-router';
-import { View, Image, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Images are 1183x292 — ratio 4.051
-const IMAGE_RATIO = 1183 / 292;
+const TABS = [
+  { name: 'home',     icon: 'home',     iconOutline: 'home-outline'      },
+  { name: 'entry',    icon: 'clipboard', iconOutline: 'clipboard-outline' },
+  { name: 'settings', icon: 'settings', iconOutline: 'settings-outline'  },
+];
 
-const TASKBAR_IMAGES = {
-  home:     require('../../assets/images/taskbar-1.png'),
-  entry:    require('../../assets/images/taskbar-2.png'),
-  settings: require('../../assets/images/taskbar-3.png'),
-};
+const ACTIVE_COLOR   = '#E07A20';
+const INACTIVE_COLOR = '#737373';
+const BAR_BG         = '#FAFAF7';
 
 function CustomTabBar({ state, navigation }) {
-  const activeRoute = state.routes[state.index]?.name ?? 'home';
-  const image = TASKBAR_IMAGES[activeRoute] ?? TASKBAR_IMAGES.home;
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
-  // On desktop web, cap to 390px phone frame; on native/PWA use real width
   const isStandalone = Platform.OS === 'web' &&
     typeof window !== 'undefined' && window.navigator.standalone === true;
   const W = (Platform.OS === 'web' && !isStandalone) ? Math.min(screenW, 390) : screenW;
-  const TAB_IMAGE_HEIGHT = W / IMAGE_RATIO;
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={image}
-        style={{ width: W, height: TAB_IMAGE_HEIGHT, marginTop: insets.bottom }}
-        resizeMode="stretch"
-      />
-      <View style={[styles.tapRow, { height: TAB_IMAGE_HEIGHT }]}>
-        {state.routes.map((route, index) => (
+    <View style={[styles.container, { width: W, paddingBottom: insets.bottom }]}>
+      {state.routes.map((route, index) => {
+        const tab = TABS.find((t) => t.name === route.name) ?? TABS[0];
+        const isFocused = state.index === index;
+        const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
+        const iconName = isFocused ? tab.icon : tab.iconOutline;
+
+        return (
           <TouchableOpacity
             key={route.key}
-            style={styles.tapZone}
+            style={styles.tab}
             activeOpacity={0.7}
             onPress={() => {
-              const isFocused = state.index === index;
               const event = navigation.emit({
                 type: 'tabPress',
                 target: route.key,
@@ -60,9 +49,11 @@ function CustomTabBar({ state, navigation }) {
                 navigation.navigate(route.name);
               }
             }}
-          />
-        ))}
-      </View>
+          >
+            <Ionicons name={iconName} size={28} color={color} />
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -82,17 +73,19 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    backgroundColor: BAR_BG,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    marginBottom: 0,
+    borderTopWidth: 1,
+    borderTopColor: '#E2EAF4',
+    paddingTop: 10,
   },
-  tapRow: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0,
-    flexDirection: 'row',
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingBottom: 6,
   },
-  tapZone: { flex: 1 },
 });

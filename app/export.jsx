@@ -16,30 +16,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from '../storage/storage';
+import t from '../i18n';
 
 export default function ExportScreen() {
   const router = useRouter();
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const [loading, setLoading]     = useState(null); // 'csv' | 'json' | 'import' | null
+  const [loading, setLoading]       = useState(null); // 'csv' | 'json' | 'import' | null
   const [showSplash, setShowSplash] = useState(false);
 
-  // Auto-dismiss import splash after 2.5s
   useEffect(() => {
     if (!showSplash) return;
-    const t = setTimeout(() => setShowSplash(false), 2500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(timer);
   }, [showSplash]);
 
   const handleExport = async (format) => {
     setLoading(format);
     try {
-      const name = await loadName();
+      const name    = await loadName();
       const entries = await loadEntries();
 
       if (entries.length === 0) {
-        Alert.alert('No data', 'Complete at least one entry before exporting.');
+        Alert.alert(t('export.noDataTitle'), t('export.noDataBody'));
         setLoading(null);
         return;
       }
@@ -50,20 +50,15 @@ export default function ExportScreen() {
 
       const filename = `sleep-diaries-${name ?? 'export'}-${new Date().toISOString().split('T')[0]}.${format}`;
 
-      await Share.share({
-        title: filename,
-        message: data,
-      });
+      await Share.share({ title: filename, message: data });
     } catch (e) {
-      Alert.alert('Export failed', e.message);
+      Alert.alert(t('export.exportFailTitle'), e.message);
     }
     setLoading(null);
   };
 
-  // Ref for the hidden web file input
   const fileInputRef = useRef(null);
 
-  // Shared logic once we have parsed JSON — handles merge/replace conflict resolution
   const doImport = async (parsed, mode) => {
     await importFromJSON(parsed, mode);
     setShowSplash(true);
@@ -75,24 +70,27 @@ export default function ExportScreen() {
     if (existing.length === 0) {
       await doImport(parsed, 'replace');
     } else {
+      const count = existing.length;
       Alert.alert(
-        'Existing data found',
-        `You already have ${existing.length} ${existing.length === 1 ? 'entry' : 'entries'}. What would you like to do?`,
+        t('export.existingDataTitle'),
+        count === 1
+          ? t('export.existingDataBody_one',   { count })
+          : t('export.existingDataBody_other', { count }),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('export.cancel'), style: 'cancel' },
           {
-            text: 'Merge',
+            text: t('export.merge'),
             onPress: () => doImport(parsed, 'merge'),
           },
           {
-            text: 'Replace',
+            text: t('export.replace'),
             style: 'destructive',
             onPress: () => Alert.alert(
-              'Replace all data?',
-              'This will permanently delete all your existing entries. This cannot be undone.',
+              t('export.replaceConfirmTitle'),
+              t('export.replaceConfirmBody'),
               [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Replace', style: 'destructive', onPress: () => doImport(parsed, 'replace') },
+                { text: t('export.cancel'), style: 'cancel' },
+                { text: t('export.replace'), style: 'destructive', onPress: () => doImport(parsed, 'replace') },
               ]
             ),
           },
@@ -102,28 +100,25 @@ export default function ExportScreen() {
     setLoading(null);
   };
 
-  // Web: handle file selected from hidden <input type="file">
   const handleWebFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) { setLoading(null); return; }
     try {
-      const text = await file.text();
+      const text   = await file.text();
       const parsed = JSON.parse(text);
       await processImport(parsed);
     } catch (err) {
-      Alert.alert('Import failed', err.message);
+      Alert.alert(t('export.importFailTitle'), err.message);
       setLoading(null);
     }
-    // Reset the input so the same file can be picked again
     e.target.value = '';
   };
 
   const handleImport = async () => {
     setLoading('import');
     if (Platform.OS === 'web') {
-      // Trigger the hidden file input
       fileInputRef.current?.click();
-      return; // loading cleared in handleWebFileChange
+      return;
     }
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -131,11 +126,11 @@ export default function ExportScreen() {
         copyToCacheDirectory: true,
       });
       if (result.canceled) { setLoading(null); return; }
-      const text = await fetch(result.assets[0].uri).then((r) => r.text());
+      const text   = await fetch(result.assets[0].uri).then((r) => r.text());
       const parsed = JSON.parse(text);
       await processImport(parsed);
     } catch (e) {
-      Alert.alert('Import failed', e.message);
+      Alert.alert(t('export.importFailTitle'), e.message);
       setLoading(null);
     }
   };
@@ -148,7 +143,7 @@ export default function ExportScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
           </TouchableOpacity>
-          <Text style={styles.title}>Export Data</Text>
+          <Text style={styles.title}>{t('export.title')}</Text>
           <View style={{ width: 36 }} />
         </View>
 
@@ -156,9 +151,7 @@ export default function ExportScreen() {
           {/* Description */}
           <View style={styles.infoCard}>
             <Ionicons name="information-circle-outline" size={22} color="#4A7BB5" />
-            <Text style={styles.infoText}>
-              Export all your sleep diary entries to share with a researcher or import into a spreadsheet.
-            </Text>
+            <Text style={styles.infoText}>{t('export.infoText')}</Text>
           </View>
 
           {/* CSV Export */}
@@ -172,10 +165,8 @@ export default function ExportScreen() {
               <Ionicons name="grid-outline" size={28} color="#4A7BB5" />
             </View>
             <View style={styles.exportText}>
-              <Text style={styles.exportTitle}>Export as CSV</Text>
-              <Text style={styles.exportSubtitle}>
-                One row per entry. Opens in Excel, Numbers, or any spreadsheet app.
-              </Text>
+              <Text style={styles.exportTitle}>{t('export.csvTitle')}</Text>
+              <Text style={styles.exportSubtitle}>{t('export.csvSubtitle')}</Text>
             </View>
             {loading === 'csv'
               ? <ActivityIndicator color="#4A7BB5" />
@@ -194,10 +185,8 @@ export default function ExportScreen() {
               <Ionicons name="code-slash-outline" size={28} color="#4A7BB5" />
             </View>
             <View style={styles.exportText}>
-              <Text style={styles.exportTitle}>Export as JSON</Text>
-              <Text style={styles.exportSubtitle}>
-                Full structured data including all answers. Ideal for analysis scripts.
-              </Text>
+              <Text style={styles.exportTitle}>{t('export.jsonTitle')}</Text>
+              <Text style={styles.exportSubtitle}>{t('export.jsonSubtitle')}</Text>
             </View>
             {loading === 'json'
               ? <ActivityIndicator color="#4A7BB5" />
@@ -219,10 +208,8 @@ export default function ExportScreen() {
               <Ionicons name="download-outline" size={28} color="#E07A20" />
             </View>
             <View style={styles.exportText}>
-              <Text style={styles.exportTitle}>Import from JSON</Text>
-              <Text style={styles.exportSubtitle}>
-                Restore entries from a previously exported Sleep Diaries JSON file.
-              </Text>
+              <Text style={styles.exportTitle}>{t('export.importTitle')}</Text>
+              <Text style={styles.exportSubtitle}>{t('export.importSubtitle')}</Text>
             </View>
             {loading === 'import'
               ? <ActivityIndicator color="#E07A20" />
@@ -241,13 +228,10 @@ export default function ExportScreen() {
             />
           )}
 
-          {/* Note */}
-          <Text style={styles.note}>
-            Your data stays on your device at all times. Exporting shares it only with the app you choose.
-          </Text>
+          <Text style={styles.note}>{t('export.note')}</Text>
         </View>
       </SafeAreaView>
-      {/* Import success splash — outside root View so it covers full screen incl. safe areas */}
+
       {showSplash && (
         <TouchableOpacity
           style={styles.splashOverlay}

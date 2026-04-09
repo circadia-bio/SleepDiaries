@@ -7,7 +7,7 @@
  *   - Instructions button that opens the InstructionsModal.
  *   - Past Entries and Final Report shortcuts.
  *
- * On focus, reloads today’s status from storage so card states always
+ * On focus, reloads today's status from storage so card states always
  * reflect the latest entries. On first visit after login (detected via
  * the showInstructions route param or hasSeenInstructions flag), opens
  * the instructions modal automatically.
@@ -26,17 +26,9 @@ import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../
 import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
-
-const CARD_IMAGES = {
-  morningPending:      require('../../assets/images/morning_pending.png'),
-  morningCompleted:    require('../../assets/images/morning_completed.png'),
-  eveningLocked:       require('../../assets/images/evening_locked.png'),
-  eveningPending:      require('../../assets/images/evening_pending.png'),
-  eveningCompleted:    require('../../assets/images/evening_completed.png'),
-  finalReport:         require('../../assets/images/final-report.png'),
-  finalReportLocked:   require('../../assets/images/final-report-locked.png'),
-  pastEntries:         require('../../assets/images/past-entries.png'),
-};
+import t from '../../i18n';
+import IMAGES from '../../assets/images';
+import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
@@ -44,11 +36,11 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
 
   let image;
   if (isMorning) {
-    image = completed ? CARD_IMAGES.morningCompleted : CARD_IMAGES.morningPending;
+    image = completed ? IMAGES.morningCompleted : IMAGES.morningPending;
   } else {
-    image = isLocked   ? CARD_IMAGES.eveningLocked
-          : completed  ? CARD_IMAGES.eveningCompleted
-          : CARD_IMAGES.eveningPending;
+    image = isLocked  ? IMAGES.eveningLocked
+          : completed ? IMAGES.eveningCompleted
+          : IMAGES.eveningPending;
   }
 
   return (
@@ -84,19 +76,20 @@ export default function HomeScreen() {
         setEveningCompleted(status.eveningCompleted);
         setMorningCount(mCount);
         setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
-        // Show on first login (via param) or if not yet seen on return visits
         if (!seen && (name || showInstructionsParam === '1')) setShowInstructions(true);
       };
       load();
     }, [])
   );
 
+  const remaining = MIN_ENTRIES_FOR_REPORT - morningCount;
+
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
       <ImageBackground
-        source={require('../../assets/images/homepage-bg.png')}
+        source={IMAGES.homepageBg}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
         resizeMode="cover"
@@ -110,19 +103,19 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <View style={styles.welcomeContainer}>
-              <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>Welcome,</Text>
+              <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>{t('home.welcome')}</Text>
               <Text style={[styles.userName,    { fontFamily: FONTS.heading }]}>{userName}!</Text>
             </View>
             <TouchableOpacity style={styles.profileButton} onPress={() => setShowProfile(true)}>
               <Ionicons name="person-circle-outline" size={32} color="#4A7BB5" />
-              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>Profile</Text>
+              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>{t('home.profile')}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.body}>
           <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>New Entry</Text>
+            <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>{t('home.newEntry')}</Text>
             <View style={styles.cardsContainer}>
               <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
                 onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
@@ -132,9 +125,9 @@ export default function HomeScreen() {
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
-            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>Instructions</Text>
+            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>{t('home.instructionsTitle')}</Text>
             <Text style={[styles.instructionsBody,  { fontFamily: FONTS.bodyRegular }]}>
-              Click here to learn more about sleep diaries and additional information.
+              {t('home.instructionsBody')}
             </Text>
           </TouchableOpacity>
 
@@ -145,7 +138,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/past-entries')}
               activeOpacity={0.8}
             >
-              <Image source={CARD_IMAGES.pastEntries} style={styles.bottomCardImage} resizeMode="contain" />
+              <PastEntriesCard />
             </TouchableOpacity>
 
             {/* Final Report */}
@@ -155,14 +148,10 @@ export default function HomeScreen() {
               activeOpacity={reportUnlocked ? 0.8 : 1}
               disabled={!reportUnlocked}
             >
-              <Image
-                source={reportUnlocked ? CARD_IMAGES.finalReport : CARD_IMAGES.finalReportLocked}
-                style={styles.bottomCardImage}
-                resizeMode="contain"
-              />
+              <FinalReportCard unlocked={reportUnlocked} />
               {!reportUnlocked && (
                 <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
-                  {MIN_ENTRIES_FOR_REPORT - morningCount} more {(MIN_ENTRIES_FOR_REPORT - morningCount) === 1 ? 'entry' : 'entries'} needed
+                  {t('home.entriesNeeded', { count: remaining })}
                 </Text>
               )}
             </TouchableOpacity>
@@ -223,8 +212,7 @@ const styles = StyleSheet.create({
   instructionsTitle: { fontSize: 18, color: '#1A3A5C', marginBottom: 6 },
   instructionsBody:  { fontSize: 13, color: '#4A7BB5', textAlign: 'center', lineHeight: 20 },
 
-  bottomRow:       { flexDirection: 'row', gap: 12 },
-  bottomCard:      { flex: 1, alignItems: 'center' },
-  bottomCardImage: { width: '100%', height: 115 },
-  bottomCardHint:  { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
+  bottomRow:      { flexDirection: 'row', gap: 12 },
+  bottomCard:     { flex: 1 },
+  bottomCardHint: { fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
 });
