@@ -35,7 +35,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
-- 🌍 **Localisation** — full Portuguese (Brazilian) translation, locale detected automatically from device settings
+- 🌍 **Localisation** — full Portuguese (Brazilian) translation 🇧🇷, locale detected automatically from device settings
 
 ---
 
@@ -151,8 +151,8 @@ The app detects the device locale at startup using `expo-localization` and selec
 
 | Language | Locale code | Status |
 |----------|-------------|--------|
-| English | `en` | ✅ Complete |
-| Portuguese (Brazil) | `pt-BR` | ✅ Complete |
+| 🇬🇧 English | `en` | ✅ Complete |
+| 🇧🇷 Portuguese (Brazil) | `pt-BR` | ✅ Complete |
 
 All other locales fall back to English.
 
