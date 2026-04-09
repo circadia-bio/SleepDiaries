@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
 import { loadTodayStatus, loadEntries } from '../../storage/storage';
-import { FONTS } from '../../theme/typography';
+import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 
@@ -17,9 +17,7 @@ const computeStats = (entries) => {
   const today = new Date().toISOString().split('T')[0];
   const dates = entries.map((e) => e.date).sort();
   const firstDate = dates[0];
-  const daysInStudy = firstDate
-    ? Math.floor((new Date(today) - new Date(firstDate)) / 86400000) + 1
-    : 0;
+  const daysInStudy = firstDate ? Math.floor((new Date(today) - new Date(firstDate)) / 86400000) + 1 : 0;
   let streak = 0;
   const morningDates = new Set(morningEntries.map((e) => e.date));
   let d = new Date(today);
@@ -31,7 +29,7 @@ const MIN_STATS_ENTRIES = 14;
 
 const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statBox}>
-    <Ionicons name={icon} size={22} color={color} />
+    <Ionicons name={icon} size={24} color={color} />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -44,42 +42,30 @@ export default function EntryTab() {
   const [eveningCompleted, setEveningCompleted] = useState(false);
   const [stats, setStats] = useState(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      const load = async () => {
-        const [status, entries] = await Promise.all([loadTodayStatus(), loadEntries()]);
-        setMorningCompleted(status.morningCompleted);
-        setEveningCompleted(status.eveningCompleted);
-        setStats(computeStats(entries));
-      };
-      load();
-    }, [])
-  );
+  useFocusEffect(useCallback(() => {
+    const load = async () => {
+      const [status, entries] = await Promise.all([loadTodayStatus(), loadEntries()]);
+      setMorningCompleted(status.morningCompleted);
+      setEveningCompleted(status.eveningCompleted);
+      setStats(computeStats(entries));
+    };
+    load();
+  }, []));
 
   const eveningLocked = !morningCompleted;
   const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
-  const eveningImage = eveningLocked
-    ? IMAGES.eveningLocked
-    : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
-
+  const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
   const s = stats;
 
   return (
     <View style={styles.root}>
-      <ImageBackground
-        source={IMAGES.homepageBg}
-        style={StyleSheet.absoluteFill}
-        imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
-        resizeMode="cover"
-      />
+      <ImageBackground source={IMAGES.homepageBg} style={StyleSheet.absoluteFill} imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined} resizeMode="cover" />
       <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
 
         <View style={styles.streakBanner}>
           <Text style={styles.streakFlame}>🔥</Text>
           <View>
-            <Text style={[styles.streakValue, { fontFamily: FONTS.heading }]}>
-              {s?.streak ?? '—'} {t('profile.statStreakUnit')}
-            </Text>
+            <Text style={[styles.streakValue, { fontFamily: FONTS.heading }]}>{s?.streak ?? '—'} {t('profile.statStreakUnit')}</Text>
             <Text style={[styles.streakLabel, { fontFamily: FONTS.bodyMedium }]}>{t('profile.statStreak')}</Text>
           </View>
         </View>
@@ -92,28 +78,19 @@ export default function EntryTab() {
 
         {s && s.morningCount < MIN_STATS_ENTRIES && (
           <View style={styles.statsUnlockHint}>
-            <Ionicons name="lock-closed-outline" size={16} color="#94A3B8" />
+            <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
             <Text style={[styles.statsUnlockText, { fontFamily: FONTS.bodyMedium }]}>
               {t('entry.statsUnlock', { count: MIN_STATS_ENTRIES - s.morningCount })}
             </Text>
           </View>
         )}
 
-        <TouchableOpacity
-          onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
-          activeOpacity={0.9}
-        >
+        <TouchableOpacity onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} activeOpacity={0.9}>
           <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" />
         </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
-          activeOpacity={eveningLocked ? 1 : 0.9}
-          disabled={eveningLocked}
-        >
+        <TouchableOpacity onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} activeOpacity={eveningLocked ? 1 : 0.9} disabled={eveningLocked}>
           <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" />
         </TouchableOpacity>
-
       </View>
     </View>
   );
@@ -123,28 +100,25 @@ const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120, justifyContent: 'flex-end' },
   cardImage: { width: '100%', height: 110, borderRadius: 14 },
-
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 16,
-    borderWidth: 1.5, borderColor: '#A8C8E8', paddingHorizontal: 20, paddingVertical: 14,
+    borderWidth: 1.5, borderColor: '#A8C8E8', paddingHorizontal: 20, paddingVertical: 16,
   },
-  streakFlame: { fontSize: 32 },
-  streakValue: { fontSize: 22, color: '#1A3A5C' },
-  streakLabel: { fontSize: 15, color: '#94A3B8', marginTop: 1 },
-
+  streakFlame: { fontSize: 36 },
+  streakValue: { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
+  streakLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8', marginTop: 2 },
   statRow: { flexDirection: 'row', gap: 8 },
   statBox: {
     flex: 1, backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 14,
-    borderWidth: 1.5, borderColor: '#A8C8E8', alignItems: 'center', paddingVertical: 14, gap: 5,
+    borderWidth: 1.5, borderColor: '#A8C8E8', alignItems: 'center', paddingVertical: 14, gap: 6,
   },
-  statValue: { fontSize: 16 },
-  statLabel: { fontSize: 13, color: '#94A3B8', textAlign: 'center' },
-
+  statValue: { fontSize: SIZES.body },
+  statLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
   statsUnlockHint: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 12,
-    borderWidth: 1, borderColor: '#A8C8E8', paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1, borderColor: '#A8C8E8', paddingHorizontal: 14, paddingVertical: 12,
   },
-  statsUnlockText: { fontSize: 14, color: '#94A3B8', flex: 1 },
+  statsUnlockText: { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
 });

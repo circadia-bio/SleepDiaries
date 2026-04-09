@@ -1,15 +1,31 @@
 // ─── App Typography ────────────────────────────────────────────────────────────
-// Fonts are loaded once in app/_layout.jsx and available everywhere.
+// Fonts and sizes are defined here and imported across all screens.
+// Change values here to update the whole app at once.
 //
-// Usage in any screen:
-//   import { FONTS } from '../../theme/typography';
-//   <Text style={{ fontFamily: FONTS.heading }}>Welcome</Text>
-//   <Text style={{ fontFamily: FONTS.body }}>Body text</Text>
+// Usage:
+//   import { FONTS, SIZES } from '../../theme/typography';
+//   <Text style={{ fontFamily: FONTS.heading, fontSize: SIZES.screenTitle }}>
 // ──────────────────────────────────────────────────────────────────────────────
 
 export const FONTS = {
-  heading:     'Livvic-Bold',      // Welcome text, screen titles (40px)
-  body:        'Afacad-Bold',      // General bold UI text
-  bodyMedium:  'Afacad-Medium',    // Medium weight
-  bodyRegular: 'Afacad-Regular',   // Regular weight
+  heading:     'Livvic-Bold',      // Screen titles, names, large values
+  body:        'Afacad-Bold',      // Buttons, labels, emphasis
+  bodyMedium:  'Afacad-Medium',    // Body text, hints, descriptions
+  bodyRegular: 'Afacad-Regular',   // Secondary text
+};
+
+export const SIZES = {
+  // Headings
+  screenTitle:  28,   // e.g. "Settings", "Past Entries"
+  sectionTitle: 22,   // e.g. welcome text, card titles
+  cardTitle:    20,   // e.g. entry type, modal header
+
+  // Body
+  body:         18,   // Primary body text, row labels
+  bodySmall:    16,   // Secondary body, subtitles, hints
+  caption:      14,   // Supporting captions, chip labels, dates
+
+  // UI chrome
+  label:        15,   // Section headers (uppercased), tags
+  badge:        13,   // Small badges, legal text
 };

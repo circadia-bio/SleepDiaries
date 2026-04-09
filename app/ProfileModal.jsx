@@ -2,21 +2,17 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, StyleSheet, Linking,
-} from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
-import { FONTS } from '../theme/typography';
+import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 
 const computeStreak = (entries) => {
   const today = new Date().toISOString().split('T')[0];
   const morningDates = new Set(entries.filter((e) => e.type === 'morning').map((e) => e.date));
-  let streak = 0;
-  let d = new Date(today);
+  let streak = 0; let d = new Date(today);
   while (morningDates.has(d.toISOString().split('T')[0])) { streak++; d.setDate(d.getDate() - 1); }
   return streak;
 };
@@ -28,7 +24,7 @@ const formatDate = (dateStr) => {
 
 const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statChip}>
-    <Ionicons name={icon} size={20} color={color} />
+    <Ionicons name={icon} size={22} color={color} />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -60,28 +56,21 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 
   const load = useCallback(async () => {
     const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
-    setName(n ?? '');
-    setCode(c ?? '');
+    setName(n ?? ''); setCode(c ?? '');
     setMorningCount(entries.filter((e) => e.type === 'morning').length);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
     setStreak(computeStreak(entries));
-    const dates = entries.map((e) => e.date).sort();
-    setMemberSince(dates[0] ?? null);
+    setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
 
   const handleSaveName = async () => {
     if (!draftName.trim()) return;
-    await saveName(draftName.trim());
-    setName(draftName.trim());
-    setEditingName(false);
+    await saveName(draftName.trim()); setName(draftName.trim()); setEditingName(false);
   };
-
   const handleSaveCode = async () => {
-    await saveResearchCode(draftCode.trim());
-    setCode(draftCode.trim());
-    setEditingCode(false);
+    await saveResearchCode(draftCode.trim()); setCode(draftCode.trim()); setEditingCode(false);
   };
 
   return (
@@ -90,54 +79,48 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { fontFamily: FONTS.heading }]}>{t('profile.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="close" size={24} color="#1E3A5F" />
+            <Ionicons name="close" size={26} color="#1E3A5F" />
           </TouchableOpacity>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.avatarSection}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={48} color="#4A7BB5" />
-            </View>
+            <View style={styles.avatar}><Ionicons name="person" size={52} color="#4A7BB5" /></View>
 
             {editingName ? (
               <View style={styles.editRow}>
-                <TextInput style={[styles.editInput, { fontFamily: FONTS.body }]} value={draftName} onChangeText={setDraftName}
-                  autoFocus autoCapitalize="words" autoCorrect={false} returnKeyType="done" onSubmitEditing={handleSaveName} />
-                <TouchableOpacity onPress={handleSaveName} style={styles.editSaveBtn}><Ionicons name="checkmark" size={20} color="#fff" /></TouchableOpacity>
-                <TouchableOpacity onPress={() => setEditingName(false)} style={styles.editCancelBtn}><Ionicons name="close" size={20} color="#94A3B8" /></TouchableOpacity>
+                <TextInput style={[styles.editInput, { fontFamily: FONTS.body }]} value={draftName} onChangeText={setDraftName} autoFocus autoCapitalize="words" autoCorrect={false} returnKeyType="done" onSubmitEditing={handleSaveName} />
+                <TouchableOpacity onPress={handleSaveName} style={styles.editSaveBtn}><Ionicons name="checkmark" size={22} color="#fff" /></TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingName(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#94A3B8" /></TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity style={styles.nameRow} onPress={() => { setDraftName(name); setEditingName(true); }}>
                 <Text style={[styles.nameText, { fontFamily: FONTS.heading }]}>{name || t('profile.tapToSetName')}</Text>
-                <Ionicons name="pencil-outline" size={16} color="#94A3B8" style={{ marginLeft: 6 }} />
+                <Ionicons name="pencil-outline" size={18} color="#94A3B8" style={{ marginLeft: 6 }} />
               </TouchableOpacity>
             )}
 
             {editingCode ? (
               <View style={styles.editRow}>
-                <TextInput style={[styles.editInput, { fontFamily: FONTS.bodyMedium }]} value={draftCode} onChangeText={setDraftCode}
-                  autoFocus autoCapitalize="none" autoCorrect={false}
-                  placeholder={t('profile.researchCodePlaceholder')} placeholderTextColor="#A0B8D0"
-                  returnKeyType="done" onSubmitEditing={handleSaveCode} />
-                <TouchableOpacity onPress={handleSaveCode} style={styles.editSaveBtn}><Ionicons name="checkmark" size={20} color="#fff" /></TouchableOpacity>
-                <TouchableOpacity onPress={() => setEditingCode(false)} style={styles.editCancelBtn}><Ionicons name="close" size={20} color="#94A3B8" /></TouchableOpacity>
+                <TextInput style={[styles.editInput, { fontFamily: FONTS.bodyMedium }]} value={draftCode} onChangeText={setDraftCode} autoFocus autoCapitalize="none" autoCorrect={false} placeholder={t('profile.researchCodePlaceholder')} placeholderTextColor="#A0B8D0" returnKeyType="done" onSubmitEditing={handleSaveCode} />
+                <TouchableOpacity onPress={handleSaveCode} style={styles.editSaveBtn}><Ionicons name="checkmark" size={22} color="#fff" /></TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingCode(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#94A3B8" /></TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity style={styles.codeRow} onPress={() => { setDraftCode(code); setEditingCode(true); }}>
-                <Ionicons name="code-slash-outline" size={14} color="#94A3B8" />
+                <Ionicons name="code-slash-outline" size={16} color="#94A3B8" />
                 <Text style={[styles.codeText, { fontFamily: FONTS.bodyMedium }]}>{code || t('profile.addResearchCode')}</Text>
-                <Ionicons name="pencil-outline" size={13} color="#94A3B8" style={{ marginLeft: 4 }} />
+                <Ionicons name="pencil-outline" size={15} color="#94A3B8" style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             )}
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionSummary')}</Text>
           <View style={styles.statsGrid}>
-            <StatChip icon="sunny-outline"    value={morningCount}                                label={t('profile.statMorning')} color="#E07A20" />
-            <StatChip icon="moon-outline"     value={eveningCount}                                label={t('profile.statEvening')} color="#2A6CB5" />
-            <StatChip icon="flame-outline"    value={`${streak} ${t('profile.statStreakUnit')}`}  label={t('profile.statStreak')}  color="#E07A20" />
-            <StatChip icon="calendar-outline" value={formatDate(memberSince)}                     label={t('profile.statSince')}   color="#4A7BB5" />
+            <StatChip icon="sunny-outline"    value={morningCount}                               label={t('profile.statMorning')} color="#E07A20" />
+            <StatChip icon="moon-outline"     value={eveningCount}                               label={t('profile.statEvening')} color="#2A6CB5" />
+            <StatChip icon="flame-outline"    value={`${streak} ${t('profile.statStreakUnit')}`} label={t('profile.statStreak')}  color="#E07A20" />
+            <StatChip icon="calendar-outline" value={formatDate(memberSince)}                    label={t('profile.statSince')}   color="#4A7BB5" />
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
@@ -146,15 +129,11 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               <View key={item.key}>
                 <View style={styles.glossaryRow}>
                   <View style={[styles.glossaryIcon, { backgroundColor: item.color + '18' }]}>
-                    <Ionicons name={item.icon} size={20} color={item.color} />
+                    <Ionicons name={item.icon} size={22} color={item.color} />
                   </View>
                   <View style={styles.glossaryText}>
-                    <Text style={[styles.glossaryTitle, { color: item.color, fontFamily: FONTS.body }]}>
-                      {t(`profile.glossary.${item.key}.title`)}
-                    </Text>
-                    <Text style={[styles.glossaryBody, { fontFamily: FONTS.bodyMedium }]}>
-                      {t(`profile.glossary.${item.key}.body`)}
-                    </Text>
+                    <Text style={[styles.glossaryTitle, { color: item.color, fontFamily: FONTS.body }]}>{t(`profile.glossary.${item.key}.title`)}</Text>
+                    <Text style={[styles.glossaryBody, { fontFamily: FONTS.bodyMedium }]}>{t(`profile.glossary.${item.key}.body`)}</Text>
                   </View>
                 </View>
                 {i < arr.length - 1 && <View style={styles.glossaryDivider} />}
@@ -165,15 +144,15 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionActions')}</Text>
           <View style={styles.card}>
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(onShowInstructions, 400); }}>
-              <Ionicons name="book-outline" size={20} color="#4A7BB5" style={styles.actionIcon} />
+              <Ionicons name="book-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.replayInstructions')}</Text>
-              <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => Linking.openURL('https://circadia-lab.uk')}>
-              <Ionicons name="globe-outline" size={20} color="#4A7BB5" style={styles.actionIcon} />
+              <Ionicons name="globe-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.website')}</Text>
-              <Ionicons name="open-outline" size={16} color="#94A3B8" />
+              <Ionicons name="open-outline" size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -184,35 +163,35 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 
 const styles = StyleSheet.create({
   root:        { flex: 1, backgroundColor: '#EEF5FF' },
-  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
-  headerTitle: { fontSize: 20, color: '#1E3A5F' },
+  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
+  headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
   avatarSection: { alignItems: 'center', gap: 10, paddingVertical: 8 },
-  avatar:        { width: 96, height: 96, borderRadius: 48, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8' },
+  avatar:        { width: 100, height: 100, borderRadius: 50, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8' },
   nameRow:       { flexDirection: 'row', alignItems: 'center' },
-  nameText:      { fontSize: 24, color: '#1A3A5C' },
+  nameText:      { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
   codeRow:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  codeText:      { fontSize: 15, color: '#94A3B8' },
+  codeText:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   editRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%' },
-  editInput:     { flex: 1, backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#7EB0DC', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 16, color: '#1E3A5F' },
+  editInput:     { flex: 1, backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#7EB0DC', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F' },
   editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 8, padding: 10 },
   editCancelBtn: { padding: 10 },
-  sectionHeader: { fontSize: 14, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
+  sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statChip:      { flex: 1, minWidth: '45%', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', alignItems: 'center', paddingVertical: 14, gap: 4 },
-  statValue:     { fontSize: 16 },
-  statLabel:     { fontSize: 13, color: '#94A3B8', textAlign: 'center' },
+  statValue:     { fontSize: SIZES.body },
+  statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
   glossaryCard:    { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
   glossaryRow:     { flexDirection: 'row', alignItems: 'flex-start', gap: 14, padding: 16 },
-  glossaryIcon:    { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  glossaryIcon:    { width: 44, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   glossaryText:    { flex: 1, gap: 4 },
-  glossaryTitle:   { fontSize: 15 },
-  glossaryBody:    { fontSize: 14, color: '#64748B', lineHeight: 21 },
+  glossaryTitle:   { fontSize: SIZES.body },
+  glossaryBody:    { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 24 },
   glossaryDivider: { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
   card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
-  actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14 },
+  actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
   actionIcon:    { marginRight: 12 },
-  actionLabel:   { flex: 1, fontSize: 16, color: '#1E3A5F' },
+  actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   divider:       { height: 1, backgroundColor: '#E2EAF4', marginHorizontal: 16 },
 });
