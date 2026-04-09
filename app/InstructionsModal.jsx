@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import {
   Modal, View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, useWindowDimensions,
+  ScrollView, useWindowDimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
@@ -41,7 +41,7 @@ function Background({ width, height }) {
       width={width}
       height={height}
       viewBox="0 0 393 852"
-      style={[StyleSheet.absoluteFill, { zIndex: 0 }]}
+      style={StyleSheet.absoluteFill}
     >
       <Defs>
         <LinearGradient id="g0" x1="177.754" y1="151.379" x2="175.651" y2="248.09" gradientUnits="userSpaceOnUse">
@@ -106,6 +106,10 @@ export default function InstructionsModal({ visible, onClose }) {
   const handleNext = () => { if (isLast) handleClose(); else setIndex(index + 1); };
   const handleBack = () => { if (index > 0) setIndex(index - 1); };
 
+  // Safe top: use real inset but ensure a minimum so notch never eats the close button
+  const safeTop    = Math.max(insets.top, 44);
+  const safeBottom = Math.max(insets.bottom, 16);
+
   return (
     <Modal
       visible={visible}
@@ -114,13 +118,13 @@ export default function InstructionsModal({ visible, onClose }) {
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <View style={styles.root}>
+      <View style={[styles.root, { width, height }]}>
 
-        {/* SVG background — zIndex 0, behind everything */}
+        {/* SVG background */}
         <Background width={width} height={height} />
 
-        {/* All content — zIndex 1, on top of SVG */}
-        <View style={[styles.overlay, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 20 }]}>
+        {/* Full-screen content layer on top of SVG */}
+        <View style={[styles.overlay, { paddingTop: safeTop, paddingBottom: safeBottom }]}>
 
           {/* Close button */}
           <TouchableOpacity style={styles.closeBtn} onPress={handleClose} activeOpacity={0.7}>
@@ -128,7 +132,7 @@ export default function InstructionsModal({ visible, onClose }) {
             <Text style={styles.closeText}>{strings.instructions.close}</Text>
           </TouchableOpacity>
 
-          {/* Scrollable slide content — fills available space */}
+          {/* Scrollable slide content */}
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
@@ -173,7 +177,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF5F6',
   },
 
-  // Full-screen overlay sitting above the SVG
   overlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
@@ -181,13 +184,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
   },
 
-  // Close
   closeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    paddingVertical: 8,
+    marginBottom: 4,
   },
   closeText: {
     fontFamily: FONTS.body,
@@ -195,7 +198,6 @@ const styles = StyleSheet.create({
     color: CLOSE_COLOR,
   },
 
-  // Scroll content
   scrollView: {
     flex: 1,
   },
@@ -221,7 +223,6 @@ const styles = StyleSheet.create({
     color: BODY_COLOR,
   },
 
-  // Dots
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -234,11 +235,11 @@ const styles = StyleSheet.create({
     borderRadius: DOT_SIZE / 2,
   },
 
-  // Nav
   navRow: {
     flexDirection: 'row',
     gap: 12,
     paddingTop: 8,
+    paddingBottom: 8,
   },
   navBtn: {
     flex: 1,
