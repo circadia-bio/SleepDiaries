@@ -24,6 +24,7 @@ function CustomTabBar({ state, navigation }) {
   const activeRoute = state.routes[state.index]?.name ?? 'home';
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
+  // On desktop web, cap to 390px phone frame; on native/PWA use real width
   const isStandalone = Platform.OS === 'web' &&
     typeof window !== 'undefined' && window.navigator.standalone === true;
   const W = (Platform.OS === 'web' && !isStandalone) ? Math.min(screenW, 390) : screenW;
@@ -34,7 +35,7 @@ function CustomTabBar({ state, navigation }) {
               : IMAGES.taskbar3;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width: W }]}>
       <Image
         source={image}
         style={{ width: W, height: TAB_IMAGE_HEIGHT, marginTop: insets.bottom }}
@@ -80,6 +81,7 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
+    overflow: 'hidden',
     position: 'absolute',
     bottom: 0,
     left: 0,

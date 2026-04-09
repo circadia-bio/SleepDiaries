@@ -7,7 +7,7 @@
  * is selected once at module load time based on the detected locale.
  *
  * EN  → assets/images/          (original files, default fallback)
- * PT-BR → assets/images/pt-BR/  (same filenames)
+ * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size 1183×292)
  *
  * Usage:
  *   import IMAGES from '../../assets/images';
