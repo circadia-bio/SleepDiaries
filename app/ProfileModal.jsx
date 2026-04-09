@@ -11,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
-import t from '../i18n';
+import t, { locale } from '../i18n';
 
 const computeStreak = (entries) => {
   const today = new Date().toISOString().split('T')[0];
@@ -24,7 +24,7 @@ const computeStreak = (entries) => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return t('profile.noEntries');
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
@@ -35,7 +35,6 @@ const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   </View>
 );
 
-// Glossary items driven by translation keys so new locales just need i18n updates
 const GLOSSARY_ITEMS = [
   { key: 'sleepDuration',     icon: 'time-outline',         color: '#4A7BB5' },
   { key: 'sleepEfficiency',   icon: 'speedometer-outline',  color: '#2E7D32' },
@@ -97,7 +96,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* ── Avatar / name / code ── */}
           <View style={styles.avatarSection}>
             <View style={styles.avatar}>
               <Ionicons name="person" size={48} color="#4A7BB5" />
@@ -144,7 +142,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             )}
           </View>
 
-          {/* ── Summary stats ── */}
           <Text style={styles.sectionHeader}>{t('profile.sectionSummary')}</Text>
           <View style={styles.statsGrid}>
             <StatChip icon="sunny-outline"    value={morningCount}                              label={t('profile.statMorning')} color="#E07A20" />
@@ -153,7 +150,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <StatChip icon="calendar-outline" value={formatDate(memberSince)}                   label={t('profile.statSince')}   color="#4A7BB5" />
           </View>
 
-          {/* ── Glossary ── */}
           <Text style={styles.sectionHeader}>{t('profile.sectionGlossary')}</Text>
           <View style={styles.glossaryCard}>
             {GLOSSARY_ITEMS.map((item, i, arr) => (
@@ -176,7 +172,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             ))}
           </View>
 
-          {/* ── Quick actions ── */}
           <Text style={styles.sectionHeader}>{t('profile.sectionActions')}</Text>
           <View style={styles.card}>
             <TouchableOpacity style={styles.actionRow}

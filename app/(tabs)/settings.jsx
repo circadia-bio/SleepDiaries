@@ -1,16 +1,5 @@
 /**
  * app/(tabs)/settings.jsx — Settings screen
- *
- * Sections visible on all platforms:
- *   - Data: export entries as CSV or JSON.
- *   - About: logo, copyright, licence, design credits, website link.
- *
- * Sections visible on iOS / Android only (hidden on web):
- *   - Accessibility: bigger text toggle.
- *   - Language: language selection.
- *   - Notifications: daily reminder toggle + test notification.
- *   - Text to Speech: read questions aloud toggle.
- *   - Account: log out and delete account.
  */
 import React, { useState, useEffect } from 'react';
 import {
@@ -26,7 +15,15 @@ import {
   sendTestNotification,
   requestNotificationPermission,
 } from '../../storage/notifications';
-import t from '../../i18n';
+import t, { locale } from '../../i18n';
+
+// Map locale codes to their display names
+const LANGUAGE_NAMES = {
+  'en':    'English',
+  'pt-BR': 'Português (Brasil)',
+  'pt':    'Português (Brasil)',
+};
+const currentLanguageName = LANGUAGE_NAMES[locale] ?? locale;
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -101,7 +98,6 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{t('settings.title')}</Text>
 
-        {/* Native-only sections */}
         {Platform.OS !== 'web' && (
           <>
             <Text style={styles.sectionHeader}>{t('settings.sectionAccessibility')}</Text>
@@ -115,7 +111,7 @@ export default function SettingsScreen() {
               <Row label={t('settings.chooseLanguage')} icon="language-outline"
                 right={
                   <View style={styles.rowRight}>
-                    <Text style={styles.rowValue}>English</Text>
+                    <Text style={styles.rowValue}>{currentLanguageName}</Text>
                     <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
                   </View>
                 }
@@ -145,7 +141,6 @@ export default function SettingsScreen() {
           </>
         )}
 
-        {/* Data — always visible */}
         <Text style={styles.sectionHeader}>{t('settings.sectionData')}</Text>
         <View style={styles.card}>
           <Row
@@ -157,7 +152,6 @@ export default function SettingsScreen() {
           <Text style={styles.cardHint}>{t('settings.exportDataHint')}</Text>
         </View>
 
-        {/* About */}
         <Text style={styles.sectionHeader}>{t('settings.sectionAbout')}</Text>
         <View style={[styles.card, styles.aboutCard]}>
           <Image
@@ -176,7 +170,6 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Account — native only */}
         {Platform.OS !== 'web' && (
           <>
             <Text style={styles.sectionHeader}>{t('settings.sectionAccount')}</Text>
@@ -209,7 +202,6 @@ const styles = StyleSheet.create({
   cardHint: { fontSize: 12, color: '#94A3B8', paddingBottom: 12, lineHeight: 18 },
   testBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14 },
   testBtnText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
-
   aboutCard:  { alignItems: 'center', paddingVertical: 20, gap: 4 },
   logo:       { width: 160, height: 60, marginBottom: 8 },
   aboutText:  { fontSize: 14, color: '#1E3A5F', fontWeight: '600' },
