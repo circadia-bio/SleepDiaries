@@ -16,17 +16,15 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
 
-// Detect if running as an installed PWA on iOS (standalone mode)
 const isStandalone =
   Platform.OS === 'web' &&
   typeof window !== 'undefined' &&
   window.navigator.standalone === true;
 
-// All image assets are listed here so they can be preloaded in parallel
-// before any screen renders, avoiding lazy-load flashes on first paint.
-// Note: taskbar images removed (tab bar now uses Ionicons in code).
-//       past-entries, final-report, final-report-locked removed
-//       (bottom cards now rendered as React Native components).
+// Preloaded image assets. Excludes assets now rendered in code:
+//   - taskbar images (tab bar uses Ionicons)
+//   - past-entries, final-report, final-report-locked (BottomCards.jsx)
+//   - back-day, back-night, next-day, next-night (NavButtons.jsx)
 const IMAGE_ASSETS = [
   require('../assets/images/homepage-bg.png'),
   require('../assets/images/login-bg.png'),
@@ -44,10 +42,6 @@ const IMAGE_ASSETS = [
   require('../assets/images/instructions-4.png'),
   require('../assets/images/instructions-5.png'),
   require('../assets/images/instructions-6.png'),
-  require('../assets/images/back-day.png'),
-  require('../assets/images/back-night.png'),
-  require('../assets/images/next-day.png'),
-  require('../assets/images/next-night.png'),
   require('../assets/images/logo.png'),
   require('../assets/splash-icon.png'),
 ];
@@ -101,14 +95,8 @@ export default function RootLayout() {
   );
 
   if (Platform.OS === 'web') {
-    const wrapperStyle = isStandalone
-      ? styles.webWrapperMobile
-      : styles.webWrapper;
-    return (
-      <View style={wrapperStyle}>
-        {content}
-      </View>
-    );
+    const wrapperStyle = isStandalone ? styles.webWrapperMobile : styles.webWrapper;
+    return <View style={wrapperStyle}>{content}</View>;
   }
 
   return content;

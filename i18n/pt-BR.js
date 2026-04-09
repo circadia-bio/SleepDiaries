@@ -204,6 +204,8 @@ export default {
 
   // ── Questionnaire ─────────────────────────────────────────────────────────
   questionnaire: {
+    back:               'Voltar',
+    next:               'Próximo',
     yes:                'Sim',
     no:                 'Não',
     addMedicine:        'Adicionar Medicamento',

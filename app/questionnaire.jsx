@@ -19,7 +19,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Alert, ImageBackground, Image,
+  Platform, ImageBackground, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -27,13 +27,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry } from '../storage/storage';
 import t from '../i18n';
-
-const BUTTON_IMAGES = {
-  backDay:   require('../assets/images/back-day.png'),
-  nextDay:   require('../assets/images/next-day.png'),
-  backNight: require('../assets/images/back-night.png'),
-  nextNight: require('../assets/images/next-night.png'),
-};
+import { BackButton, NextButton } from '../components/NavButtons';
+import IMAGES from '../assets/images';
 
 const THEME = {
   morning: {
@@ -207,7 +202,7 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
   const removeMed  = (id) => onChange(value.filter((m) => m.id !== id));
   const updateMed  = (id, field, val) => onChange(value.map((m) => (m.id === id ? { ...m, [field]: val } : m)));
   const addTime    = (id) => onChange(value.map((m) => (m.id === id ? { ...m, times: [...m.times, ''] } : m)));
-  const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((t, i) => (i === idx ? val : t)) } : m));
+  const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((tm, i) => (i === idx ? val : tm)) } : m));
   return (
     <View style={styles.medContainer}>
       {value.map((med) => (
@@ -267,7 +262,6 @@ const TextInputField = ({ value, onChange, placeholder, theme }) => {
   );
 };
 
-// ─── Progress Bar ─────────────────────────────────────────────────────────────
 const ProgressBar = ({ current, total, theme }) => {
   const c = THEME[theme];
   const progress = current / total;
@@ -299,7 +293,6 @@ export default function QuestionnaireScreen() {
   const { entryType = 'morning' } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
-  const c = THEME[theme];
 
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -354,10 +347,7 @@ export default function QuestionnaireScreen() {
         onPress={() => router.replace('/(tabs)/home')}
       >
         <Image
-          source={isMorning
-            ? require('../assets/images/splash-end-morning.png')
-            : require('../assets/images/splash-end-night.png')
-          }
+          source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
           style={styles.splashImage}
           resizeMode="cover"
         />
@@ -367,9 +357,11 @@ export default function QuestionnaireScreen() {
 
   if (!question) return null;
 
+  const c = THEME[theme];
+
   return (
     <ImageBackground
-      source={require('../assets/images/questionnaire-bg.png')}
+      source={IMAGES.questionnaireBg}
       style={styles.root}
       imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
       resizeMode="cover"
@@ -398,17 +390,8 @@ export default function QuestionnaireScreen() {
 
         {/* ── Nav buttons ── */}
         <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
-          <TouchableOpacity onPress={handleBack} activeOpacity={0.8} style={styles.navBtn}>
-            <Image source={theme === 'morning' ? BUTTON_IMAGES.backDay : BUTTON_IMAGES.backNight} style={styles.navBtnImage} resizeMode="contain" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleNext}
-            activeOpacity={canProceed() ? 0.8 : 1}
-            disabled={!canProceed()}
-            style={[styles.navBtn, !canProceed() && styles.navBtnDisabled]}
-          >
-            <Image source={theme === 'morning' ? BUTTON_IMAGES.nextDay : BUTTON_IMAGES.nextNight} style={styles.navBtnImage} resizeMode="contain" />
-          </TouchableOpacity>
+          <BackButton onPress={handleBack} theme={theme} />
+          <NextButton onPress={handleNext} theme={theme} disabled={!canProceed()} />
         </View>
 
       </KeyboardAvoidingView>
@@ -491,17 +474,14 @@ const styles = StyleSheet.create({
   addMedBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 14, gap: 8 },
   addMedBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   freeText:      { width: '100%', borderWidth: 1.5, borderRadius: 12, padding: 14, fontSize: 16, minHeight: 120 },
-  navRow:         { flexDirection: 'row', paddingHorizontal: 36, paddingTop: 12, gap: 4 },
-  navBtn:         { flex: 1, height: 52 },
-  navBtnDisabled: { opacity: 0.4 },
-  navBtnImage:    { width: '100%', height: '100%' },
 
-  splashContainer: {
-    flex: 1,
-    backgroundColor: '#C8DFF5',
+  navRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 36,
+    paddingTop: 12,
+    gap: 12,
   },
-  splashImage: {
-    width: '100%',
-    height: '100%',
-  },
+
+  splashContainer: { flex: 1, backgroundColor: '#C8DFF5' },
+  splashImage:     { width: '100%', height: '100%' },
 });

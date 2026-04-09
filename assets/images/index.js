@@ -9,9 +9,10 @@
  * EN  → assets/images/          (original files, default fallback)
  * PT-BR → assets/images/pt-BR/  (same filenames, same canvas size)
  *
- * The tab bar is rendered in code (Ionicons) — no taskbar assets needed.
- * Past Entries and Final Report cards are rendered in code (BottomCards.jsx)
- * — no past-entries.png / final-report.png assets needed.
+ * No longer needed as image assets (now rendered in code):
+ *   - Tab bar (Ionicons in _layout.jsx)
+ *   - Past Entries / Final Report cards (BottomCards.jsx)
+ *   - Back / Next nav buttons (NavButtons.jsx)
  *
  * Usage:
  *   import IMAGES from '../../assets/images';
