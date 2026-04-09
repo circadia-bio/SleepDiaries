@@ -14,24 +14,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
 import { loadTodayStatus, loadEntries } from '../../storage/storage';
 import { FONTS } from '../../theme/typography';
+import t from '../../i18n';
 
 // ─── Stat helpers ─────────────────────────────────────────────────────────────
 
 const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);
 const durationToMinutes = (d) => (d ? d.hours * 60 + d.minutes : 0);
 
-const formatMinutes = (mins) => {
-  if (mins === null || isNaN(mins) || mins <= 0) return '—';
-  const h = Math.floor(mins / 60);
-  const m = Math.round(mins % 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-};
-
 const computeStats = (entries) => {
   const morningEntries = entries.filter((e) => e.type === 'morning');
   const eveningEntries = entries.filter((e) => e.type === 'evening');
 
-  // Days in study — from first entry date to today
   const today = new Date().toISOString().split('T')[0];
   const dates = entries.map((e) => e.date).sort();
   const firstDate = dates[0];
@@ -39,7 +32,6 @@ const computeStats = (entries) => {
     ? Math.floor((new Date(today) - new Date(firstDate)) / 86400000) + 1
     : 0;
 
-  // Current streak — consecutive days with a morning entry up to today
   let streak = 0;
   const morningDates = new Set(morningEntries.map((e) => e.date));
   let d = new Date(today);
@@ -48,35 +40,11 @@ const computeStats = (entries) => {
     d.setDate(d.getDate() - 1);
   }
 
-  // Avg sleep time, efficiency
-  let totalSleep = [], totalEff = [], totalQuality = [];
-  for (const e of morningEntries) {
-    const a = e.answers;
-    if (!a) continue;
-    const sol  = durationToMinutes(a.mq3);
-    const waso = durationToMinutes(a.mq5);
-    const bed  = timeToMinutes(a.mq1);
-    const rise = timeToMinutes(a.mq7);
-    if (bed !== null && rise !== null) {
-      let tib = rise - bed;
-      if (tib < 0) tib += 1440;
-      const tst = Math.max(0, tib - sol - waso);
-      totalSleep.push(tst);
-      if (tib > 0) totalEff.push((tst / tib) * 100);
-    }
-    if (a.mq11) totalQuality.push(a.mq11);
-  }
-
-  const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-
   return {
     morningCount: morningEntries.length,
     eveningCount: eveningEntries.length,
     daysInStudy,
     streak,
-    avgSleep:     avg(totalSleep),
-    avgEff:       avg(totalEff),
-    avgQuality:   avg(totalQuality),
   };
 };
 
@@ -126,6 +94,7 @@ export default function EntryTab() {
     : eveningCompleted ? CARD_IMAGES.eveningCompleted : CARD_IMAGES.eveningPending;
 
   const s = stats;
+  const streakUnit = t('profile.statStreakUnit'); // "days" / "dias"
 
   return (
     <View style={styles.root}>
@@ -141,25 +110,24 @@ export default function EntryTab() {
         <View style={styles.streakBanner}>
           <Text style={styles.streakFlame}>🔥</Text>
           <View>
-            <Text style={styles.streakValue}>{s?.streak ?? '—'} day{s?.streak !== 1 ? 's' : ''}</Text>
-            <Text style={styles.streakLabel}>Current streak</Text>
+            <Text style={styles.streakValue}>{s?.streak ?? '—'} {streakUnit}</Text>
+            <Text style={styles.streakLabel}>{t('profile.statStreak')}</Text>
           </View>
         </View>
 
-        {/* ── Row 1: counts ── */}
-        {/* Counts always visible */}
+        {/* ── Row: counts ── */}
         <View style={styles.statRow}>
-          <StatBox icon="sunny-outline"    value={s?.morningCount ?? '—'} label="Morning entries" color="#E07A20" />
-          <StatBox icon="moon-outline"     value={s?.eveningCount ?? '—'} label="Evening entries" color="#2A6CB5" />
-          <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label="Days in study"   color="#4A7BB5" />
+          <StatBox icon="sunny-outline"    value={s?.morningCount ?? '—'} label={t('profile.statMorning')} color="#E07A20" />
+          <StatBox icon="moon-outline"     value={s?.eveningCount ?? '—'} label={t('profile.statEvening')} color="#2A6CB5" />
+          <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label={t('entry.daysInStudy')}   color="#4A7BB5" />
         </View>
 
-        {/* Sleep stats unlock hint — shown until MIN_STATS_ENTRIES reached */}
+        {/* Sleep stats unlock hint */}
         {s && s.morningCount < MIN_STATS_ENTRIES && (
           <View style={styles.statsUnlockHint}>
             <Ionicons name="lock-closed-outline" size={16} color="#94A3B8" />
             <Text style={styles.statsUnlockText}>
-              Sleep stats unlock after {MIN_STATS_ENTRIES} morning entries — {MIN_STATS_ENTRIES - s.morningCount} to go
+              {t('entry.statsUnlock', { count: MIN_STATS_ENTRIES - s.morningCount })}
             </Text>
           </View>
         )}
@@ -190,7 +158,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120, justifyContent: 'flex-end' },
   cardImage: { width: '100%', height: 110, borderRadius: 14 },
 
-  // Streak banner
   streakBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -206,7 +173,6 @@ const styles = StyleSheet.create({
   streakValue: { fontSize: 22, fontWeight: '800', color: '#1A3A5C' },
   streakLabel: { fontSize: 12, color: '#94A3B8', marginTop: 1 },
 
-  // Stat rows
   statRow: { flexDirection: 'row', gap: 8 },
   statBox: {
     flex: 1,

@@ -1,0 +1,221 @@
+/**
+ * i18n/pt-BR.js — Portuguese (Brazil) strings
+ */
+export default {
+  // ── Login screen ─────────────────────────────────────────────────────────
+  login: {
+    subtitle:        'Digite seu nome para começar',
+    namePlaceholder: 'Seu nome',
+    codePlaceholder: 'Código de pesquisa (opcional)',
+    codeHint:        'Opcional — fornecido pela sua equipa de investigação',
+    cta:             'Vamos lá',
+    errorName:       'Por favor, digite seu nome para continuar.',
+  },
+
+  // ── Home screen ───────────────────────────────────────────────────────────
+  home: {
+    welcome:          'Bem-vindo(a),',
+    profile:          'Perfil',
+    newEntry:         'Novo Registo',
+    instructionsTitle:'Instruções',
+    instructionsBody: 'Clique aqui para saber mais sobre os diários de sono e informações adicionais.',
+    entriesNeeded_one:   'Falta {{count}} registo',
+    entriesNeeded_other: 'Faltam {{count}} registos',
+  },
+
+  // ── Entry tab ─────────────────────────────────────────────────────────────
+  entry: {
+    daysInStudy: 'Dias no estudo',
+    statsUnlock: 'As estatísticas desbloqueiam após mais {{count}} registos de manhã',
+  },
+
+  // ── Profile modal ─────────────────────────────────────────────────────────
+  profile: {
+    title:           'Perfil',
+    tapToSetName:    'Toque para definir o nome',
+    addResearchCode: 'Adicionar código de pesquisa',
+    researchCodePlaceholder: 'Código de pesquisa',
+
+    sectionSummary:  'Resumo',
+    statMorning:     'Registos de manhã',
+    statEvening:     'Registos de noite',
+    statStreak:      'Sequência actual',
+    statStreakUnit:  'dias',
+    statSince:       'Membro desde',
+    noEntries:       'Sem registos ainda',
+
+    sectionGlossary: 'Métricas do sono explicadas',
+    glossary: {
+      sleepDuration: {
+        title: 'Duração do Sono',
+        body:  'O tempo total que passou a dormir. A maioria dos adultos precisa entre 7 e 9 horas por noite.',
+      },
+      sleepEfficiency: {
+        title: 'Eficiência do Sono',
+        body:  'A percentagem do tempo na cama em que estava efectivamente a dormir. Uma pontuação igual ou superior a 85% é considerada saudável — quanto maior, melhor.',
+      },
+      sleepOnsetLatency: {
+        title: 'Latência do Início do Sono',
+        body:  'Quanto tempo demorou a adormecer após se deitar. Adormecer em menos de 30 minutos é habitual.',
+      },
+      waso: {
+        title: 'Vigília Após o Início do Sono (WASO)',
+        body:  'O tempo total acordado após adormecer pela primeira vez e antes de se levantar definitivamente. Quanto menor, melhor.',
+      },
+      nightWakings: {
+        title: 'Despertares Nocturnos',
+        body:  'O número de vezes que acordou durante a noite. Despertares breves e ocasionais são normais, mas interrupções frequentes podem afectar a qualidade do sono.',
+      },
+      sleepQuality: {
+        title: 'Qualidade do Sono',
+        body:  'A sua avaliação de como dormiu, numa escala de 1 a 5. Capta a sensação geral da noite para além do que os números por si só conseguem mostrar.',
+      },
+      restedness: {
+        title: 'Sensação de Descanso',
+        body:  'O quanto se sentiu revigorado(a) e restaurado(a) ao acordar, numa escala de 1 a 5. Reflecte se o sono foi reparador, mesmo quando a duração e eficiência parecem boas.',
+      },
+      earlyWaking: {
+        title: 'Despertar Precoce',
+        body:  'A proporção de noites em que acordou mais cedo do que o pretendido e não conseguiu voltar a adormecer. Pode ser sinal de sono perturbado ou exposição à luz no início da manhã.',
+      },
+    },
+
+    sectionActions:     'Acções rápidas',
+    replayInstructions: 'Rever instruções',
+    website:            'circadia-lab.uk',
+  },
+
+  // ── Past entries screen ───────────────────────────────────────────────────
+  pastEntries: {
+    title:         'Registos Anteriores',
+    morningEntry:  'Registo de Manhã',
+    eveningEntry:  'Registo de Noite',
+    emptyTitle:    'Sem registos ainda',
+    emptySubtitle: 'Complete o seu primeiro registo de manhã ou de noite para o ver aqui.',
+    answerNone:    'Nenhum registado',
+    answerYes:     'Sim',
+    answerNo:      'Não',
+  },
+
+  // ── Export / import screen ────────────────────────────────────────────────
+  export: {
+    title:               'Exportar Dados',
+    infoText:            'Exporte todos os seus registos do diário de sono para partilhar com um investigador ou importar para uma folha de cálculo.',
+    csvTitle:            'Exportar como CSV',
+    csvSubtitle:         'Uma linha por registo. Abre no Excel, Numbers ou qualquer aplicação de folha de cálculo.',
+    jsonTitle:           'Exportar como JSON',
+    jsonSubtitle:        'Dados completos e estruturados, incluindo todas as respostas. Ideal para scripts de análise.',
+    importTitle:         'Importar de JSON',
+    importSubtitle:      'Restaure registos a partir de um ficheiro JSON exportado anteriormente pelo Sleep Diaries.',
+    note:                'Os seus dados ficam sempre no seu dispositivo. A exportação partilha-os apenas com a aplicação que escolher.',
+    noDataTitle:         'Sem dados',
+    noDataBody:          'Complete pelo menos um registo antes de exportar.',
+    exportFailTitle:     'Exportação falhou',
+    importFailTitle:     'Importação falhou',
+    existingDataTitle:   'Dados existentes encontrados',
+    existingDataBody_one:   'Já tem {{count}} registo. O que pretende fazer?',
+    existingDataBody_other: 'Já tem {{count}} registos. O que pretende fazer?',
+    cancel:              'Cancelar',
+    merge:               'Combinar',
+    replace:             'Substituir',
+    replaceConfirmTitle: 'Substituir todos os dados?',
+    replaceConfirmBody:  'Isto eliminará permanentemente todos os seus registos existentes. Esta acção não pode ser desfeita.',
+  },
+
+  // ── Final report ──────────────────────────────────────────────────────────
+  report: {
+    title:               'Relatório Final',
+    notEnoughTitle:      'Dados insuficientes',
+    notEnoughSubtitle:   'Complete pelo menos {{count}} registos de manhã para gerar o seu relatório.',
+    morningEntries_one:   '{{count}} registo de manhã',
+    morningEntries_other: '{{count}} registos de manhã',
+    sleepTiming:         'Horários do sono',
+    sleepQuality:        'Qualidade do sono',
+    nightDisruptions:    'Perturbações nocturnas',
+    lifestyle:           'Factores de estilo de vida',
+    avgSleepDuration:    'Duração média do sono',
+    avgSleepDurationSub: 'Tempo total de sono por noite',
+    sleepEfficiency:     'Eficiência do sono',
+    sleepEfficiencySub:  'Tempo a dormir ÷ tempo na cama (≥85% é saudável)',
+    sleepOnsetLatency:   'Latência do início do sono',
+    sleepOnsetLatencySub:'Tempo médio para adormecer',
+    waso:                'Vigília após o início do sono',
+    wasoSub:             'Tempo médio acordado durante a noite',
+    avgNightWakings:     'Despertares nocturnos médios',
+    avgNightWakingsSub:  'Média por noite',
+    earlyWaking:         'Despertar precoce',
+    earlyWakingSub:      'Acordou mais cedo do que o previsto',
+    avgAlcohol:          'Consumo médio de álcool',
+    avgAlcoholSub:       'Reportado na noite anterior',
+    nightQuality:        'Qualidade do sono',
+    morningRestedness:   'Sensação de descanso ao acordar',
+    ofNights:            '% das noites',
+    drinksNight:         'bebidas/noite',
+    times:               'vezes',
+    disclaimer:          'Este relatório é gerado a partir de dados auto-reportados do diário. Destina-se a ser um resumo de investigação e não um diagnóstico clínico.',
+    shareHeader:         'Sleep Diaries — Relatório Final',
+    shareParticipant:    'Participante:',
+    sharePeriod:         'Período:',
+    shareEntries:        'Registos:',
+    shareAvgDuration:    'Duração média do sono:',
+    shareAvgEfficiency:  'Eficiência média do sono:',
+    shareAvgSOL:         'Latência média do início do sono:',
+    shareAvgWASO:        'Vigília média após início do sono:',
+    shareAvgWakings:     'Despertares nocturnos médios:',
+    shareAvgQuality:     'Qualidade média do sono:',
+    shareAvgRestedness:  'Sensação média de descanso:',
+    shareEarlyWaking:    'Despertar precoce:',
+  },
+
+  // ── Settings screen ───────────────────────────────────────────────────────
+  settings: {
+    title:                'Definições',
+    sectionAccessibility: 'Acessibilidade',
+    biggerText:           'Texto maior',
+    sectionLanguage:      'Idioma',
+    chooseLanguage:       'Escolher idioma',
+    sectionNotifications: 'Notificações',
+    dailyReminders:       'Lembretes diários',
+    notificationsHint:    'Lembrete de manhã às 8:00 e lembrete de noite às 21:00 todos os dias.',
+    permissionTitle:      'Permissão necessária',
+    permissionBody:       'Por favor, active as notificações para o Sleep Diaries nas Definições do seu dispositivo.',
+    remindersSetTitle:    'Lembretes activados',
+    remindersSetBody:     'Receberá um lembrete de manhã às 8:00 e de noite às 21:00 todos os dias.',
+    sendTestNotif:        'Enviar notificação de teste',
+    ok:                   'OK',
+    sectionTTS:           'Texto para fala',
+    ttsLabel:             'Texto para fala',
+    ttsHint:              'Ler as perguntas em voz alta através do altifalante.',
+    sectionData:          'Dados',
+    exportData:           'Exportar dados',
+    exportDataHint:       'Exporte os seus registos como CSV ou JSON para uso em investigação.',
+    sectionAbout:         'Sobre',
+    aboutDesign:          'Design',
+    sectionAccount:       'Conta',
+    logOut:               'Terminar sessão',
+    logOutTitle:          'Terminar sessão',
+    logOutBody:           'Tem a certeza que quer terminar a sessão?',
+    cancel:               'Cancelar',
+    deleteAccount:        'Eliminar conta',
+    deleteAccountTitle:   'Eliminar conta',
+    deleteAccountBody:    'Isto eliminará permanentemente a sua conta e todos os dados. Tem a certeza?',
+    delete:               'Eliminar',
+  },
+
+  // ── Questionnaire ─────────────────────────────────────────────────────────
+  questionnaire: {
+    yes:                'Sim',
+    no:                 'Não',
+    addMedicine:        'Adicionar Medicamento',
+    addNewTime:         'Adicionar Horário',
+    dose:               'Dose:',
+    time:               'Hora:',
+    mgUnit:             'mg',
+    dosePlaceholder:    'ex. 5',
+    timePlaceholder:    'ex. 22:30',
+    newMedication:      'Novo Medicamento',
+    medNamePlaceholder: 'Nome do medicamento',
+    hrs:                'h',
+    min:                'min',
+  },
+};

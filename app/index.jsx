@@ -15,6 +15,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveName, saveResearchCode } from '../storage/storage';
+import t from '../i18n';
 
 const { height: H } = Dimensions.get('window');
 
@@ -28,7 +29,7 @@ export default function LoginScreen() {
 
   const handleStart = async () => {
     if (!name.trim()) {
-      setError('Please enter your name to continue.');
+      setError(t('login.errorName'));
       return;
     }
     setError('');
@@ -55,12 +56,12 @@ export default function LoginScreen() {
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <Text style={styles.subtitle}>Enter your name to get started</Text>
+          <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Your name"
+              placeholder={t('login.namePlaceholder')}
               placeholderTextColor="#A0B8D0"
               value={name}
               onChangeText={setName}
@@ -73,7 +74,7 @@ export default function LoginScreen() {
           <View style={styles.inputWrapper}>
             <TextInput
               style={[styles.input, styles.inputOptional]}
-              placeholder="Research code (optional)"
+              placeholder={t('login.codePlaceholder')}
               placeholderTextColor="#A0B8D0"
               value={researchCode}
               onChangeText={setResearchCode}
@@ -82,7 +83,7 @@ export default function LoginScreen() {
               returnKeyType="go"
               onSubmitEditing={handleStart}
             />
-            <Text style={styles.optionalLabel}>Optional — provided by your research team</Text>
+            <Text style={styles.optionalLabel}>{t('login.codeHint')}</Text>
           </View>
 
           <TouchableOpacity
@@ -94,7 +95,7 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginBtnText}>Let's go</Text>
+              <Text style={styles.loginBtnText}>{t('login.cta')}</Text>
             )}
           </TouchableOpacity>
 

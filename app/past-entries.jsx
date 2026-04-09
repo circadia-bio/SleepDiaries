@@ -18,7 +18,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { loadEntries } from '../storage/storage';
-import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
+import t from '../i18n';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -42,14 +43,14 @@ const formatAnswer = (question, value) => {
       if (value.minutes > 0) parts.push(`${value.minutes}m`);
       return parts.length > 0 ? parts.join(' ') : '0m';
     }
-    case 'yes_no':    return value === 'yes' ? 'Yes' : 'No';
+    case 'yes_no':    return value === 'yes' ? t('pastEntries.answerYes') : t('pastEntries.answerNo');
     case 'number':    return `${value}${question.unit ? ' ' + question.unit : ''}`;
     case 'rating': {
       const option = question.options?.find((o) => o.value === value);
       return option ? `${value}/5 — ${option.label}` : `${value}/5`;
     }
     case 'medication':
-      if (!value || value.length === 0) return 'None recorded';
+      if (!value || value.length === 0) return t('pastEntries.answerNone');
       return value.map((m) => `${m.name}${m.dose ? ` (${m.dose}mg)` : ''}`).join(', ');
     case 'text_input': return value || '—';
     default:           return String(value);
@@ -87,7 +88,7 @@ const EntryCard = ({ entry }) => {
         <View style={styles.cardHeaderLeft}>
           <Ionicons name={isMorning ? 'sunny-outline' : 'moon-outline'} size={18} color={primaryColor} />
           <Text style={[styles.cardType, { color: primaryColor }]}>
-            {isMorning ? 'Morning Entry' : 'Evening Entry'}
+            {isMorning ? t('pastEntries.morningEntry') : t('pastEntries.eveningEntry')}
           </Text>
         </View>
         <View style={styles.cardHeaderRight}>
@@ -160,7 +161,6 @@ export default function PastEntriesScreen() {
   const listItems = buildListItems(grouped, dates);
 
   const HEADER_HEIGHT = 52;
-  // Explicitly calculate the available height for the list
   const listHeight = windowHeight - insets.top - insets.bottom - HEADER_HEIGHT;
 
   const renderItem = ({ item }) => {
@@ -177,7 +177,7 @@ export default function PastEntriesScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#1E3A5F" />
         </TouchableOpacity>
-        <Text style={styles.title}>Past Entries</Text>
+        <Text style={styles.title}>{t('pastEntries.title')}</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -188,10 +188,8 @@ export default function PastEntriesScreen() {
       ) : entries.length === 0 ? (
         <View style={[styles.centred, { height: listHeight }]}>
           <Ionicons name="moon-outline" size={48} color="#B0CCEE" />
-          <Text style={styles.emptyTitle}>No entries yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Complete your first morning or evening entry to see it here.
-          </Text>
+          <Text style={styles.emptyTitle}>{t('pastEntries.emptyTitle')}</Text>
+          <Text style={styles.emptySubtitle}>{t('pastEntries.emptySubtitle')}</Text>
         </View>
       ) : (
         <FlatList
@@ -200,7 +198,6 @@ export default function PastEntriesScreen() {
           renderItem={renderItem}
           contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
           showsVerticalScrollIndicator={true}
-          // Explicitly set height so FlatList always knows its bounds
           style={{ height: listHeight }}
         />
       )}

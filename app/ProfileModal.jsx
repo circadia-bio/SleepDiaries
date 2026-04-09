@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
+import t from '../i18n';
 
 const computeStreak = (entries) => {
   const today = new Date().toISOString().split('T')[0];
@@ -22,7 +23,7 @@ const computeStreak = (entries) => {
 };
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return 'No entries yet';
+  if (!dateStr) return t('profile.noEntries');
   return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
@@ -33,6 +34,18 @@ const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
     <Text style={styles.statLabel}>{label}</Text>
   </View>
 );
+
+// Glossary items driven by translation keys so new locales just need i18n updates
+const GLOSSARY_ITEMS = [
+  { key: 'sleepDuration',     icon: 'time-outline',         color: '#4A7BB5' },
+  { key: 'sleepEfficiency',   icon: 'speedometer-outline',  color: '#2E7D32' },
+  { key: 'sleepOnsetLatency', icon: 'hourglass-outline',    color: '#4A7BB5' },
+  { key: 'waso',              icon: 'moon-outline',          color: '#2A6CB5' },
+  { key: 'nightWakings',      icon: 'alert-circle-outline', color: '#4A7BB5' },
+  { key: 'sleepQuality',      icon: 'star-outline',         color: '#E07A20' },
+  { key: 'restedness',        icon: 'sunny-outline',        color: '#E07A20' },
+  { key: 'earlyWaking',       icon: 'alarm-outline',        color: '#C25E00' },
+];
 
 export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const insets = useSafeAreaInsets();
@@ -77,16 +90,19 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.root, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.headerTitle}>{t('profile.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
             <Ionicons name="close" size={24} color="#1E3A5F" />
           </TouchableOpacity>
         </View>
+
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {/* ── Avatar / name / code ── */}
           <View style={styles.avatarSection}>
             <View style={styles.avatar}>
               <Ionicons name="person" size={48} color="#4A7BB5" />
             </View>
+
             {editingName ? (
               <View style={styles.editRow}>
                 <TextInput style={styles.editInput} value={draftName} onChangeText={setDraftName}
@@ -101,15 +117,16 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               </View>
             ) : (
               <TouchableOpacity style={styles.nameRow} onPress={() => { setDraftName(name); setEditingName(true); }}>
-                <Text style={styles.nameText}>{name || 'Tap to set name'}</Text>
+                <Text style={styles.nameText}>{name || t('profile.tapToSetName')}</Text>
                 <Ionicons name="pencil-outline" size={16} color="#94A3B8" style={{ marginLeft: 6 }} />
               </TouchableOpacity>
             )}
+
             {editingCode ? (
               <View style={styles.editRow}>
                 <TextInput style={styles.editInput} value={draftCode} onChangeText={setDraftCode}
                   autoFocus autoCapitalize="none" autoCorrect={false}
-                  placeholder="Research code" placeholderTextColor="#A0B8D0"
+                  placeholder={t('profile.researchCodePlaceholder')} placeholderTextColor="#A0B8D0"
                   returnKeyType="done" onSubmitEditing={handleSaveCode} />
                 <TouchableOpacity onPress={handleSaveCode} style={styles.editSaveBtn}>
                   <Ionicons name="checkmark" size={20} color="#fff" />
@@ -121,80 +138,37 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             ) : (
               <TouchableOpacity style={styles.codeRow} onPress={() => { setDraftCode(code); setEditingCode(true); }}>
                 <Ionicons name="code-slash-outline" size={14} color="#94A3B8" />
-                <Text style={styles.codeText}>{code || 'Add research code'}</Text>
+                <Text style={styles.codeText}>{code || t('profile.addResearchCode')}</Text>
                 <Ionicons name="pencil-outline" size={13} color="#94A3B8" style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             )}
           </View>
 
-          <Text style={styles.sectionHeader}>Summary</Text>
+          {/* ── Summary stats ── */}
+          <Text style={styles.sectionHeader}>{t('profile.sectionSummary')}</Text>
           <View style={styles.statsGrid}>
-            <StatChip icon="sunny-outline"    value={morningCount}           label="Morning entries" color="#E07A20" />
-            <StatChip icon="moon-outline"     value={eveningCount}           label="Evening entries" color="#2A6CB5" />
-            <StatChip icon="flame-outline"    value={`${streak} days`}       label="Current streak"  color="#E07A20" />
-            <StatChip icon="calendar-outline" value={formatDate(memberSince)} label="Member since"   color="#4A7BB5" />
+            <StatChip icon="sunny-outline"    value={morningCount}                              label={t('profile.statMorning')} color="#E07A20" />
+            <StatChip icon="moon-outline"     value={eveningCount}                              label={t('profile.statEvening')} color="#2A6CB5" />
+            <StatChip icon="flame-outline"    value={`${streak} ${t('profile.statStreakUnit')}`} label={t('profile.statStreak')}  color="#E07A20" />
+            <StatChip icon="calendar-outline" value={formatDate(memberSince)}                   label={t('profile.statSince')}   color="#4A7BB5" />
           </View>
 
-          <Text style={styles.sectionHeader}>Sleep metrics explained</Text>
+          {/* ── Glossary ── */}
+          <Text style={styles.sectionHeader}>{t('profile.sectionGlossary')}</Text>
           <View style={styles.glossaryCard}>
-            {[
-              {
-                icon: 'time-outline',
-                color: '#4A7BB5',
-                title: 'Sleep Duration',
-                body: 'The total amount of time you were asleep. Most adults need between 7 and 9 hours per night.',
-              },
-              {
-                icon: 'speedometer-outline',
-                color: '#2E7D32',
-                title: 'Sleep Efficiency',
-                body: 'The percentage of time in bed that you were actually asleep. A score of 85% or above is considered healthy — higher is better.',
-              },
-              {
-                icon: 'hourglass-outline',
-                color: '#4A7BB5',
-                title: 'Sleep Onset Latency',
-                body: 'How long it took you to fall asleep after getting into bed. Falling asleep within 30 minutes is typical.',
-              },
-              {
-                icon: 'moon-outline',
-                color: '#2A6CB5',
-                title: 'Wake After Sleep Onset (WASO)',
-                body: 'The total time spent awake after first falling asleep but before getting up for the day. Lower is better.',
-              },
-              {
-                icon: 'alert-circle-outline',
-                color: '#4A7BB5',
-                title: 'Night Wakings',
-                body: 'The number of times you woke during the night. Occasional brief wakings are normal, but frequent disruptions can affect sleep quality.',
-              },
-              {
-                icon: 'star-outline',
-                color: '#E07A20',
-                title: 'Sleep Quality',
-                body: 'Your own rating of how well you slept, on a scale of 1 to 5. This captures the overall feel of your night beyond what the numbers alone can show.',
-              },
-              {
-                icon: 'sunny-outline',
-                color: '#E07A20',
-                title: 'Restedness',
-                body: 'How refreshed and restored you felt upon waking, on a scale of 1 to 5. This reflects whether sleep was restorative, even when duration and efficiency look good.',
-              },
-              {
-                icon: 'alarm-outline',
-                color: '#C25E00',
-                title: 'Early Waking',
-                body: 'The proportion of nights you woke earlier than intended and could not get back to sleep. This can be a sign of disrupted sleep or early-morning light exposure.',
-              },
-            ].map((item, i, arr) => (
-              <View key={item.title}>
+            {GLOSSARY_ITEMS.map((item, i, arr) => (
+              <View key={item.key}>
                 <View style={styles.glossaryRow}>
                   <View style={[styles.glossaryIcon, { backgroundColor: item.color + '18' }]}>
                     <Ionicons name={item.icon} size={20} color={item.color} />
                   </View>
                   <View style={styles.glossaryText}>
-                    <Text style={[styles.glossaryTitle, { color: item.color }]}>{item.title}</Text>
-                    <Text style={styles.glossaryBody}>{item.body}</Text>
+                    <Text style={[styles.glossaryTitle, { color: item.color }]}>
+                      {t(`profile.glossary.${item.key}.title`)}
+                    </Text>
+                    <Text style={styles.glossaryBody}>
+                      {t(`profile.glossary.${item.key}.body`)}
+                    </Text>
                   </View>
                 </View>
                 {i < arr.length - 1 && <View style={styles.glossaryDivider} />}
@@ -202,19 +176,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             ))}
           </View>
 
-          <Text style={styles.sectionHeader}>Quick actions</Text>
+          {/* ── Quick actions ── */}
+          <Text style={styles.sectionHeader}>{t('profile.sectionActions')}</Text>
           <View style={styles.card}>
             <TouchableOpacity style={styles.actionRow}
               onPress={() => { onClose(); setTimeout(onShowInstructions, 400); }}>
               <Ionicons name="book-outline" size={20} color="#4A7BB5" style={styles.actionIcon} />
-              <Text style={styles.actionLabel}>Replay instructions</Text>
+              <Text style={styles.actionLabel}>{t('profile.replayInstructions')}</Text>
               <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow}
               onPress={() => Linking.openURL('https://circadia-lab.uk')}>
               <Ionicons name="globe-outline" size={20} color="#4A7BB5" style={styles.actionIcon} />
-              <Text style={styles.actionLabel}>circadia-lab.uk</Text>
+              <Text style={styles.actionLabel}>{t('profile.website')}</Text>
               <Ionicons name="open-outline" size={16} color="#94A3B8" />
             </TouchableOpacity>
           </View>
@@ -252,7 +227,6 @@ const styles = StyleSheet.create({
   glossaryTitle:   { fontSize: 14, fontWeight: '700' },
   glossaryBody:    { fontSize: 13, color: '#64748B', lineHeight: 19 },
   glossaryDivider: { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
-
   card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14 },
   actionIcon:    { marginRight: 12 },

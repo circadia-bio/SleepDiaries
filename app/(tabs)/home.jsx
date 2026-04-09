@@ -7,7 +7,7 @@
  *   - Instructions button that opens the InstructionsModal.
  *   - Past Entries and Final Report shortcuts.
  *
- * On focus, reloads today’s status from storage so card states always
+ * On focus, reloads today's status from storage so card states always
  * reflect the latest entries. On first visit after login (detected via
  * the showInstructions route param or hasSeenInstructions flag), opens
  * the instructions modal automatically.
@@ -26,6 +26,7 @@ import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../
 import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
+import t from '../../i18n';
 
 const CARD_IMAGES = {
   morningPending:      require('../../assets/images/morning_pending.png'),
@@ -84,12 +85,13 @@ export default function HomeScreen() {
         setEveningCompleted(status.eveningCompleted);
         setMorningCount(mCount);
         setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
-        // Show on first login (via param) or if not yet seen on return visits
         if (!seen && (name || showInstructionsParam === '1')) setShowInstructions(true);
       };
       load();
     }, [])
   );
+
+  const remaining = MIN_ENTRIES_FOR_REPORT - morningCount;
 
   return (
     <View style={styles.root}>
@@ -110,19 +112,19 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <View style={styles.welcomeContainer}>
-              <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>Welcome,</Text>
+              <Text style={[styles.welcomeText, { fontFamily: FONTS.heading }]}>{t('home.welcome')}</Text>
               <Text style={[styles.userName,    { fontFamily: FONTS.heading }]}>{userName}!</Text>
             </View>
             <TouchableOpacity style={styles.profileButton} onPress={() => setShowProfile(true)}>
               <Ionicons name="person-circle-outline" size={32} color="#4A7BB5" />
-              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>Profile</Text>
+              <Text style={[styles.profileLabel, { fontFamily: FONTS.bodyRegular }]}>{t('home.profile')}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.body}>
           <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>New Entry</Text>
+            <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>{t('home.newEntry')}</Text>
             <View style={styles.cardsContainer}>
               <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
                 onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
@@ -132,9 +134,9 @@ export default function HomeScreen() {
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
-            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>Instructions</Text>
+            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.body }]}>{t('home.instructionsTitle')}</Text>
             <Text style={[styles.instructionsBody,  { fontFamily: FONTS.bodyRegular }]}>
-              Click here to learn more about sleep diaries and additional information.
+              {t('home.instructionsBody')}
             </Text>
           </TouchableOpacity>
 
@@ -162,7 +164,7 @@ export default function HomeScreen() {
               />
               {!reportUnlocked && (
                 <Text style={[styles.bottomCardHint, { fontFamily: FONTS.bodyRegular }]}>
-                  {MIN_ENTRIES_FOR_REPORT - morningCount} more {(MIN_ENTRIES_FOR_REPORT - morningCount) === 1 ? 'entry' : 'entries'} needed
+                  {t('home.entriesNeeded', { count: remaining })}
                 </Text>
               )}
             </TouchableOpacity>

@@ -24,8 +24,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry } from '../storage/storage';
+import t from '../i18n';
 
 const BUTTON_IMAGES = {
   backDay:   require('../assets/images/back-day.png'),
@@ -134,9 +135,9 @@ const DurationInput = ({ value, onChange, theme }) => {
   );
   return (
     <View style={styles.durationRow}>
-      <Stepper field="hours"   display={String(hours)}   unit="hrs" />
+      <Stepper field="hours"   display={String(hours)}   unit={t('questionnaire.hrs')} />
       <View style={styles.durationGap} />
-      <Stepper field="minutes" display={pad(minutes)} unit="min" />
+      <Stepper field="minutes" display={pad(minutes)} unit={t('questionnaire.min')} />
     </View>
   );
 };
@@ -152,7 +153,7 @@ const YesNoInput = ({ value, onChange, theme }) => {
             style={[styles.yesNoBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : { backgroundColor: '#fff', borderColor: c.primary }]}
             onPress={() => onChange(opt)} activeOpacity={0.8}>
             <Text style={[styles.yesNoText, { color: selected ? '#fff' : c.primary }]}>
-              {opt === 'yes' ? 'Yes' : 'No'}
+              {opt === 'yes' ? t('questionnaire.yes') : t('questionnaire.no')}
             </Text>
           </TouchableOpacity>
         );
@@ -199,7 +200,7 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
   const c = THEME[theme];
   const [expanded, setExpanded] = useState({});
   const addMed = () => {
-    const newMed = { id: Date.now(), name: 'New Medication', dose: '', times: [''] };
+    const newMed = { id: Date.now(), name: t('questionnaire.newMedication'), dose: '', times: [''] };
     onChange([...value, newMed]);
     setExpanded((e) => ({ ...e, [newMed.id]: true }));
   };
@@ -213,7 +214,8 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
         <View key={med.id} style={[styles.medCard, { backgroundColor: c.cardBg, borderColor: c.primaryLight }]}>
           <View style={styles.medHeader}>
             <TextInput style={[styles.medNameInput, { color: c.primary }]} value={med.name}
-              onChangeText={(t) => updateMed(med.id, 'name', t)} placeholder="Medication name" placeholderTextColor="#aaa" />
+              onChangeText={(txt) => updateMed(med.id, 'name', txt)}
+              placeholder={t('questionnaire.medNamePlaceholder')} placeholderTextColor="#aaa" />
             <View style={styles.medHeaderActions}>
               <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.medIconBtn}>
                 <Ionicons name="trash-outline" size={20} color={c.primary} />
@@ -226,22 +228,23 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
           {expanded[med.id] && (
             <View style={styles.medDetail}>
               <View style={styles.medRow}>
-                <Text style={[styles.medLabel, { color: c.primary }]}>Dose:</Text>
+                <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.dose')}</Text>
                 <TextInput style={[styles.medDoseInput, { borderColor: c.primaryLight, color: c.primary }]}
-                  value={med.dose} onChangeText={(t) => updateMed(med.id, 'dose', t)}
-                  placeholder="e.g. 5" keyboardType="numeric" placeholderTextColor="#aaa" />
-                <Text style={[styles.medLabel, { color: c.primary }]}>mg</Text>
+                  value={med.dose} onChangeText={(txt) => updateMed(med.id, 'dose', txt)}
+                  placeholder={t('questionnaire.dosePlaceholder')} keyboardType="numeric" placeholderTextColor="#aaa" />
+                <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.mgUnit')}</Text>
               </View>
-              {med.times.map((t, i) => (
+              {med.times.map((tm, i) => (
                 <View key={i} style={styles.medRow}>
-                  <Text style={[styles.medLabel, { color: c.primary }]}>Time:</Text>
+                  <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.time')}</Text>
                   <TextInput style={[styles.medTimeInput, { borderColor: c.primaryLight, color: c.primary }]}
-                    value={t} onChangeText={(v) => updateTime(med.id, i, v)} placeholder="e.g. 22:30" placeholderTextColor="#aaa" />
+                    value={tm} onChangeText={(v) => updateTime(med.id, i, v)}
+                    placeholder={t('questionnaire.timePlaceholder')} placeholderTextColor="#aaa" />
                 </View>
               ))}
               <TouchableOpacity style={[styles.addTimeBtn, { borderColor: c.primary }]} onPress={() => addTime(med.id)}>
                 <Ionicons name="add-circle-outline" size={18} color={c.primary} />
-                <Text style={[styles.addTimeBtnText, { color: c.primary }]}>Add New Time</Text>
+                <Text style={[styles.addTimeBtnText, { color: c.primary }]}>{t('questionnaire.addNewTime')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -249,7 +252,7 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
       ))}
       <TouchableOpacity style={[styles.addMedBtn, { backgroundColor: c.primary }]} onPress={addMed}>
         <Ionicons name="add" size={20} color="#fff" />
-        <Text style={styles.addMedBtnText}>Add Medicine</Text>
+        <Text style={styles.addMedBtnText}>{t('questionnaire.addMedicine')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -264,18 +267,15 @@ const TextInputField = ({ value, onChange, placeholder, theme }) => {
   );
 };
 
-// ─── Progress Bar matching Figma design ───────────────────────────────────────
+// ─── Progress Bar ─────────────────────────────────────────────────────────────
 const ProgressBar = ({ current, total, theme }) => {
   const c = THEME[theme];
   const progress = current / total;
   return (
     <View style={styles.progressRow}>
-      {/* Person icon */}
       <View style={[styles.progressIcon, { borderColor: c.primary }]}>
         <Ionicons name="person-outline" size={20} color={c.primary} />
       </View>
-
-      {/* Track */}
       <View style={[styles.progressTrack, {
         borderColor: c.progressTrackBorder,
         backgroundColor: c.progressTrackBg,
@@ -285,8 +285,6 @@ const ProgressBar = ({ current, total, theme }) => {
           backgroundColor: c.progressFill,
         }]} />
       </View>
-
-      {/* Counter */}
       <Text style={[styles.progressLabel, { color: c.primary }]}>
         {current}/{total}
       </Text>
@@ -295,9 +293,9 @@ const ProgressBar = ({ current, total, theme }) => {
 };
 
 export default function QuestionnaireScreen() {
-  const router   = useRouter();
+  const router    = useRouter();
   const rawInsets = useSafeAreaInsets();
-  const insets   = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
+  const insets    = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { entryType = 'morning' } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
@@ -425,7 +423,6 @@ const styles = StyleSheet.create({
   questionText:  { fontSize: 26, fontWeight: '800', marginTop: 24, marginBottom: 40, lineHeight: 34 },
   inputArea:     { alignItems: 'center' },
 
-  // ── Progress bar — matches Figma design ──
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -444,7 +441,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     flex: 1,
-    height: 28,              // thick like Figma
+    height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
     overflow: 'hidden',
@@ -460,7 +457,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // ── Inputs ──
   timeRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
   stepperCol:    { alignItems: 'center', gap: 12 },
   stepBtn:       { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
