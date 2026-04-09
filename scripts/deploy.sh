@@ -17,7 +17,7 @@ html = html.replace(
   'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover'
 );
 
-// 2. PWA meta tags + splash links + service worker
+// 2. PWA meta tags + splash links + service worker + analytics
 const metaTags = [
   '<link rel="manifest" href="/manifest.json" />',
   '<meta name="apple-mobile-web-app-capable" content="yes" />',
@@ -46,6 +46,9 @@ const metaTags = [
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_x.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
+  '<!-- Fathom - beautiful, simple website analytics -->',
+  '<script src="https://cdn.usefathom.com/script.js" data-site="CKGXUGRT" defer><\/script>',
+  '<!-- / Fathom -->',
   '<script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js");});}<\/script>',
 ].join('\n');
 html = html.replace('</head>', metaTags + '\n</head>');
