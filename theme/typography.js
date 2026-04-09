@@ -23,9 +23,9 @@ export const SIZES = {
   // Body
   body:         18,   // Primary body text, row labels
   bodySmall:    16,   // Secondary body, subtitles, hints
-  caption:      14,   // Supporting captions, chip labels, dates
+  caption:      16,   // Supporting captions, chip labels, dates
 
   // UI chrome
-  label:        15,   // Section headers (uppercased), tags
-  badge:        13,   // Small badges, legal text
+  label:        16,   // Section headers (uppercased), tags
+  badge:        16,   // Small badges, legal text
 };
