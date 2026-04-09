@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { markInstructionsSeen } from '../storage/storage';
 import { FONTS } from '../theme/typography';
 import { strings } from '../i18n';
@@ -34,7 +35,7 @@ const CLOSE_COLOR  = '#BDBDBD';
 const DOT_SIZE     = 12;
 const NUM_SLIDES   = 6;
 
-// Background SVG — the three gradient blobs from Figma
+// Background SVG — blobs only, no background rect (View provides bg colour)
 function Background({ width, height }) {
   return (
     <Svg
@@ -42,6 +43,7 @@ function Background({ width, height }) {
       height={height}
       viewBox="0 0 393 852"
       style={StyleSheet.absoluteFill}
+      pointerEvents="none"
     >
       <Defs>
         <LinearGradient id="g0" x1="177.754" y1="151.379" x2="175.651" y2="248.09" gradientUnits="userSpaceOnUse">
@@ -57,15 +59,17 @@ function Background({ width, height }) {
           <Stop offset="1" stopColor="#F2F2F2" stopOpacity="0" />
         </LinearGradient>
       </Defs>
-      <Rect width="393" height="852" fill="#EFF5F6" />
+      {/* Amber blob */}
       <Path
         d="M177 235C204.062 235 226 213.062 226 186C226 158.938 204.062 137 177 137C149.938 137 128 158.938 128 186C128 213.062 149.938 235 177 235Z"
         fill="url(#g0)"
       />
+      {/* Large left blue blob */}
       <Path
         d="M443.94 358.555C441.894 302.265 388.001 258.532 323.561 260.875C316.944 261.117 310.478 261.838 304.194 262.992C278.896 228.551 235.631 209.358 190.779 217.052C190.391 217.117 190.003 217.198 189.615 217.269C165.627 185.151 131.101 165 92.7254 165C50.5143 165 12.9699 189.378 -11.0233 227.241C-79.2635 232.471 -133 289.486 -133 359.054C-133 432.072 -73.8007 491.265 -0.772908 491.265C19.1685 491.265 38.0717 486.84 55.0298 478.939C66.9684 483.313 79.6227 485.671 92.7254 485.671C111.029 485.671 128.456 481.081 144.28 472.802C171.312 496.777 207.929 508.714 245.494 502.269C272.969 497.553 296.685 483.731 314.288 464.276C319.751 464.755 325.315 464.916 330.969 464.709C395.404 462.371 445.986 414.839 443.94 358.555Z"
         fill="url(#g1)"
       />
+      {/* Top-right blue blob */}
       <Path
         d="M401.274 188.394C402.941 184.975 404.324 181.345 405.378 177.529C413.959 146.463 397.605 114.815 368.848 106.838C349.908 101.585 330.313 107.913 316.688 121.722C308.748 118.606 299.921 116.868 290.62 116.868C258.964 116.868 232.793 136.973 228.54 163.092C228.337 163.092 228.134 163.085 227.931 163.085C198.148 163.085 174 187.277 174 217.122C174 246.967 196.025 268.971 223.952 271.013C234.193 281.67 248.573 288.302 264.503 288.302C274.003 288.302 282.951 285.939 290.802 281.774C299.351 287.595 309.674 291 320.788 291C334.912 291 347.75 285.507 357.303 276.538C367.352 283.066 379.98 286.956 393.701 286.956C426.451 286.956 453 264.802 453 237.473C453 212.286 430.448 191.495 401.274 188.39V188.394Z"
         fill="url(#g2)"
@@ -91,6 +95,7 @@ function Dots({ total, current }) {
 export default function InstructionsModal({ visible, onClose }) {
   const [index, setIndex] = useState(0);
   const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isFirst = index === 0;
   const isLast  = index === NUM_SLIDES - 1;
 
@@ -106,8 +111,8 @@ export default function InstructionsModal({ visible, onClose }) {
   const handleNext = () => { if (isLast) handleClose(); else setIndex(index + 1); };
   const handleBack = () => { if (index > 0) setIndex(index - 1); };
 
-  // Nav button height + dots + padding at bottom
-  const NAV_AREA_HEIGHT = 51 + 24 + 24 + 24; // dots row + gap + buttons + bottom padding
+  // Blob area height in Figma is ~34% of 852px screen
+  const BLOB_HEIGHT = height * 0.34;
 
   return (
     <Modal
@@ -117,31 +122,39 @@ export default function InstructionsModal({ visible, onClose }) {
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <View style={[styles.root, { width, height }]}>
+      <View style={[styles.root, { width, height, backgroundColor: '#EFF5F6' }]}>
+
+        {/* SVG blobs — decorative, behind everything */}
         <Background width={width} height={height} />
 
-        {/* Close button — X icon + label */}
-        <TouchableOpacity style={styles.closeBtn} onPress={handleClose} activeOpacity={0.7}>
+        {/* Close button — floats above blobs */}
+        <TouchableOpacity
+          style={[styles.closeBtn, { top: insets.top + 20 }]}
+          onPress={handleClose}
+          activeOpacity={0.7}
+        >
           <Ionicons name="close" size={20} color={CLOSE_COLOR} />
           <Text style={styles.closeText}>{strings.instructions.close}</Text>
         </TouchableOpacity>
 
-        {/* Content — scrollable, sits below background blobs */}
-        <View style={[styles.content, { paddingTop: height * 0.32, paddingBottom: NAV_AREA_HEIGHT + 40 }]}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={styles.title}>{slide.title}</Text>
-            <Text style={styles.body}>{slide.body}</Text>
-          </ScrollView>
-        </View>
+        {/* Spacer pushes content below blob area */}
+        <View style={{ height: BLOB_HEIGHT }} />
+
+        {/* Content — scrollable text below blobs */}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>{slide.title}</Text>
+          <Text style={styles.body}>{slide.body}</Text>
+        </ScrollView>
 
         {/* Pagination dots */}
         <Dots total={NUM_SLIDES} current={index} />
 
-        {/* Navigation buttons — equal width, matching questionnaire style */}
-        <View style={styles.navRow}>
+        {/* Navigation buttons */}
+        <View style={[styles.navRow, { paddingBottom: insets.bottom + 20 }]}>
           {isFirst ? (
             <TouchableOpacity style={[styles.navBtn, styles.nextBtn]} onPress={handleNext} activeOpacity={0.8}>
               <Text style={styles.nextText}>{strings.instructions.getStarted}</Text>
@@ -159,6 +172,7 @@ export default function InstructionsModal({ visible, onClose }) {
             </>
           )}
         </View>
+
       </View>
     </Modal>
   );
@@ -167,13 +181,11 @@ export default function InstructionsModal({ visible, onClose }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#EFF5F6',
   },
 
-  // Close — icon + text side by side
+  // Close
   closeBtn: {
     position: 'absolute',
-    top: 68,
     left: 32,
     zIndex: 10,
     flexDirection: 'row',
@@ -186,17 +198,14 @@ const styles = StyleSheet.create({
     color: CLOSE_COLOR,
   },
 
-  // Content — fills space between blobs and nav area
-  content: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  // Scroll content
+  scrollView: {
+    flex: 1,
     paddingHorizontal: 28,
   },
   scrollContent: {
     gap: 24,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   title: {
@@ -217,13 +226,10 @@ const styles = StyleSheet.create({
 
   // Dots
   dotsRow: {
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 10,
+    paddingVertical: 16,
   },
   dot: {
     width: DOT_SIZE,
@@ -231,14 +237,12 @@ const styles = StyleSheet.create({
     borderRadius: DOT_SIZE / 2,
   },
 
-  // Nav — equal width buttons matching questionnaire
+  // Nav
   navRow: {
-    position: 'absolute',
-    bottom: 36,
-    left: 36,
-    right: 36,
     flexDirection: 'row',
     gap: 12,
+    paddingHorizontal: 36,
+    paddingTop: 8,
   },
   navBtn: {
     flex: 1,
