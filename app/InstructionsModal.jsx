@@ -94,7 +94,6 @@ export default function InstructionsModal({ visible, onClose }) {
   const handleNext = () => { if (isLast) handleClose(); else setIndex(index + 1); };
   const handleBack = () => { if (index > 0) setIndex(index - 1); };
 
-  // Ensure close button clears the notch/status bar with generous minimum
   const safeTop    = Math.max(insets.top, 60);
   const safeBottom = Math.max(insets.bottom, 16);
 
@@ -117,7 +116,7 @@ export default function InstructionsModal({ visible, onClose }) {
             <Text style={styles.closeText}>{strings.instructions.close}</Text>
           </TouchableOpacity>
 
-          {/* Extra space to push text well below the blob area */}
+          {/* Spacer pushes content below blob area */}
           <View style={{ height: height * 0.22 }} />
 
           {/* Scrollable slide content */}
@@ -194,14 +193,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: FONTS.heading,
     fontSize: 38,
-    lineHeight: Math.round(38 * 0.89),
+    lineHeight: 46,
     textAlign: 'center',
     color: TITLE_COLOR,
   },
   body: {
     fontFamily: FONTS.body,
     fontSize: 22,
-    lineHeight: 24,
+    lineHeight: 28,
     textAlign: 'center',
     letterSpacing: 0.44,
     color: BODY_COLOR,
