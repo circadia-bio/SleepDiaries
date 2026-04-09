@@ -12,7 +12,7 @@
  * Labels are translated via i18n (Back / Voltar, Next / Próximo).
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS } from '../theme/typography';
 import t from '../i18n';
@@ -21,20 +21,20 @@ const CREAM = '#FEFDF8';
 
 const THEMES = {
   morning: {
-    border:    '#F0A963',
-    iconBack:  '#DD7F5A',
-    textBack:  '#DD7F5A',
-    fillNext:  '#FFB060',
-    textNext:  CREAM,
-    iconNext:  CREAM,
+    border:   '#F0A963',
+    iconBack: '#DD7F5A',
+    textBack: '#DD7F5A',
+    fillNext: '#FFB060',
+    textNext: CREAM,
+    iconNext: CREAM,
   },
   evening: {
-    border:    '#509EE0',
-    iconBack:  '#4578A2',
-    textBack:  '#4578A2',
-    fillNext:  '#509EE0',
-    textNext:  CREAM,
-    iconNext:  CREAM,
+    border:   '#509EE0',
+    iconBack: '#4578A2',
+    textBack: '#4578A2',
+    fillNext: '#509EE0',
+    textNext: CREAM,
+    iconNext: CREAM,
   },
 };
 
@@ -47,7 +47,7 @@ export function BackButton({ onPress, theme }) {
       style={[styles.btn, styles.backBtn, { borderColor: c.border, backgroundColor: CREAM }]}
     >
       <Ionicons name="chevron-back" size={22} color={c.iconBack} />
-      <Text style={[styles.label, { color: c.textBack, fontFamily: FONTS.body }]}>
+      <Text style={[styles.label, { color: c.textBack }]}>
         {t('questionnaire.back')}
       </Text>
     </TouchableOpacity>
@@ -63,7 +63,7 @@ export function NextButton({ onPress, theme, disabled }) {
       disabled={disabled}
       style={[styles.btn, styles.nextBtn, { backgroundColor: c.fillNext }, disabled && styles.disabled]}
     >
-      <Text style={[styles.label, { color: c.textNext, fontFamily: FONTS.body }]}>
+      <Text style={[styles.label, { color: c.textNext }]}>
         {t('questionnaire.next')}
       </Text>
       <Ionicons name="chevron-forward" size={22} color={c.iconNext} />
@@ -84,12 +84,9 @@ const styles = StyleSheet.create({
   backBtn: {
     borderWidth: 2,
   },
-  nextBtn: {
-    // no border — filled
-  },
   label: {
+    fontFamily: FONTS.body,
     fontSize: 25,
-    fontWeight: '700',
     lineHeight: 33,
   },
   disabled: {

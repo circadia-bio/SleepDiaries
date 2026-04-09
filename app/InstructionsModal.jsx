@@ -1,14 +1,14 @@
 /**
  * app/InstructionsModal.jsx — Instructions slideshow modal
  *
- * A full-screen modal stepping through 6 informational slides.
+ * A full-screen modal stepping through 7 informational slides.
  * Replaces the PNG image assets with a fully coded React Native layout,
  * matching the Figma design spec exactly.
  *
  * Background: SVG with gradient blobs (rendered via react-native-svg).
  * Typography: Livvic Bold for titles (#4988BC), Afacad Bold for body (#A5A5A5).
- * Navigation: Close (top-left), Get Started (slide 1), Back + Next (slides 2–6).
- * Pagination: 6 dots, active = #61A1D7, inactive = #DEDEDE.
+ * Navigation: Close (top-left), Get Started (slide 1), Back + Next (slides 2–7).
+ * Pagination: 7 dots, active = #61A1D7, inactive = #DEDEDE.
  * All strings are translated via i18n.
  */
 import React, { useState } from 'react';
@@ -32,8 +32,8 @@ const AMBER        = '#FFB060';
 const AMBER_BORDER = '#F0A963';
 const AMBER_TEXT   = '#DD7F5A';
 const CLOSE_COLOR  = '#BDBDBD';
-const DOT_SIZE     = 12;
-const NUM_SLIDES   = 6;
+const DOT_SIZE     = 10;
+const NUM_SLIDES   = 7;
 
 function Background({ width, height }) {
   return (
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
     paddingVertical: 16,
   },
   dot: {

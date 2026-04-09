@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { FONTS } from '../../theme/typography';
 import { clearAll } from '../../storage/storage';
 import {
   loadNotificationsEnabled,
@@ -17,7 +18,6 @@ import {
 } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
 
-// Map locale codes to their display names
 const LANGUAGE_NAMES = {
   'en':    'English',
   'pt-BR': 'Português (Brasil)',
@@ -88,7 +88,7 @@ export default function SettingsScreen() {
   const Row = ({ label, icon, right, onPress }) => (
     <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
       <Ionicons name={icon} size={20} color="#4A7BB5" style={{ marginRight: 12 }} />
-      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={[styles.rowLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
       <View style={styles.rowRight}>{right}</View>
     </TouchableOpacity>
   );
@@ -96,52 +96,54 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{t('settings.title')}</Text>
+        <Text style={[styles.title, { fontFamily: FONTS.heading }]}>{t('settings.title')}</Text>
 
+        {/* Native-only sections */}
         {Platform.OS !== 'web' && (
           <>
-            <Text style={styles.sectionHeader}>{t('settings.sectionAccessibility')}</Text>
+            <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccessibility')}</Text>
             <View style={styles.card}>
               <Row label={t('settings.biggerText')} icon="text-outline"
                 right={<Switch value={biggerText} onValueChange={setBiggerText} trackColor={{ true: '#4A7BB5' }} />} />
             </View>
 
-            <Text style={styles.sectionHeader}>{t('settings.sectionLanguage')}</Text>
+            <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionLanguage')}</Text>
             <View style={styles.card}>
               <Row label={t('settings.chooseLanguage')} icon="language-outline"
                 right={
                   <View style={styles.rowRight}>
-                    <Text style={styles.rowValue}>{currentLanguageName}</Text>
+                    <Text style={[styles.rowValue, { fontFamily: FONTS.bodyRegular }]}>{currentLanguageName}</Text>
                     <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
                   </View>
                 }
               />
             </View>
 
-            <Text style={styles.sectionHeader}>{t('settings.sectionNotifications')}</Text>
+            <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionNotifications')}</Text>
             <View style={styles.card}>
               <Row label={t('settings.dailyReminders')} icon="notifications-outline"
                 right={<Switch value={notifications} onValueChange={handleNotificationsToggle} trackColor={{ true: '#4A7BB5' }} />}
               />
-              <Text style={styles.cardHint}>{t('settings.notificationsHint')}</Text>
+              <Text style={[styles.cardHint, { fontFamily: FONTS.bodyRegular }]}>{t('settings.notificationsHint')}</Text>
               {notifications && (
                 <TouchableOpacity style={styles.testBtn} onPress={sendTestNotification}>
                   <Ionicons name="notifications-outline" size={14} color="#4A7BB5" />
-                  <Text style={styles.testBtnText}>{t('settings.sendTestNotif')}</Text>
+                  <Text style={[styles.testBtnText, { fontFamily: FONTS.body }]}>{t('settings.sendTestNotif')}</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            <Text style={styles.sectionHeader}>{t('settings.sectionTTS')}</Text>
+            <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionTTS')}</Text>
             <View style={styles.card}>
               <Row label={t('settings.ttsLabel')} icon="volume-medium-outline"
                 right={<Switch value={textToSpeech} onValueChange={setTextToSpeech} trackColor={{ true: '#4A7BB5' }} />} />
-              <Text style={styles.cardHint}>{t('settings.ttsHint')}</Text>
+              <Text style={[styles.cardHint, { fontFamily: FONTS.bodyRegular }]}>{t('settings.ttsHint')}</Text>
             </View>
           </>
         )}
 
-        <Text style={styles.sectionHeader}>{t('settings.sectionData')}</Text>
+        {/* Data — always visible */}
+        <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionData')}</Text>
         <View style={styles.card}>
           <Row
             label={t('settings.exportData')}
@@ -149,40 +151,39 @@ export default function SettingsScreen() {
             onPress={() => router.push('/export')}
             right={<Ionicons name="chevron-forward" size={16} color="#94A3B8" />}
           />
-          <Text style={styles.cardHint}>{t('settings.exportDataHint')}</Text>
+          <Text style={[styles.cardHint, { fontFamily: FONTS.bodyRegular }]}>{t('settings.exportDataHint')}</Text>
         </View>
 
-        <Text style={styles.sectionHeader}>{t('settings.sectionAbout')}</Text>
+        {/* About — always visible */}
+        <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAbout')}</Text>
         <View style={[styles.card, styles.aboutCard]}>
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.aboutText}>© Circadia Lab</Text>
-          <Text style={styles.aboutText}>MIT Licence</Text>
-          <Text style={styles.aboutSmall}>Lucas França · Mario Leocadio-Miguel</Text>
-          <Text style={styles.aboutLabel}>{t('settings.aboutDesign')}</Text>
-          <Text style={styles.aboutSmall}>Bri Baehl · Jacob Howard</Text>
-          <Text style={styles.aboutSmall}>Frederic Kussow · Yuliana Luna Colón</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.body }]}>© Circadia Lab</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyRegular }]}>MIT Licence</Text>
+          <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyRegular }]}>Lucas França · Mario Leocadio-Miguel</Text>
+          <Text style={[styles.aboutLabel, { fontFamily: FONTS.body }]}>{t('settings.aboutDesign')}</Text>
+          <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyRegular }]}>Bri Baehl · Jacob Howard</Text>
+          <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyRegular }]}>Frederic Kussow · Yuliana Luna Colón</Text>
           <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
-            <Text style={styles.aboutLinkText}>circadia-lab.uk</Text>
+            <Text style={[styles.aboutLinkText, { fontFamily: FONTS.body }]}>circadia-lab.uk</Text>
           </TouchableOpacity>
         </View>
 
-        {Platform.OS !== 'web' && (
-          <>
-            <Text style={styles.sectionHeader}>{t('settings.sectionAccount')}</Text>
-            <View style={styles.card}>
-              <Row label={t('settings.logOut')} icon="log-out-outline" onPress={handleLogout} right={null} />
-              <View style={styles.divider} />
-              <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
-                <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
-                <Text style={[styles.rowLabel, { color: '#C0392B' }]}>{t('settings.deleteAccount')}</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+        {/* Account — always visible so web/PWA users can log out */}
+        <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccount')}</Text>
+        <View style={styles.card}>
+          <Row label={t('settings.logOut')} icon="log-out-outline" onPress={handleLogout} right={null} />
+          <View style={styles.divider} />
+          <TouchableOpacity style={styles.row} onPress={handleDeleteAccount}>
+            <Ionicons name="trash-outline" size={20} color="#C0392B" style={{ marginRight: 12 }} />
+            <Text style={[styles.rowLabel, { color: '#C0392B', fontFamily: FONTS.body }]}>{t('settings.deleteAccount')}</Text>
+          </TouchableOpacity>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -191,22 +192,22 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#EEF5FF' },
   content:  { padding: 24, gap: 8, paddingBottom: 40 },
-  title:    { fontSize: 28, fontWeight: '800', color: '#1E3A5F', marginBottom: 8 },
-  sectionHeader: { fontSize: 13, fontWeight: '700', color: '#E07A20', marginTop: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.8 },
+  title:    { fontSize: 28, color: '#1E3A5F', marginBottom: 8 },
+  sectionHeader: { fontSize: 13, color: '#E07A20', marginTop: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.8 },
   card:     { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden', paddingHorizontal: 16 },
   row:      { flexDirection: 'row', alignItems: 'center', paddingVertical: 14 },
-  rowLabel: { flex: 1, fontSize: 15, color: '#1E3A5F', fontWeight: '500' },
+  rowLabel: { flex: 1, fontSize: 15, color: '#1E3A5F' },
   rowRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   rowValue: { fontSize: 14, color: '#94A3B8' },
   divider:  { height: 1, backgroundColor: '#E2EAF4' },
   cardHint: { fontSize: 12, color: '#94A3B8', paddingBottom: 12, lineHeight: 18 },
   testBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14 },
-  testBtnText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600' },
+  testBtnText: { fontSize: 13, color: '#4A7BB5' },
   aboutCard:  { alignItems: 'center', paddingVertical: 20, gap: 4 },
   logo:       { width: 160, height: 60, marginBottom: 8 },
-  aboutText:  { fontSize: 14, color: '#1E3A5F', fontWeight: '600' },
-  aboutLabel: { fontSize: 12, color: '#E07A20', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
+  aboutText:  { fontSize: 14, color: '#1E3A5F' },
+  aboutLabel: { fontSize: 12, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   aboutSmall: { fontSize: 12, color: '#94A3B8', textAlign: 'center', lineHeight: 18 },
   aboutLink:     { marginTop: 8 },
-  aboutLinkText: { fontSize: 13, color: '#4A7BB5', fontWeight: '600', textDecorationLine: 'underline' },
+  aboutLinkText: { fontSize: 13, color: '#4A7BB5', textDecorationLine: 'underline' },
 });

@@ -252,6 +252,10 @@ export default {
         title: 'Responder a estas perguntas sobre o meu sono vai me manter acordado?',
         body:  'Isso geralmente não é um problema. Não se preocupe em fornecer horários exactos e não fique olhando para o relógio. Dê apenas a sua melhor estimativa.',
       },
+      {
+        title: 'Instale o Sleep Diaries no seu dispositivo',
+        body:  'No iPhone: abra esta página no Safari, toque no botão Compartilhar ↑ e escolha Adicionar à Tela de Início.\n\nNo Android: abra no Chrome, toque no menu (⋮) e escolha Adicionar à tela inicial.\n\nApós instalar, o app funciona em tela cheia e offline — como um app nativo.',
+      },
     ],
   },
 };

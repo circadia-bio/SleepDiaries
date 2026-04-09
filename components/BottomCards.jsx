@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { FONTS } from '../theme/typography';
 import t from '../i18n';
 
 const BLUE          = '#7EB0DC';
@@ -55,8 +56,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
+    fontFamily: FONTS.body,
     fontSize: 12,
-    fontWeight: '700',
     textAlign: 'center',
     paddingHorizontal: 6,
   },

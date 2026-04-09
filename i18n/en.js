@@ -252,6 +252,10 @@ export default {
         title: 'Will answering these questions about my sleep keep me awake?',
         body:  'This is not usually a problem. You should not worry about giving exact times, and you should not watch the clock. Just give your best estimate.',
       },
+      {
+        title: 'Install Sleep Diaries on your device',
+        body:  'On iPhone: open this page in Safari, tap the Share button ↑, and choose Add to Home Screen.\n\nOn Android: open in Chrome, tap the menu (⋮), and choose Add to Home Screen.\n\nOnce installed the app runs full-screen and works offline — just like a native app.',
+      },
     ],
   },
 };
