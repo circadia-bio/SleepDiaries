@@ -19,7 +19,10 @@ import { loadName } from '../storage/storage';
 const isStandalone =
   Platform.OS === 'web' &&
   typeof window !== 'undefined' &&
-  window.navigator.standalone === true;
+  (
+    window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches
+  );
 
 // Preloaded image assets. Excludes assets now rendered in code:
 //   - taskbar images (tab bar uses Ionicons)
@@ -68,12 +71,17 @@ export default function RootLayout() {
     if (!isStandalone) return;
     const el = document.getElementById('pwa-splash');
     if (!el) return;
-    const t = setTimeout(() => {
+    const dismiss = () => {
+      if (!el.parentNode) return; // already removed
       el.style.transition = 'opacity 0.4s ease';
       el.style.opacity = '0';
       setTimeout(() => el.remove(), 400);
-    }, 300);
-    return () => clearTimeout(t);
+    };
+    // Normal dismiss: 300ms after React mounts
+    const t = setTimeout(dismiss, 300);
+    // Fallback: force-remove after 8s in case something stalls
+    const fallback = setTimeout(dismiss, 8000);
+    return () => { clearTimeout(t); clearTimeout(fallback); };
   }, []);
 
   if (!checked) return null;
