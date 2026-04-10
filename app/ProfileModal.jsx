@@ -57,16 +57,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [memberSince, setMemberSince]   = useState(null);
   const [qResults, setQResults]         = useState({});
   const [activeQ, setActiveQ]           = useState(null);
+  const [qUnlocked, setQUnlocked]       = useState(false);
 
   const load = useCallback(async () => {
     const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
     setName(n ?? ''); setCode(c ?? '');
-    setMorningCount(entries.filter((e) => e.type === 'morning').length);
+    const morningCount = entries.filter((e) => e.type === 'morning').length;
+    setMorningCount(morningCount);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
     setStreak(computeStreak(entries));
     setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
     const qr = await loadAllQuestionnaires();
     setQResults(Object.fromEntries(qr.map((r) => [r.id, r])));
+    const morningCount = entries.filter((e) => e.type === 'morning').length;
+    setQUnlocked(morningCount >= 14);
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
@@ -130,15 +134,24 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>Questionnaires</Text>
-          <View style={styles.glossaryCard}>
+          {!qUnlocked && (
+            <View style={styles.qLockBanner}>
+              <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
+              <Text style={[styles.qLockText, { fontFamily: FONTS.bodyMedium }]}>
+                Questionnaires unlock after 14 morning entries
+              </Text>
+            </View>
+          )}
+          <View style={[styles.glossaryCard, !qUnlocked && styles.qCardLocked]}>
             {QUESTIONNAIRES.map((q, i, arr) => {
               const result = qResults[q.id];
               const interpretation = result ? q.interpret(result.score) : null;
+              const canStart = qUnlocked;
               return (
                 <View key={q.id}>
                   <View style={styles.qRow}>
                     <View style={styles.qInfo}>
-                      <Text style={[styles.qTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
+                      <Text style={[styles.qTitle, { fontFamily: FONTS.body, color: canStart ? '#1E3A5F' : '#B0BFCF' }]}>{q.title}</Text>
                       {result ? (
                         <View style={styles.qResultRow}>
                           <View style={[styles.qBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
@@ -151,14 +164,17 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                           </Text>
                         </View>
                       ) : (
-                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>Not yet completed</Text>
+                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>
+                          {canStart ? 'Not yet completed' : `${14 - morningCount} more morning ${14 - morningCount === 1 ? 'entry' : 'entries'} needed`}
+                        </Text>
                       )}
                     </View>
                     <TouchableOpacity
-                      style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
-                      onPress={() => setActiveQ(q)}
+                      style={[styles.qBtn, { borderColor: !canStart ? '#D1D9E0' : result ? '#94A3B8' : '#4A7BB5' }]}
+                      onPress={() => canStart && setActiveQ(q)}
+                      disabled={!canStart}
                     >
-                      <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
+                      <Text style={[styles.qBtnText, { color: !canStart ? '#D1D9E0' : result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
                         {result ? 'Redo' : 'Start'}
                       </Text>
                     </TouchableOpacity>
@@ -265,4 +281,7 @@ const styles = StyleSheet.create({
   qPending:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   qBtn:          { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
   qBtnText:      { fontSize: SIZES.label },
+  qLockBanner:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 4 },
+  qLockText:     { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
+  qCardLocked:   { opacity: 0.5 },
 });
