@@ -524,7 +524,12 @@ export const MCTQ = {
     { id: 'mctq_bt_w', number: 'A2', text: 'Workdays — What time do you usually go to bed? (when you turn off the lights to sleep)', type: 'time',     defaultValue: { hour: 23, minute: 0 } },
     { id: 'mctq_sl_w', number: 'A3', text: 'Workdays — How many minutes does it usually take you to fall asleep?',               type: 'duration_min', defaultValue: 15, min: 0, max: 120, unit: 'min' },
     { id: 'mctq_wt_w', number: 'A4', text: 'Workdays — What time do you usually wake up?',                                       type: 'time',         defaultValue: { hour: 7, minute: 0 } },
-    { id: 'mctq_bt_f', number: 'B1', text: 'Free days — What time do you usually go to bed?',                                    type: 'time',         defaultValue: { hour: 0, minute: 0 } },
+    { id: 'mctq_bt_f', number: 'B1', text: 'Free days — What time do you usually go to bed?',
+      // Note: bedtimes before noon are treated as post-midnight (e.g. 01:00 AM).
+      // This assumption covers the vast majority of sleep schedules but would
+      // misinterpret a genuine late-morning bedtime (e.g. 11:00 AM shift worker).
+      hint: 'If you go to bed after midnight, simply enter the time as shown — e.g. 01:30 for half past one in the morning.',
+      type: 'time', defaultValue: { hour: 0, minute: 0 } },
     { id: 'mctq_sl_f', number: 'B2', text: 'Free days — How many minutes does it usually take you to fall asleep?',              type: 'duration_min', defaultValue: 15, min: 0, max: 120, unit: 'min' },
     { id: 'mctq_wt_f', number: 'B4', text: 'Free days — What time do you usually wake up?',                                      type: 'time',         defaultValue: { hour: 8, minute: 30 } },
   ],

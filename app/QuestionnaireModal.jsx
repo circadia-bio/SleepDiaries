@@ -376,6 +376,12 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
 
               <Text style={styles.itemNumber}>{t('questionnaireModal.itemOf', { current: item.number, total })}</Text>
               <Text style={styles.itemText}>{item.text}</Text>
+              {item.hint && (
+                <View style={styles.hintBox}>
+                  <Ionicons name="information-circle-outline" size={16} color={C.primary} />
+                  <Text style={[styles.hintText, { fontFamily: FONTS.bodyMedium }]}>{item.hint}</Text>
+                </View>
+              )}
 
               <View style={styles.inputArea}>
                 {(item.type === 'scale_0_3' || item.type === 'scale_0_4' || item.type === 'scale_1_10' ||
@@ -471,7 +477,9 @@ const styles = StyleSheet.create({
   instructionsText: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#3B1F6A', lineHeight: 24 },
 
   itemNumber: { fontSize: SIZES.label, fontFamily: FONTS.body, color: C.primaryLight, textTransform: 'uppercase', marginTop: 20, marginBottom: 6 },
-  itemText:   { fontSize: 20, fontFamily: FONTS.heading, color: C.primary, lineHeight: 28, marginBottom: 24 },
+  itemText:   { fontSize: 20, fontFamily: FONTS.heading, color: C.primary, lineHeight: 28, marginBottom: 12 },
+  hintBox:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#EDE0FA', borderRadius: 10, padding: 12, marginBottom: 16 },
+  hintText:   { flex: 1, fontSize: SIZES.bodySmall, color: C.primary, lineHeight: 22 },
   inputArea:  { alignItems: 'stretch' },
 
   // Option list (scale_0_3, scale_0_4, scale_1_10, single_choice, frequency_*)
