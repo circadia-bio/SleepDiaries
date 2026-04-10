@@ -2,13 +2,14 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires } from '../storage/storage';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import QuestionnaireModal from './QuestionnaireModal';
 import { FONTS, SIZES } from '../theme/typography';
+import showAlert from '../utils/alert';
 import t, { locale } from '../i18n';
 
 const computeStreak = (entries) => {
@@ -179,7 +180,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                       style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
                       onPress={() => {
                         if (result) {
-                          Alert.alert(
+                          showAlert(
                             t('profileQuestionnaires.redoTitle'),
                             t('profileQuestionnaires.redoBody', { title: q.shortTitle }),
                             [
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
   betaChipText:  { fontSize: 11, color: '#6B3FA0', letterSpacing: 0.5 },
   betaFootnote:  { fontSize: 13, color: '#94A3B8', lineHeight: 20, paddingHorizontal: 4, marginTop: 4 },
   qResultRow:    { gap: 4 },
-  qBadge:        { alignSelf: 'flex-start', borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
+  qBadge:        { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
   qBadgeText:    { fontSize: SIZES.label },
   qDate:         { fontSize: SIZES.caption, color: '#94A3B8' },
   qPending:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },

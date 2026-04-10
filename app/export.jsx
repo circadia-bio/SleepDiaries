@@ -2,12 +2,13 @@
  * app/export.jsx — Data export and import screen
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, Alert, Share, useWindowDimensions, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, Share, useWindowDimensions, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from '../storage/storage';
+import showAlert from '../utils/alert';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
 
@@ -26,9 +27,9 @@ export default function ExportScreen() {
     setLoading(format);
     try {
       const name = await loadName(); const entries = await loadEntries();
-      if (!entries.length) { Alert.alert(t('export.noDataTitle'), t('export.noDataBody')); setLoading(null); return; }
+      if (!entries.length) { showAlert(t('export.noDataTitle'), t('export.noDataBody')); setLoading(null); return; }
       await Share.share({ title: `sleep-diaries-${name ?? 'export'}-${new Date().toISOString().split('T')[0]}.${format}`, message: format === 'csv' ? await exportToCSV(name) : await exportToJSON(name) });
-    } catch (e) { Alert.alert(t('export.exportFailTitle'), e.message); }
+    } catch (e) { showAlert(t('export.exportFailTitle'), e.message); }
     setLoading(null);
   };
 
@@ -38,17 +39,17 @@ export default function ExportScreen() {
     const existing = await loadEntries();
     if (!existing.length) { await doImport(parsed, 'replace'); return; }
     const count = existing.length;
-    Alert.alert(t('export.existingDataTitle'), count === 1 ? t('export.existingDataBody_one', { count }) : t('export.existingDataBody_other', { count }), [
+    showAlert(t('export.existingDataTitle'), count === 1 ? t('export.existingDataBody_one', { count }) : t('export.existingDataBody_other', { count }), [
       { text: t('export.cancel'), style: 'cancel' },
       { text: t('export.merge'), onPress: () => doImport(parsed, 'merge') },
-      { text: t('export.replace'), style: 'destructive', onPress: () => Alert.alert(t('export.replaceConfirmTitle'), t('export.replaceConfirmBody'), [{ text: t('export.cancel'), style: 'cancel' }, { text: t('export.replace'), style: 'destructive', onPress: () => doImport(parsed, 'replace') }]) },
+      { text: t('export.replace'), style: 'destructive', onPress: () => showAlert(t('export.replaceConfirmTitle'), t('export.replaceConfirmBody'), [{ text: t('export.cancel'), style: 'cancel' }, { text: t('export.replace'), style: 'destructive', onPress: () => doImport(parsed, 'replace') }]) },
     ]);
     setLoading(null);
   };
 
   const handleWebFileChange = async (e) => {
     const file = e.target.files?.[0]; if (!file) { setLoading(null); return; }
-    try { await processImport(JSON.parse(await file.text())); } catch (err) { Alert.alert(t('export.importFailTitle'), err.message); setLoading(null); }
+    try { await processImport(JSON.parse(await file.text())); } catch (err) { showAlert(t('export.importFailTitle'), err.message); setLoading(null); }
     e.target.value = '';
   };
 
@@ -59,7 +60,7 @@ export default function ExportScreen() {
       const result = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain', 'text/json', '*/*'], copyToCacheDirectory: true });
       if (result.canceled) { setLoading(null); return; }
       await processImport(JSON.parse(await fetch(result.assets[0].uri).then((r) => r.text())));
-    } catch (e) { Alert.alert(t('export.importFailTitle'), e.message); setLoading(null); }
+    } catch (e) { showAlert(t('export.importFailTitle'), e.message); setLoading(null); }
   };
 
   return (

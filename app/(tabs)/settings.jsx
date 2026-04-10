@@ -2,12 +2,13 @@
  * app/(tabs)/settings.jsx — Settings screen
  */
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Alert, Platform, Linking } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Platform, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES } from '../../theme/typography';
 import { clearAll } from '../../storage/storage';
 import { QUESTIONNAIRES } from '../../data/questionnaires';
+import showAlert from '../../utils/alert';
 import { loadNotificationsEnabled, saveNotificationsEnabled, sendTestNotification, requestNotificationPermission } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
 
@@ -25,19 +26,19 @@ export default function SettingsScreen() {
   const handleNotificationsToggle = async (value) => {
     if (value) {
       const granted = await requestNotificationPermission();
-      if (!granted) { Alert.alert(t('settings.permissionTitle'), t('settings.permissionBody'), [{ text: t('settings.ok') }]); return; }
+      if (!granted) { showAlert(t('settings.permissionTitle'), t('settings.permissionBody'), [{ text: t('settings.ok') }]); return; }
     }
     setNotifications(value);
     await saveNotificationsEnabled(value);
-    if (value) Alert.alert(t('settings.remindersSetTitle'), t('settings.remindersSetBody'), [{ text: t('settings.sendTestNotif'), onPress: sendTestNotification }, { text: t('settings.ok') }]);
+    if (value) showAlert(t('settings.remindersSetTitle'), t('settings.remindersSetBody'), [{ text: t('settings.sendTestNotif'), onPress: sendTestNotification }, { text: t('settings.ok') }]);
   };
 
-  const handleLogout = () => Alert.alert(t('settings.logOutTitle'), t('settings.logOutBody'), [
+  const handleLogout = () => showAlert(t('settings.logOutTitle'), t('settings.logOutBody'), [
     { text: t('settings.cancel'), style: 'cancel' },
     { text: t('settings.logOut'), style: 'destructive', onPress: async () => { await clearAll(); router.replace('/'); } },
   ]);
 
-  const handleDeleteAccount = () => Alert.alert(t('settings.deleteAccountTitle'), t('settings.deleteAccountBody'), [
+  const handleDeleteAccount = () => showAlert(t('settings.deleteAccountTitle'), t('settings.deleteAccountBody'), [
     { text: t('settings.cancel'), style: 'cancel' },
     { text: t('settings.delete'), style: 'destructive', onPress: async () => { await clearAll(); router.replace('/'); } },
   ]);
