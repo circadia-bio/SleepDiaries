@@ -140,7 +140,14 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                 <View key={q.id}>
                   <View style={styles.qRow}>
                     <View style={styles.qInfo}>
-                      <Text style={[styles.qTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
+                      <View style={styles.qTitleRow}>
+                        <Text style={[styles.qTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
+                        {q.beta && (
+                          <View style={styles.betaChip}>
+                            <Text style={[styles.betaChipText, { fontFamily: FONTS.body }]}>BETA</Text>
+                          </View>
+                        )}
+                      </View>
                       {result && resultsUnlocked ? (
                         <View style={styles.qResultRow}>
                           <View style={[styles.qBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
@@ -182,6 +189,11 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               );
             })}
           </View>
+          {QUESTIONNAIRES.some((q) => q.beta) && (
+            <Text style={[styles.betaFootnote, { fontFamily: FONTS.bodyMedium }]}>
+              * These questionnaires are experimental. Scoring algorithms and interpretations are provided for informational purposes only and may not be fully accurate. Always verify results against validated published sources before use in research or clinical practice.
+            </Text>
+          )}
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
           <View style={styles.glossaryCard}>
@@ -273,6 +285,10 @@ const styles = StyleSheet.create({
   qRow:          { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
   qInfo:         { flex: 1, gap: 6 },
   qTitle:        { fontSize: SIZES.body, color: '#1E3A5F' },
+  qTitleRow:     { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  betaChip:      { backgroundColor: '#F0E8FA', borderWidth: 1.5, borderColor: '#C4A8E0', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  betaChipText:  { fontSize: 11, color: '#6B3FA0', letterSpacing: 0.5 },
+  betaFootnote:  { fontSize: 13, color: '#94A3B8', lineHeight: 20, paddingHorizontal: 4, marginTop: 4 },
   qResultRow:    { gap: 4 },
   qBadge:        { alignSelf: 'flex-start', borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
   qBadgeText:    { fontSize: SIZES.label },
