@@ -28,6 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveQuestionnaire } from '../storage/storage';
 import { FONTS, SIZES } from '../theme/typography';
+import t from '../i18n';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const C = {
@@ -205,14 +206,13 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
       <View style={styles.resultContainer}>
         <View style={styles.resultCard}>
           <Ionicons name="time-outline" size={48} color="#94A3B8" />
-          <Text style={styles.resultTitle}>All done!</Text>
+          <Text style={styles.resultTitle}>{t('questionnaireModal.allDone')}</Text>
           <Text style={styles.pendingDesc}>
-            Your responses have been saved. Your {questionnaire.shortTitle} results will be
-            available once you have completed 14 days of sleep diary entries.
+            {t('questionnaireModal.pendingDesc', { shortTitle: questionnaire.shortTitle })}
           </Text>
         </View>
         <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
-          <Text style={styles.doneBtnText}>Done</Text>
+          <Text style={styles.doneBtnText}>{t('questionnaireModal.done')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -253,7 +253,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
         <Text style={styles.referenceText}>{questionnaire.reference}</Text>
       </View>
       <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
-        <Text style={styles.doneBtnText}>Done</Text>
+      <Text style={styles.doneBtnText}>{t('questionnaireModal.done')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -350,7 +350,7 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
           <View style={styles.betaBanner}>
             <Ionicons name="flask-outline" size={15} color="#6B3FA0" />
             <Text style={[styles.betaBannerText, { fontFamily: FONTS.bodyMedium }]}>
-              Beta — scoring and results are experimental and may not be fully accurate.
+              {t('questionnaireModal.betaBanner')}
             </Text>
           </View>
         )}
@@ -374,7 +374,7 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
                 </View>
               )}
 
-              <Text style={styles.itemNumber}>Item {item.number} of {total}</Text>
+              <Text style={styles.itemNumber}>{t('questionnaireModal.itemOf', { current: item.number, total })}</Text>
               <Text style={styles.itemText}>{item.text}</Text>
 
               <View style={styles.inputArea}>
@@ -408,7 +408,7 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
             <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
               <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
                 <Ionicons name="chevron-back" size={22} color={C.primary} />
-                <Text style={styles.backBtnText}>Back</Text>
+                <Text style={styles.backBtnText}>{t('questionnaireModal.back')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.nextBtn, !canProceed && styles.nextBtnDisabled]}
@@ -416,7 +416,7 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
                 disabled={!canProceed}
               >
                 <Text style={styles.nextBtnText}>
-                  {currentIndex < total - 1 ? 'Next' : 'Finish'}
+                  {currentIndex < total - 1 ? t('questionnaireModal.next') : t('questionnaireModal.finish')}
                 </Text>
                 <Ionicons name="chevron-forward" size={22} color="#fff" />
               </TouchableOpacity>

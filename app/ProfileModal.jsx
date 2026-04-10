@@ -130,7 +130,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <StatChip icon="calendar-outline" value={formatDate(memberSince)}                    label={t('profile.statSince')}   color="#4A7BB5" />
           </View>
 
-          <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>Questionnaires</Text>
+          <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profileQuestionnaires.sectionTitle')}</Text>
           <View style={styles.glossaryCard}>
             {QUESTIONNAIRES.map((q, i, arr) => {
               const result = qResults[q.id];
@@ -164,15 +164,15 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                           <View style={[styles.qBadge, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
                             <Ionicons name="time-outline" size={13} color="#94A3B8" />
                             <Text style={[styles.qBadgeText, { color: '#94A3B8', fontFamily: FONTS.body }]}>
-                              Results available after 14 days
+                              {t('profileQuestionnaires.resultsAfter14')}
                             </Text>
                           </View>
                           <Text style={[styles.qDate, { fontFamily: FONTS.bodyMedium }]}>
-                            Completed {formatDate(result.completedAt?.split('T')[0])}
+                            {t('profileQuestionnaires.completed')} {formatDate(result.completedAt?.split('T')[0])}
                           </Text>
                         </View>
                       ) : (
-                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>Not yet completed</Text>
+                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>{t('profileQuestionnaires.notYetCompleted')}</Text>
                       )}
                     </View>
                     <TouchableOpacity
@@ -180,7 +180,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                       onPress={() => setActiveQ(q)}
                     >
                       <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
-                        {result ? 'Redo' : 'Start'}
+                        {result ? t('profileQuestionnaires.redo') : t('profileQuestionnaires.start')}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -191,7 +191,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </View>
           {QUESTIONNAIRES.some((q) => q.beta) && (
             <Text style={[styles.betaFootnote, { fontFamily: FONTS.bodyMedium }]}>
-              * These questionnaires are experimental. Scoring algorithms and interpretations are provided for informational purposes only and may not be fully accurate. Always verify results against validated published sources before use in research or clinical practice.
+              {t('profileQuestionnaires.betaFootnote')}
             </Text>
           )}
 

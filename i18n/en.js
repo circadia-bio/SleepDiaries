@@ -100,7 +100,7 @@ export default {
   // ── Export / import screen ────────────────────────────────────────────────
   export: {
     title:               'Export Data',
-    infoText:            'Export all your sleep diary entries to share with a researcher or import into a spreadsheet.',
+    infoText:            'Export all your sleep diary entries and questionnaire results to share with a researcher or import into a spreadsheet.',
     csvTitle:            'Export as CSV',
     csvSubtitle:         'One row per entry. Opens in Excel, Numbers, or any spreadsheet app.',
     jsonTitle:           'Export as JSON',
@@ -202,7 +202,30 @@ export default {
     delete:               'Delete',
   },
 
-  // ── Questionnaire ─────────────────────────────────────────────────────────
+  // ── Profile modal — questionnaires section ─────────────────────────────
+  profileQuestionnaires: {
+    sectionTitle:        'Questionnaires',
+    start:               'Start',
+    redo:                'Redo',
+    notYetCompleted:     'Not yet completed',
+    resultsAfter14:      'Results available after 14 days',
+    completed:           'Completed',
+    betaFootnote:        '* These questionnaires are experimental. Scoring algorithms and interpretations are provided for informational purposes only and may not be fully accurate. Always verify results against validated published sources before use in research or clinical practice.',
+  },
+
+  // ── Questionnaire modal ──────────────────────────────────────────────────
+  questionnaireModal: {
+    back:            'Back',
+    next:            'Next',
+    finish:          'Finish',
+    itemOf:          'Item {{current}} of {{total}}',
+    allDone:         'All done!',
+    pendingDesc:     'Your responses have been saved. Your {{shortTitle}} results will be available once you have completed 14 days of sleep diary entries.',
+    done:            'Done',
+    betaBanner:      'Beta — scoring and results are experimental and may not be fully accurate.',
+  },
+
+  // ── Daily questionnaire (diary entry flow) ───────────────────────────────
   questionnaire: {
     back:               'Back',
     next:               'Next',

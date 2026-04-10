@@ -100,7 +100,7 @@ export default {
   // ── Export / import screen ────────────────────────────────────────────────
   export: {
     title:               'Exportar Dados',
-    infoText:            'Exporte todos os seus registros do diário de sono para compartilhar com um pesquisador ou importar para uma planilha.',
+    infoText:            'Exporte todos os seus registros do diário de sono e resultados de questionários para compartilhar com um pesquisador ou importar para uma planilha.',
     csvTitle:            'Exportar como CSV',
     csvSubtitle:         'Uma linha por registro. Abre no Excel, Numbers ou qualquer aplicativo de planilha.',
     jsonTitle:           'Exportar como JSON',
@@ -257,5 +257,47 @@ export default {
         body:  'No iPhone: abra esta página no Safari, toque no botão Compartilhar ↑ e escolha Adicionar à Tela de Início.\n\nNo Android: abra no Chrome, toque no menu (⋮) e escolha Adicionar à tela inicial.\n\nApós instalar, o app funciona em tela cheia e offline — como um app nativo.',
       },
     ],
+  },
+
+  // ── Questionário diário (fluxo de registro) ─────────────────────────────
+  questionnaire: {
+    back:               'Voltar',
+    next:               'Próximo',
+    yes:                'Sim',
+    no:                 'Não',
+    addMedicine:        'Adicionar Medicamento',
+    addNewTime:         'Adicionar Horário',
+    dose:               'Dose:',
+    time:               'Horário:',
+    mgUnit:             'mg',
+    dosePlaceholder:    'ex.: 5',
+    timePlaceholder:    'ex.: 22:30',
+    newMedication:      'Novo Medicamento',
+    medNamePlaceholder: 'Nome do medicamento',
+    hrs:                'h',
+    min:                'min',
+  },
+
+  // ── Perfil — seção de questionários ─────────────────────────────────
+  profileQuestionnaires: {
+    sectionTitle:        'Questionários',
+    start:               'Iniciar',
+    redo:                'Refazer',
+    notYetCompleted:     'Ainda não concluído',
+    resultsAfter14:      'Resultados disponíveis após 14 dias',
+    completed:           'Concluído em',
+    betaFootnote:        '* Estes questionários são experimentais. Os algoritmos de pontuação e interpretações são fornecidos apenas para fins informativos e podem não ser totalmente precisos. Sempre verifique os resultados em relação às fontes publicadas validadas antes de usar em pesquisa ou prática clínica.',
+  },
+
+  // ── Modal de questionário ─────────────────────────────────────────────────
+  questionnaireModal: {
+    back:            'Voltar',
+    next:            'Próximo',
+    finish:          'Finalizar',
+    itemOf:          'Item {{current}} de {{total}}',
+    allDone:         'Tudo pronto!',
+    pendingDesc:     'Suas respostas foram salvas. Os resultados do {{shortTitle}} estarão disponíveis após 14 dias de registros do diário de sono.',
+    done:            'Concluír',
+    betaBanner:      'Beta — pontuação e resultados são experimentais e podem não ser totalmente precisos.',
   },
 };
