@@ -598,6 +598,6 @@ function fmtH(h) {
 
 // ─── Registry ──────────────────────────────────────────────────────────────────
 
-export const QUESTIONNAIRES = [ESS, ISI, DBAS16, KSS, MEQ, PSQI, RUSATED, STOPBANG, MCTQ];
+export const QUESTIONNAIRES = [ESS, ISI, DBAS16, MEQ, PSQI, RUSATED, STOPBANG, MCTQ];
 
 export const getQuestionnaire = (id) => QUESTIONNAIRES.find((q) => q.id === id) ?? null;
