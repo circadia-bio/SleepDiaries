@@ -26,16 +26,17 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 💾 **Local persistence** — all entries saved to device storage via AsyncStorage
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics
-- 📤 **Data export** — CSV and JSON export via native share sheet
+- 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
-- ⚙️ **Settings** — notifications toggle, text-to-speech, language, account management
+- ⚙️ **Settings** — notifications toggle, text-to-speech, language, questionnaire credits, account management
 - 👤 **Profile** — editable name and research code, summary stats, sleep metrics glossary, quick actions
 - 📈 **Entry tab stats** — streak, entry counts, days in study
-- 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace
+- 📥 **JSON import** — restore a backup or migrate between devices, with merge or replace (imports questionnaire results too)
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
 - 🌍 **Localisation** — full Portuguese (Brazilian) translation 🇧🇷, locale detected automatically from device settings
+- 📋 **Research questionnaires** *(beta)* — validated one-time instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) accessible from the Profile, with results unlocking after 14 diary days
 
 ---
 
@@ -57,19 +58,21 @@ SleepDiaries/
 │   ├── final-report.jsx        # Sleep metrics summary report
 │   ├── export.jsx              # CSV / JSON export + JSON import
 │   ├── InstructionsModal.jsx   # Full-screen instructions slideshow (coded, no PNGs)
-│   ├── ProfileModal.jsx        # Profile sheet (name, research code, stats, glossary)
+│   ├── ProfileModal.jsx        # Profile sheet (name, code, stats, glossary, questionnaires)
+│   ├── QuestionnaireModal.jsx  # Step-by-step one-time research questionnaire modal
 │   └── (tabs)/                 # Tab bar screens
 │       ├── _layout.jsx         # Custom tab bar (Ionicons, no image assets)
 │       ├── home.jsx            # Home screen
 │       ├── entry.jsx           # Entry tab with sleep stats dashboard
-│       └── settings.jsx        # Settings
+│       └── settings.jsx        # Settings (includes questionnaire credits)
 ├── components/
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
 │   └── NavButtons.jsx          # Questionnaire Back / Next buttons
 ├── data/
-│   ├── questions.js            # ⭐ All question definitions — start here to customise
+│   ├── questions.js            # ⭐ Daily diary question definitions — start here to customise
 │   ├── questions.pt-BR.js      # Portuguese (BR) translations of question text
-│   └── useQuestions.js         # Merges locale overrides at startup
+│   ├── useQuestions.js         # Merges locale overrides at startup
+│   └── questionnaires.js       # ⭐ One-time research questionnaire definitions (ESS, ISI, etc.)
 ├── i18n/
 │   ├── index.js                # Locale detector + t() helper (interpolation, plurals)
 │   ├── en.js                   # English strings
@@ -189,6 +192,102 @@ The tab bar, questionnaire nav buttons, instructions slideshow, and bottom short
 
 ---
 
+## 📋 Research Questionnaires *(Beta)*
+
+Sleep Diaries includes a set of validated one-time research questionnaires accessible from the Profile screen. These complement the daily diary by capturing baseline clinical and chronobiological characteristics of participants.
+
+> ⚠️ **Beta notice:** Questionnaire scoring algorithms and result interpretations are implemented in good faith from the published literature but should be considered experimental. Always verify results against the original published sources before use in research or clinical practice.
+
+### Available instruments
+
+| Instrument | Full name | Items | Measures |
+|------------|-----------|-------|---------|
+| ESS | Epworth Sleepiness Scale | 8 | Daytime sleepiness |
+| ISI | Insomnia Severity Index | 7 | Insomnia severity |
+| DBAS-16 | Dysfunctional Beliefs and Attitudes about Sleep | 16 | Sleep-related cognitions |
+| MEQ | Morningness–Eveningness Questionnaire | 19 | Chronotype |
+| PSQI | Pittsburgh Sleep Quality Index | 17 | Sleep quality (7 components) |
+| RU-SATED | RU-SATED Sleep Health Scale | 7 | Multidimensional sleep health |
+| STOP-BANG | STOP-BANG Questionnaire | 8 | OSA risk screening |
+| MCTQ | Munich Chronotype Questionnaire | 7 | Chronotype (MSFsc + social jetlag) |
+
+### How it works
+
+Questionnaires appear in the **Profile** modal under a dedicated section. Each can be completed at any time, but **results are withheld until 14 morning diary entries have been collected** — matching the same threshold as the final report. This ensures results reflect a participant who has completed an adequate baseline period.
+
+Once the threshold is met, the scored result and a colour-banded interpretation are shown both in the profile and on the completion screen. A **Redo** option is available for follow-up timepoints, with a confirmation prompt before overwriting any existing result.
+
+### Adding a new questionnaire
+
+All questionnaire definitions live in `data/questionnaires.js`. Each instrument is a plain JavaScript object:
+
+```js
+export const MY_SCALE = {
+  id:           'myscale',
+  title:        'My Scale',
+  shortTitle:   'MS',
+  beta:         true,
+  credit:       'Author, A. (Year). Journal, vol(issue), pp–pp. © Rights holder.',
+  instructions: 'Instructions shown to the participant before item 1.',
+  reference:    'Short citation string shown on the result screen.',
+  items: [
+    {
+      id: 'ms1', number: 1,
+      text: 'Question text',
+      type: 'scale_0_3',       // see supported input types below
+      options: [ ... ],
+    },
+  ],
+  score: (answers) => /* return a number or object */,
+  interpret: (score) => ({
+    label: 'Label',
+    color: '#hex',
+    description: 'Plain-language description shown to the participant.',
+  }),
+};
+
+// Add to the registry:
+export const QUESTIONNAIRES = [..., MY_SCALE];
+```
+
+### Supported input types
+
+| Type | Description |
+|------|-------------|
+| `scale_0_3` | 4-option labelled scale (0–3) |
+| `scale_0_4` | 5-option labelled scale (0–4) |
+| `scale_0_10` | 11-point circular picker (0–10) |
+| `scale_1_10` | 10-option labelled scale (1–10) |
+| `single_choice` | Pick one from a list of options with explicit values |
+| `yes_no` | Yes / No |
+| `frequency_3` | Rarely or never / Sometimes / Usually or always |
+| `frequency_4` | Not during the past month / <once/week / 1–2×/week / ≥3×/week |
+| `time` | HH:MM stepper |
+| `duration_min` | Integer minutes stepper |
+| `number` | Integer stepper with min/max/unit |
+
+Any item can also include an optional `hint` string, which renders as a small info box below the question text — useful for clarifying ambiguous items (e.g. the MCTQ free-day bedtime question).
+
+### Copyright and permissions
+
+Several instruments are protected by copyright. The `credit` field on each definition (visible in **Settings → Questionnaire credits**) lists the citation and permission status. A summary:
+
+| Instrument | Status |
+|------------|--------|
+| ESS | © Murray W. Johns — permission required for commercial use |
+| ISI | © Charles M. Morin — available for non-commercial research |
+| DBAS-16 | © Charles M. Morin — available via MAPI Research Trust |
+| MEQ | Public domain |
+| PSQI | © University of Pittsburgh — permission required; contact authors |
+| RU-SATED | © University of Pittsburgh — permission required; contact authors |
+| STOP-BANG | © University Health Network, Toronto — free for non-commercial research (stopbang.ca) |
+| MCTQ | © Till Roenneberg, LMU Munich — free for non-commercial research (thewep.org) |
+| KSS | Freely available for research use *(defined but not currently active)* |
+
+**It is the responsibility of the researcher or institution deploying this app to obtain the necessary permissions before using any instrument in a study.**
+
+---
+
 ## 📥 Importing Data
 
 Entries exported as JSON from Sleep Diaries can be imported back into the app — useful for restoring a backup, transferring data between devices, or migrating participants between study phases.
@@ -202,12 +301,12 @@ Entries exported as JSON from Sleep Diaries can be imported back into the app �
 
 | Option | What it does |
 |--------|--------------|
-| **Merge** | Keeps all existing entries and adds any new ones from the file. Duplicate entries (same date and type) are skipped. |
-| **Replace** | Deletes all existing entries and replaces them with the imported ones. Requires a second confirmation. |
+| **Merge** | Keeps all existing entries and adds any new ones from the file. Duplicate entries (same date and type) are skipped. Questionnaire results are imported only if not already present. |
+| **Replace** | Deletes all existing entries and questionnaire results, and replaces them with the imported data. Requires a second confirmation. |
 
 ### File format
 
-The import expects a JSON file previously exported by Sleep Diaries. The file must contain an `entries` array. A `participant` name and `researchCode` at the top level are optional and not imported (only the entries are).
+The import expects a JSON file previously exported by Sleep Diaries. The file must contain an `entries` array. A `questionnaires` array is imported if present.
 
 ```json
 {
@@ -220,7 +319,15 @@ The import expects a JSON file previously exported by Sleep Diaries. The file mu
       "type": "morning",
       "date": "2025-01-14",
       "completedAt": "2025-01-14T08:22:00Z",
-      "answers": { ... }
+      "answers": { "...": "..." }
+    }
+  ],
+  "questionnaires": [
+    {
+      "id": "ess",
+      "completedAt": "2025-01-14T09:00:00Z",
+      "answers": { "ess1": 2, "ess2": 1, "...": "..." },
+      "score": 12
     }
   ]
 }
@@ -331,6 +438,8 @@ const THEME = {
 };
 ```
 
+The one-time research questionnaire modal uses a **purple theme** (`#6B3FA0`) to visually distinguish it from the daily diary flows.
+
 ---
 
 ## 🗺️ Navigation Architecture
@@ -341,12 +450,14 @@ The app uses [expo-router](https://expo.github.io/router/) with file-based routi
 index.jsx           → Onboarding (shown on first launch, skipped if name saved)
 (tabs)/home         → Main home screen (+ InstructionsModal + ProfileModal)
 (tabs)/entry        → Entry tab with sleep stats dashboard
-(tabs)/settings     → Settings
+(tabs)/settings     → Settings (includes questionnaire credits)
 questionnaire       → Full-screen questionnaire (slides up, hides tab bar)
 past-entries        → Entry history
 final-report        → Sleep metrics report
 export              → CSV / JSON export + JSON import
 ```
+
+The `ProfileModal` also hosts the `QuestionnaireModal` inline — tapping Start or Redo on a questionnaire opens it as a page sheet on top of the profile, without leaving the screen.
 
 ---
 
@@ -356,12 +467,13 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 
 ```js
 // Stored keys:
-// 'user_name'         → participant name string
-// 'research_code'     → optional research study identifier
-// 'entries'           → JSON array of entry objects
-// 'seen_instructions' → 'true' once the instructions modal has been dismissed
+// 'user_name'            → participant name string
+// 'research_code'        → optional research study identifier
+// 'entries'              → JSON array of diary entry objects
+// 'seen_instructions'    → 'true' once the instructions modal has been dismissed
+// 'questionnaire_{id}'   → one object per completed one-time questionnaire
 
-// Entry structure:
+// Diary entry structure:
 {
   id: '2024-01-15-morning',
   type: 'morning',
@@ -374,6 +486,14 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
     mq11: 4,
     // ...
   }
+}
+
+// Questionnaire result structure:
+{
+  id: 'ess',
+  completedAt: '2024-01-15T09:00:00Z',
+  answers: { ess1: 2, ess2: 0, /* ... */ },
+  score: 12   // number, or object for computed instruments (e.g. MCTQ: { msf_sc, sjl })
 }
 ```
 
@@ -420,6 +540,7 @@ The **Profile** button on the home screen slides up a modal showing:
 
 - Editable participant name and research code
 - Summary stats: morning entries, evening entries, current streak, member since date
+- **Questionnaires** — one-time research instruments with status badges and Start/Redo buttons
 - Sleep metrics glossary with plain-language explanations of each metric
 - Quick actions: replay instructions, link to circadia-lab.uk
 
@@ -432,10 +553,11 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ### Adapting for your study
 
-1. **Edit `data/questions.js`** to add, remove, or reorder questions
-2. **Add new input types** in `app/questionnaire.jsx`
-3. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `app/final-report.jsx` (currently 14)
-4. **Connect a backend** — replace the `AsyncStorage` calls in `storage/storage.js` with API calls
+1. **Edit `data/questions.js`** to add, remove, or reorder diary questions
+2. **Edit `data/questionnaires.js`** to add, remove, or reorder one-time instruments
+3. **Add new input types** in `app/questionnaire.jsx` or `app/QuestionnaireModal.jsx`
+4. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `app/final-report.jsx` (currently 14); the same constant governs questionnaire result visibility
+5. **Connect a backend** — replace the `AsyncStorage` calls in `storage/storage.js` with API calls
 
 ---
 
@@ -459,7 +581,7 @@ The app design was created by exchange students — Bri Baehl, Jacob Howard, Fre
 
 ## 🤖 AI Acknowledgement
 
-Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, the final report, and the localisation system.
+Development of this app was assisted by **Claude** (Anthropic's AI assistant). Claude helped scaffold the React Native codebase, implement navigation, build the questionnaire engine, set up local storage, push notifications, data export, the final report, the localisation system, and the one-time research questionnaire feature.
 
 ---
 
@@ -509,6 +631,8 @@ Released under the [MIT License](./LICENSE).
 
 Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 
+> **Note on third-party questionnaire instruments:** The validated sleep questionnaires included in this app (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) are the intellectual property of their respective authors and institutions. Their inclusion in this open-source repository does not grant any rights to use them beyond what is permitted by each instrument's licence. See **Settings → Questionnaire credits** in the app, or the `credit` field in `data/questionnaires.js`, for per-instrument copyright and permission details.
+
 ---
 
 ## 🏗️ Roadmap
@@ -518,16 +642,19 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Past entries screen with history view
 - [x] Final report with sleep metrics
 - [x] Push notification reminders (morning + evening)
-- [x] Data export (CSV / JSON)
+- [x] Data export (CSV / JSON) including questionnaire results
 - [x] Web app
 - [x] Progressive Web App (PWA) — installable on iOS, Android, and desktop
 - [x] Offline support via service worker
-- [x] JSON import with merge/replace
+- [x] JSON import with merge/replace (including questionnaire results)
 - [x] Optional research code for study participants
 - [x] Profile screen with editable participant info, stats, and metrics glossary
 - [x] Entry tab sleep stats dashboard
 - [x] Automatic deployment via CI/CD
 - [x] Full Portuguese (Brazil) localisation — strings, questions, and image assets
 - [x] SVG support via react-native-svg-transformer
+- [x] One-time research questionnaires (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) *(beta)*
+- [ ] Questionnaire result validation and removal of beta flag per instrument
+- [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
