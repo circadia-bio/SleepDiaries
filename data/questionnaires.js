@@ -384,6 +384,9 @@ export const PSQI = {
     {
       id: 'psqi5i', number: '5i', text: 'How often have you had trouble sleeping because you have pain?', type: 'frequency_4', options: FREQUENCY_4,
     },
+    // Note: PSQI item 5j ('other reason, please describe') is intentionally omitted.
+    // It is a free-text field that does not contribute to any of the 7 component scores
+    // and would require a text_input item outside the standard scoring algorithm.
     {
       id: 'psqi6',  number: 6,   text: 'During the past month, how often have you taken medicine to help you sleep (prescribed or over the counter)?', type: 'frequency_4', options: FREQUENCY_4,
     },
