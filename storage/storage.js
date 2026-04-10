@@ -5,17 +5,27 @@
  * @react-native-async-storage/async-storage. No data is ever sent to a server.
  *
  * Stored keys:
- *   user_name         — participant’s name string
- *   entries           — JSON array of entry objects
- *   seen_instructions — 'true' once the instructions modal has been dismissed
+ *   user_name               — participant's name string
+ *   research_code           — optional research code string
+ *   entries                 — JSON array of diary entry objects
+ *   seen_instructions       — 'true' once the instructions modal has been dismissed
+ *   questionnaire_{id}      — one object per completed one-time questionnaire
  *
- * Entry object shape:
+ * Diary entry object shape:
  *   {
  *     id:          '{date}-{type}',   e.g. '2024-01-15-morning'
  *     type:        'morning' | 'evening'
  *     date:        'YYYY-MM-DD'
  *     completedAt: ISO timestamp string
  *     answers:     { [questionId]: value, ... }
+ *   }
+ *
+ * Questionnaire result object shape:
+ *   {
+ *     id:          questionnaire id string, e.g. 'ess'
+ *     completedAt: ISO timestamp string
+ *     answers:     { [itemId]: number, ... }
+ *     score:       number
  *   }
  *
  * Also exports CSV and JSON export helpers used by the export screen.
@@ -29,6 +39,8 @@ const KEYS = {
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
 };
+
+const questionnaireKey = (id) => `questionnaire_${id}`;
 
 // ─── User name ────────────────────────────────────────────────────────────────
 export const saveName = async (name) => {
@@ -88,7 +100,48 @@ export const loadTodayStatus = async () => {
 };
 
 export const clearAll = async () => {
-  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS]);
+  // Also remove any stored questionnaire results
+  const allKeys = await AsyncStorage.getAllKeys();
+  const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
+  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, ...qKeys]);
+};
+
+// ─── One-time questionnaires ──────────────────────────────────────────────────
+
+/**
+ * Save a completed questionnaire result.
+ * Overwrites any previous result for the same questionnaire id.
+ */
+export const saveQuestionnaire = async (id, answers, score) => {
+  const result = {
+    id,
+    completedAt: new Date().toISOString(),
+    answers,
+    score,
+  };
+  await AsyncStorage.setItem(questionnaireKey(id), JSON.stringify(result));
+  return result;
+};
+
+/**
+ * Load a single questionnaire result, or null if not yet completed.
+ */
+export const loadQuestionnaire = async (id) => {
+  const raw = await AsyncStorage.getItem(questionnaireKey(id));
+  return raw ? JSON.parse(raw) : null;
+};
+
+/**
+ * Load all completed questionnaire results as an array.
+ */
+export const loadAllQuestionnaires = async () => {
+  const allKeys = await AsyncStorage.getAllKeys();
+  const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
+  if (qKeys.length === 0) return [];
+  const pairs = await AsyncStorage.multiGet(qKeys);
+  return pairs
+    .map(([, val]) => (val ? JSON.parse(val) : null))
+    .filter(Boolean);
 };
 
 // ─── Instructions ──────────────────────────────────────────────────────────────
@@ -103,6 +156,7 @@ export const markInstructionsSeen = async () => {
 
 // ─── Data export ──────────────────────────────────────────────────────────────
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/questions';
+import { QUESTIONNAIRES } from '../data/questionnaires';
 
 const ALL_QUESTIONS = [...MORNING_QUESTIONS, ...EVENING_QUESTIONS];
 
@@ -133,17 +187,17 @@ const flattenAnswer = (question, value) => {
 export const exportToCSV = async (userName) => {
   const researchCode = await loadResearchCode();
   const entries = await loadEntries();
-  if (entries.length === 0) return null;
+  const qResults = await loadAllQuestionnaires();
 
-  // ── Build headers ──
+  if (entries.length === 0 && qResults.length === 0) return null;
+
+  // ── Diary section ──
   const morningHeaders = MORNING_QUESTIONS.map((q) => `morning_q${q.number}_${q.id}`);
   const eveningHeaders = EVENING_QUESTIONS.map((q) => `evening_q${q.number}_${q.id}`);
-  const headers = ['participant', 'research_code', 'date', 'entry_type', 'completed_at', ...morningHeaders, ...eveningHeaders];
+  const diaryHeaders = ['participant', 'research_code', 'date', 'entry_type', 'completed_at', ...morningHeaders, ...eveningHeaders];
 
-  // ── Build rows ──
-  const rows = entries.map((entry) => {
+  const diaryRows = entries.map((entry) => {
     const isMorning = entry.type === 'morning';
-    const questions = isMorning ? MORNING_QUESTIONS : EVENING_QUESTIONS;
 
     const morningCols = MORNING_QUESTIONS.map((q) => {
       if (!isMorning) return '';
@@ -157,6 +211,7 @@ export const exportToCSV = async (userName) => {
 
     return [
       userName ?? 'participant',
+      researchCode ?? '',
       entry.date,
       entry.type,
       entry.completedAt,
@@ -165,14 +220,36 @@ export const exportToCSV = async (userName) => {
     ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
   });
 
-  return [headers.join(','), ...rows].join('\n');
+  const diaryCsv = entries.length > 0
+    ? [diaryHeaders.join(','), ...diaryRows].join('\n')
+    : null;
+
+  // ── Questionnaires section ──
+  const qCsvParts = QUESTIONNAIRES.map((q) => {
+    const result = qResults.find((r) => r.id === q.id);
+    if (!result) return null;
+    const itemHeaders = q.items.map((item) => `${q.id}_item${item.number}_${item.id}`);
+    const headers = ['participant', 'research_code', 'questionnaire', 'completed_at', 'score', ...itemHeaders];
+    const row = [
+      userName ?? 'participant',
+      researchCode ?? '',
+      q.id,
+      result.completedAt,
+      result.score,
+      ...q.items.map((item) => result.answers?.[item.id] ?? ''),
+    ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
+    return [headers.join(','), row].join('\n');
+  }).filter(Boolean);
+
+  const sections = [diaryCsv, ...qCsvParts].filter(Boolean);
+  return sections.length > 0 ? sections.join('\n\n') : null;
 };
 
 // ─── Data import ────────────────────────────────────────────────────────────
 
 /**
  * Validate that a parsed object looks like a Sleep Diaries JSON export.
- * Returns an array of valid entries, or throws if the file is unrecognised.
+ * Returns an array of valid diary entries, or throws if the file is unrecognised.
  */
 const validateImport = (parsed) => {
   if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file format.');
@@ -189,9 +266,29 @@ const validateImport = (parsed) => {
  * Import entries from a parsed JSON object.
  * mode: 'merge'   — keep existing entries, add new ones (existing ids win)
  * mode: 'replace' — discard all existing entries and replace with imported ones
+ *
+ * Also imports questionnaire results if present in the JSON, using the same
+ * merge/replace logic.
  */
 export const importFromJSON = async (parsed, mode = 'merge') => {
   const incoming = validateImport(parsed);
+
+  // ── Import questionnaire results if present ──
+  if (parsed && typeof parsed === 'object' && Array.isArray(parsed.questionnaires)) {
+    for (const result of parsed.questionnaires) {
+      if (!result || !result.id || !result.answers || result.score === undefined) continue;
+      if (mode === 'replace') {
+        await AsyncStorage.setItem(questionnaireKey(result.id), JSON.stringify(result));
+      } else {
+        // Merge: only import if not already present
+        const existing = await loadQuestionnaire(result.id);
+        if (!existing) {
+          await AsyncStorage.setItem(questionnaireKey(result.id), JSON.stringify(result));
+        }
+      }
+    }
+  }
+
   if (mode === 'replace') {
     await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify(incoming));
     return { imported: incoming.length, skipped: 0 };
@@ -209,12 +306,14 @@ export const importFromJSON = async (parsed, mode = 'merge') => {
 // Build a JSON export string
 export const exportToJSON = async (userName) => {
   const entries = await loadEntries();
-  if (entries.length === 0) return null;
+  const qResults = await loadAllQuestionnaires();
+  if (entries.length === 0 && qResults.length === 0) return null;
   const researchCode = await loadResearchCode();
   return JSON.stringify({
     participant: userName,
     researchCode: researchCode ?? null,
     exportedAt: new Date().toISOString(),
     entries,
+    questionnaires: qResults,
   }, null, 2);
 };
