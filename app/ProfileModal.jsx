@@ -57,7 +57,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [memberSince, setMemberSince]   = useState(null);
   const [qResults, setQResults]         = useState({});
   const [activeQ, setActiveQ]           = useState(null);
-  const [qUnlocked, setQUnlocked]       = useState(false);
 
   const load = useCallback(async () => {
     const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
@@ -69,8 +68,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
     setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
     const qr = await loadAllQuestionnaires();
     setQResults(Object.fromEntries(qr.map((r) => [r.id, r])));
-    const morningCount = entries.filter((e) => e.type === 'morning').length;
-    setQUnlocked(morningCount >= 14);
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
@@ -134,25 +131,17 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>Questionnaires</Text>
-          {!qUnlocked && (
-            <View style={styles.qLockBanner}>
-              <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
-              <Text style={[styles.qLockText, { fontFamily: FONTS.bodyMedium }]}>
-                Questionnaires unlock after 14 morning entries
-              </Text>
-            </View>
-          )}
-          <View style={[styles.glossaryCard, !qUnlocked && styles.qCardLocked]}>
+          <View style={styles.glossaryCard}>
             {QUESTIONNAIRES.map((q, i, arr) => {
               const result = qResults[q.id];
-              const interpretation = result ? q.interpret(result.score) : null;
-              const canStart = qUnlocked;
+              const resultsUnlocked = morningCount >= 14;
+              const interpretation = (result && resultsUnlocked) ? q.interpret(result.score) : null;
               return (
                 <View key={q.id}>
                   <View style={styles.qRow}>
                     <View style={styles.qInfo}>
-                      <Text style={[styles.qTitle, { fontFamily: FONTS.body, color: canStart ? '#1E3A5F' : '#B0BFCF' }]}>{q.title}</Text>
-                      {result ? (
+                      <Text style={[styles.qTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
+                      {result && resultsUnlocked ? (
                         <View style={styles.qResultRow}>
                           <View style={[styles.qBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
                             <Text style={[styles.qBadgeText, { color: interpretation.color, fontFamily: FONTS.body }]}>
@@ -163,18 +152,27 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                             {formatDate(result.completedAt?.split('T')[0])}
                           </Text>
                         </View>
+                      ) : result && !resultsUnlocked ? (
+                        <View style={styles.qResultRow}>
+                          <View style={[styles.qBadge, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
+                            <Ionicons name="time-outline" size={13} color="#94A3B8" />
+                            <Text style={[styles.qBadgeText, { color: '#94A3B8', fontFamily: FONTS.body }]}>
+                              Results available after 14 days
+                            </Text>
+                          </View>
+                          <Text style={[styles.qDate, { fontFamily: FONTS.bodyMedium }]}>
+                            Completed {formatDate(result.completedAt?.split('T')[0])}
+                          </Text>
+                        </View>
                       ) : (
-                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>
-                          {canStart ? 'Not yet completed' : `${14 - morningCount} more morning ${14 - morningCount === 1 ? 'entry' : 'entries'} needed`}
-                        </Text>
+                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>Not yet completed</Text>
                       )}
                     </View>
                     <TouchableOpacity
-                      style={[styles.qBtn, { borderColor: !canStart ? '#D1D9E0' : result ? '#94A3B8' : '#4A7BB5' }]}
-                      onPress={() => canStart && setActiveQ(q)}
-                      disabled={!canStart}
+                      style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
+                      onPress={() => setActiveQ(q)}
                     >
-                      <Text style={[styles.qBtnText, { color: !canStart ? '#D1D9E0' : result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
+                      <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
                         {result ? 'Redo' : 'Start'}
                       </Text>
                     </TouchableOpacity>
@@ -225,6 +223,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
         <QuestionnaireModal
           visible={!!activeQ}
           questionnaire={activeQ}
+          resultsUnlocked={morningCount >= 14}
           onClose={() => setActiveQ(null)}
           onComplete={async (result) => {
             setQResults((prev) => ({ ...prev, [result.id]: result }));
@@ -281,7 +280,5 @@ const styles = StyleSheet.create({
   qPending:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   qBtn:          { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
   qBtnText:      { fontSize: SIZES.label },
-  qLockBanner:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 4 },
-  qLockText:     { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
-  qCardLocked:   { opacity: 0.5 },
+
 });

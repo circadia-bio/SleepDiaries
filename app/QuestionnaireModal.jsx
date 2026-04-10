@@ -75,7 +75,23 @@ const ProgressBar = ({ current, total }) => (
 );
 
 // ─── Score result screen ──────────────────────────────────────────────────────
-const ResultScreen = ({ questionnaire, score, onClose }) => {
+const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
+  if (!resultsUnlocked) {
+    return (
+      <View style={styles.resultContainer}>
+        <View style={styles.resultCard}>
+          <Ionicons name="time-outline" size={48} color="#94A3B8" />
+          <Text style={styles.resultTitle}>All done!</Text>
+          <Text style={styles.pendingDesc}>
+            Your responses have been saved. Your {questionnaire.shortTitle} results will be available once you have completed 14 days of sleep diary entries.
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   const interpretation = questionnaire.interpret(score);
   return (
     <View style={styles.resultContainer}>
@@ -97,7 +113,7 @@ const ResultScreen = ({ questionnaire, score, onClose }) => {
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function QuestionnaireModal({ visible, questionnaire, onClose, onComplete }) {
+export default function QuestionnaireModal({ visible, questionnaire, onClose, onComplete, resultsUnlocked = true }) {
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
 
@@ -157,7 +173,7 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
         </View>
 
         {result ? (
-          <ResultScreen questionnaire={questionnaire} score={result.score} onClose={onClose} />
+          <ResultScreen questionnaire={questionnaire} score={result.score} resultsUnlocked={resultsUnlocked} onClose={onClose} />
         ) : (
           <>
             {/* ── Progress ── */}
@@ -293,6 +309,7 @@ const styles = StyleSheet.create({
   interpretLabel:  { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading },
   interpretDesc:   { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   referenceText:   { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8', textAlign: 'center', lineHeight: 20, marginTop: 4 },
+  pendingDesc:     { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   doneBtn: {
     backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16,
     alignItems: 'center',
