@@ -287,6 +287,10 @@ export default {
     resultsAfter14:      'Resultados disponíveis após 14 dias',
     completed:           'Concluído em',
     betaFootnote:        '* Estes questionários são experimentais. Os algoritmos de pontuação e interpretações são fornecidos apenas para fins informativos e podem não ser totalmente precisos. Sempre verifique os resultados em relação às fontes publicadas validadas antes de usar em pesquisa ou prática clínica.',
+    redoTitle:           'Substituir resultado existente?',
+    redoBody:            'Isso vai substituir permanentemente o seu resultado anterior do {{title}}. Tem certeza?',
+    redoCancel:          'Cancelar',
+    redoConfirm:         'Continuar',
   },
 
   // ── Modal de questionário ─────────────────────────────────────────────────

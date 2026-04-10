@@ -2,7 +2,7 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires } from '../storage/storage';
@@ -177,7 +177,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
                     </View>
                     <TouchableOpacity
                       style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
-                      onPress={() => setActiveQ(q)}
+                      onPress={() => {
+                        if (result) {
+                          Alert.alert(
+                            t('profileQuestionnaires.redoTitle'),
+                            t('profileQuestionnaires.redoBody', { title: q.shortTitle }),
+                            [
+                              { text: t('profileQuestionnaires.redoCancel'), style: 'cancel' },
+                              { text: t('profileQuestionnaires.redoConfirm'), style: 'destructive', onPress: () => setActiveQ(q) },
+                            ]
+                          );
+                        } else {
+                          setActiveQ(q);
+                        }
+                      }}
                     >
                       <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
                         {result ? t('profileQuestionnaires.redo') : t('profileQuestionnaires.start')}
