@@ -78,6 +78,7 @@ export const ESS = {
   beta:       true,
   title:      'Epworth Sleepiness Scale',
   shortTitle: 'ESS',
+  credit:     'Johns, M. W. (1991). Sleep, 14(6), 540–545. © Murray W. Johns. Permission required for commercial use.',
   instructions:
     'How likely are you to doze off or fall asleep in the following situations, ' +
     'in contrast to feeling just tired? This refers to your usual way of life in ' +
@@ -112,6 +113,7 @@ export const ISI = {
   beta:       true,
   title:      'Insomnia Severity Index',
   shortTitle: 'ISI',
+  credit:     'Morin, C. M., et al. (2011). Sleep, 34(5), 601–608. © Charles M. Morin. Available for non-commercial research use.',
   instructions:
     'For each of the following questions, please rate the current severity of your ' +
     'insomnia problem over the past two weeks.',
@@ -164,6 +166,7 @@ export const DBAS16 = {
   beta:       true,
   title:      'Dysfunctional Beliefs and Attitudes about Sleep',
   shortTitle: 'DBAS-16',
+  credit:     'Morin, C. M., Vallières, A., & Ivers, H. (2007). Sleep, 30(11), 1547–1554. © Charles M. Morin. Available via MAPI Research Trust for research use.',
   instructions:
     'Listed below are statements reflecting people\'s beliefs and attitudes about sleep. ' +
     'Please indicate to what extent you personally agree or disagree with each statement. ' +
@@ -207,6 +210,7 @@ export const KSS = {
   beta:       true,
   title:      'Karolinska Sleepiness Scale',
   shortTitle: 'KSS',
+  credit:     'Åkerstedt, T., & Gillberg, M. (1990). International Journal of Neuroscience, 52(1–2), 29–37. Freely available for research use.',
   instructions:
     'Using the scale below, please indicate how sleepy you feel right now, at this moment.',
   reference:
@@ -244,6 +248,7 @@ export const MEQ = {
   beta:       true,
   title:      'Morningness–Eveningness Questionnaire',
   shortTitle: 'MEQ',
+  credit:     'Horne, J. A., & Östberg, O. (1976). International Journal of Chronobiology, 4(2), 97–110. In the public domain.',
   instructions:
     'Please read each question carefully before answering. Answer ALL questions. ' +
     'Each question should be answered independently of the others. ' +
@@ -347,6 +352,7 @@ export const PSQI = {
   beta:       true,
   title:      'Pittsburgh Sleep Quality Index',
   shortTitle: 'PSQI',
+  credit:     'Buysse, D. J., et al. (1989). Psychiatry Research, 28(2), 193–213. © University of Pittsburgh. Permission required; contact the authors for research use.',
   instructions:
     'The following questions relate to your usual sleep habits during the past month only. ' +
     'Your answers should indicate the most accurate reply for the majority of days and nights in the past month.',
@@ -452,6 +458,7 @@ export const RUSATED = {
   beta:       true,
   title:      'RU-SATED Sleep Health Scale',
   shortTitle: 'RU-SATED',
+  credit:     'Buysse, D. J. (2014). Sleep, 37(1), 9–17. © University of Pittsburgh. Permission required; contact the authors for research use.',
   instructions:
     'For each of the following questions, please select the response that best describes your sleep over the past month.',
   reference:
@@ -481,6 +488,7 @@ export const STOPBANG = {
   beta:       true,
   title:      'STOP-BANG Questionnaire',
   shortTitle: 'STOP-BANG',
+  credit:     'Chung, F., et al. (2016). Chest, 149(3), 631–638. © University Health Network, Toronto. Freely available for clinical and non-commercial research use (stopbang.ca).',
   instructions:
     'Please answer YES or NO to each of the following questions. ' +
     'This questionnaire screens for the risk of obstructive sleep apnoea.',
@@ -513,6 +521,7 @@ export const MCTQ = {
   beta:       true,
   title:      'Munich Chronotype Questionnaire',
   shortTitle: 'MCTQ',
+  credit:     'Roenneberg, T., et al. (2003). Journal of Biological Rhythms, 18(1), 80–90. © Till Roenneberg, LMU Munich. Free for non-commercial research; contact thewep.org for permission.',
   instructions:
     'Please answer the following questions about your typical sleep behaviour on workdays ' +
     'and on free days (days without work, school, or early appointments). ' +

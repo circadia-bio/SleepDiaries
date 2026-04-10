@@ -189,6 +189,8 @@ export default {
     sectionData:          'Data',
     exportData:           'Export Data',
     exportDataHint:       'Export your entries as CSV or JSON for research use.',
+    sectionQuestionnaires: 'Questionnaire credits',
+    questionnairesNote:    'The following validated instruments are used in this app. Please ensure you have the appropriate permissions before using them in research or clinical practice.',
     sectionAbout:         'About',
     aboutDesign:          'Design',
     sectionAccount:       'Account',

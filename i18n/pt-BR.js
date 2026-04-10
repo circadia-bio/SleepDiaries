@@ -189,6 +189,8 @@ export default {
     sectionData:          'Dados',
     exportData:           'Exportar dados',
     exportDataHint:       'Exporte seus registros como CSV ou JSON para uso em pesquisa.',
+    sectionQuestionnaires: 'Créditos dos questionários',
+    questionnairesNote:    'Os seguintes instrumentos validados são utilizados neste aplicativo. Certifique-se de que possui as permissões adequadas antes de usá-los em pesquisa ou prática clínica.',
     sectionAbout:         'Sobre',
     aboutDesign:          'Design',
     sectionAccount:       'Conta',
