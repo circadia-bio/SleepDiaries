@@ -111,35 +111,46 @@ const TimeInput = ({ value, onChange, theme }) => {
 
   useEffect(() => () => stopLongPress(), []);
 
-  const Stepper = ({ field, display, shortDelta }) => (
-    <View style={styles.stepperCol}>
-      <Pressable
-        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
-        onPress={() => adjust(field, shortDelta)}
-        onLongPress={() => startLongPress(field, shortDelta > 0 ? 1 : -1)}
-        onPressOut={stopLongPress}
-        delayLongPress={300}
-      >
-        <Ionicons name="caret-up" size={20} color={c.primary} />
-      </Pressable>
-      <Text style={[styles.stepValue, { color: c.primary }]}>{display}</Text>
-      <Pressable
-        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
-        onPress={() => adjust(field, -shortDelta)}
-        onLongPress={() => startLongPress(field, shortDelta > 0 ? -1 : 1)}
-        onPressOut={stopLongPress}
-        delayLongPress={300}
-      >
-        <Ionicons name="caret-down" size={20} color={c.primary} />
-      </Pressable>
-    </View>
-  );
   return (
     <View style={styles.stepperWrapper}>
       <View style={styles.timeRow}>
-        <Stepper field="hour"   display={pad(hour)}   shortDelta={1} />
+        {/* Hour stepper */}
+        <View style={styles.stepperCol}>
+          <Pressable style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+            onPress={() => adjust('hour', 1)}
+            onLongPress={() => startLongPress('hour', 1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-up" size={20} color={c.primary} />
+          </Pressable>
+          <Text style={[styles.stepValue, { color: c.primary }]}>{pad(hour)}</Text>
+          <Pressable style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+            onPress={() => adjust('hour', -1)}
+            onLongPress={() => startLongPress('hour', -1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-down" size={20} color={c.primary} />
+          </Pressable>
+        </View>
         <Text style={[styles.timeSep, { color: c.primary }]}>:</Text>
-        <Stepper field="minute" display={pad(minute)} shortDelta={5} />
+        {/* Minute stepper */}
+        <View style={styles.stepperCol}>
+          <Pressable style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+            onPress={() => adjust('minute', 5)}
+            onLongPress={() => startLongPress('minute', 1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-up" size={20} color={c.primary} />
+          </Pressable>
+          <Text style={[styles.stepValue, { color: c.primary }]}>{pad(minute)}</Text>
+          <Pressable style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+            onPress={() => adjust('minute', -5)}
+            onLongPress={() => startLongPress('minute', -1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-down" size={20} color={c.primary} />
+          </Pressable>
+        </View>
       </View>
       <Text style={[styles.stepHint, { color: c.primary }]}>hold for ±1 min</Text>
     </View>
