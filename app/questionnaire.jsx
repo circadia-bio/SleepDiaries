@@ -99,7 +99,7 @@ const TimeInput = ({ value, onChange, theme }) => {
 
   const startLongPress = useCallback((field, delta) => {
     adjust(field, delta);
-    intervalRef.current = setInterval(() => adjust(field, delta), 150);
+    intervalRef.current = setInterval(() => adjust(field, delta), 300);
   }, [adjust]);
 
   const stopLongPress = useCallback(() => {
