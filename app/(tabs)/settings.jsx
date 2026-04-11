@@ -113,7 +113,6 @@ export default function SettingsScreen() {
         <View style={[styles.card, styles.aboutCard]}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={[styles.aboutText, { fontFamily: FONTS.body }]}>© Circadia Lab</Text>
-          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>Made with ❤️</Text>
           <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>MIT Licence</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Lucas França · Mario Leocadio-Miguel</Text>
           <Text style={[styles.aboutLabel, { fontFamily: FONTS.body }]}>{t('settings.aboutDesign')}</Text>
@@ -122,6 +121,7 @@ export default function SettingsScreen() {
           <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
             <Text style={[styles.aboutLinkText, { fontFamily: FONTS.body }]}>circadia-lab.uk</Text>
           </TouchableOpacity>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>Made with ❤️</Text>
         </View>
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccount')}</Text>
