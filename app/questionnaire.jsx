@@ -15,9 +15,9 @@
  *     screen, then auto-navigates home after 2.5 seconds.
  *   - Amber theme for morning entries, blue for evening entries.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, TouchableOpacity, Pressable, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
   Platform, ImageBackground, Image,
 } from 'react-native';
@@ -87,26 +87,61 @@ const buildFlow = (questions, answers) => {
 const TimeInput = ({ value, onChange, theme }) => {
   const { hour, minute } = value;
   const c = THEME[theme];
-  const adjust = (field, delta) => {
-    if (field === 'hour')   onChange({ ...value, hour:   (hour   + delta + 24) % 24 });
-    if (field === 'minute') onChange({ ...value, minute: (minute + delta + 60) % 60 });
-  };
-  const Stepper = ({ field, display }) => (
+  const intervalRef = useRef(null);
+  const valueRef    = useRef(value);
+  useEffect(() => { valueRef.current = value; }, [value]);
+
+  const adjust = useCallback((field, delta) => {
+    const p = valueRef.current;
+    if (field === 'hour')   onChange({ ...p, hour:   (p.hour   + delta + 24) % 24 });
+    if (field === 'minute') onChange({ ...p, minute: (p.minute + delta + 60) % 60 });
+  }, [onChange]);
+
+  const startLongPress = useCallback((field, delta) => {
+    adjust(field, delta);
+    intervalRef.current = setInterval(() => adjust(field, delta), 150);
+  }, [adjust]);
+
+  const stopLongPress = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => stopLongPress(), []);
+
+  const Stepper = ({ field, display, shortDelta }) => (
     <View style={styles.stepperCol}>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: c.primaryLight }]} onPress={() => adjust(field, 1)}>
+      <Pressable
+        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+        onPress={() => adjust(field, shortDelta)}
+        onLongPress={() => startLongPress(field, shortDelta > 0 ? 1 : -1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}
+      >
         <Ionicons name="caret-up" size={20} color={c.primary} />
-      </TouchableOpacity>
+      </Pressable>
       <Text style={[styles.stepValue, { color: c.primary }]}>{display}</Text>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: c.primaryLight }]} onPress={() => adjust(field, -1)}>
+      <Pressable
+        style={[styles.stepBtn, { backgroundColor: c.primaryLight }]}
+        onPress={() => adjust(field, -shortDelta)}
+        onLongPress={() => startLongPress(field, shortDelta > 0 ? -1 : 1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}
+      >
         <Ionicons name="caret-down" size={20} color={c.primary} />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
   return (
-    <View style={styles.timeRow}>
-      <Stepper field="hour"   display={pad(hour)} />
-      <Text style={[styles.timeSep, { color: c.primary }]}>:</Text>
-      <Stepper field="minute" display={pad(minute)} />
+    <View style={styles.stepperWrapper}>
+      <View style={styles.timeRow}>
+        <Stepper field="hour"   display={pad(hour)}   shortDelta={1} />
+        <Text style={[styles.timeSep, { color: c.primary }]}>:</Text>
+        <Stepper field="minute" display={pad(minute)} shortDelta={5} />
+      </View>
+      <Text style={[styles.stepHint, { color: c.primary }]}>hold for ±1 min</Text>
     </View>
   );
 };
@@ -440,6 +475,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
+  stepperWrapper: { alignItems: 'center', gap: 10 },
+  stepHint:      { fontSize: 12, opacity: 0.5, fontWeight: '500' },
   timeRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
   stepperCol:    { alignItems: 'center', gap: 12 },
   stepBtn:       { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
