@@ -4,6 +4,17 @@
 
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8?logo=pwa&logoColor=white)](https://sleepdiaries.circadia-lab.uk)
+[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Web-lightgrey)](#)
+[![License: MIT](https://img.shields.io/badge/licence-MIT-yellow)](./LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/circadia-bio/SleepDiaries)](https://github.com/circadia-bio/SleepDiaries/commits/main)
+[![Issues](https://img.shields.io/github/issues/circadia-bio/SleepDiaries)](https://github.com/circadia-bio/SleepDiaries/issues)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/circadia-bio/SleepDiaries/pulls)
+
 🌐 **Web app:** https://sleepdiaries.circadia-lab.uk
 
 ---
