@@ -153,6 +153,7 @@ export default {
     drinksNight:         'doses/noite',
     times:               'vezes',
     disclaimer:          'Este relatório é gerado a partir de dados autorrelatados do diário. Tem a finalidade de ser um resumo de pesquisa e não um diagnóstico clínico.',
+    sectionQuestionnaires: 'Questionários de pesquisa',
     shareHeader:         'Sleep Diaries — Relatório Final',
     shareParticipant:    'Participante:',
     sharePeriod:         'Período:',

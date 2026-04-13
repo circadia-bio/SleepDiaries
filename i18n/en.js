@@ -153,6 +153,7 @@ export default {
     drinksNight:         'drinks/night',
     times:               'times',
     disclaimer:          'This report is generated from self-reported diary data. It is intended as a research summary and not a clinical diagnosis.',
+    sectionQuestionnaires: 'Research questionnaires',
     shareHeader:         'Sleep Diaries — Final Report',
     shareParticipant:    'Participant:',
     sharePeriod:         'Period:',

@@ -7,9 +7,10 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadEntries, loadName } from '../storage/storage';
+import { loadEntries, loadName, loadAllQuestionnaires } from '../storage/storage';
+import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
-import t from '../i18n';
+import t, { locale } from '../i18n';
 
 export const MIN_ENTRIES_FOR_REPORT = 14;
 
@@ -46,6 +47,130 @@ const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5' }) => (
   </View>
 );
 
+// ─── Questionnaire scale bar ─────────────────────────────────────────────────
+// Renders a horizontal bar showing the score's position across interpretation
+// bands. Works for any instrument by inferring bands from the interpret function
+// at a set of evenly-spaced probe values.
+const PROBE_COUNTS = 40;
+
+const buildBands = (questionnaire) => {
+  const score = questionnaire.score;
+  const interpret = questionnaire.interpret;
+  // For numeric scores: find min and max from items
+  // We probe 0..maxScore to collect interpretation bands
+  let maxScore = 0;
+  try {
+    // Build a full-answer object with maximum values
+    const maxAnswers = {};
+    for (const item of questionnaire.items) {
+      if (item.options) {
+        maxAnswers[item.id] = Math.max(...item.options.map((o) => o.value));
+      } else if (item.type === 'number' || item.type === 'duration_min') {
+        maxAnswers[item.id] = item.max ?? 10;
+      } else if (item.type === 'scale_0_10') {
+        maxAnswers[item.id] = 10;
+      } else if (item.type === 'yes_no') {
+        maxAnswers[item.id] = 'yes';
+      }
+    }
+    const s = score(maxAnswers);
+    if (typeof s === 'number') maxScore = s;
+    else return null; // object score (MCTQ) — skip bar
+  } catch (_) { return null; }
+  if (maxScore <= 0) return null;
+
+  const bands = [];
+  let lastLabel = null;
+  let bandStart = 0;
+  for (let i = 0; i <= PROBE_COUNTS; i++) {
+    const probeScore = (i / PROBE_COUNTS) * maxScore;
+    const interp = interpret(probeScore);
+    if (interp.label !== lastLabel) {
+      if (lastLabel !== null) bands.push({ label: lastLabel, end: i / PROBE_COUNTS });
+      lastLabel = interp.label;
+      bandStart = i / PROBE_COUNTS;
+    }
+  }
+  if (lastLabel) bands.push({ label: lastLabel, end: 1 });
+  return { bands, maxScore };
+};
+
+const ScaleBar = ({ questionnaire, score: rawScore }) => {
+  if (typeof rawScore !== 'number') return null;
+  const built = buildBands(questionnaire);
+  if (!built) return null;
+  const { bands, maxScore } = built;
+  const pctScore = rawScore / maxScore;
+
+  return (
+    <View style={styles.scaleBarContainer}>
+      <View style={styles.scaleBarTrack}>
+        {/* Colour bands */}
+        {bands.map((band, i) => {
+          const prevEnd = i === 0 ? 0 : bands[i - 1].end;
+          const width = (band.end - prevEnd) * 100;
+          const interp = questionnaire.interpret((prevEnd + band.end) / 2 * maxScore);
+          return (
+            <View
+              key={band.label}
+              style={[styles.scaleBarSegment, { width: `${width}%`, backgroundColor: interp.color + '55' }]}
+            />
+          );
+        })}
+        {/* Score marker */}
+        <View style={[styles.scaleBarMarker, { left: `${Math.min(pctScore * 100, 97)}%` }]} />
+      </View>
+      <View style={styles.scaleBarEndLabels}>
+        <Text style={[styles.scaleBarEndText, { fontFamily: FONTS.bodyMedium }]}>0</Text>
+        <Text style={[styles.scaleBarEndText, { fontFamily: FONTS.bodyMedium }]}>{maxScore}</Text>
+      </View>
+    </View>
+  );
+};
+
+// ─── Single questionnaire result card ────────────────────────────────────────
+const QuestionnaireReportCard = ({ result, questionnaire, locale }) => {
+  const interpretation = questionnaire.interpret(result.score);
+  const isMCTQ = typeof result.score === 'object';
+  const scoreDisplay = isMCTQ
+    ? (() => { const h = result.score.msf_sc; const hh = Math.floor(h); const mm = Math.round((h % 1) * 60); return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`; })()
+    : String(result.score);
+  const completedDate = result.completedAt
+    ? new Date(result.completedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+
+  return (
+    <View style={styles.qReportCard}>
+      {/* Header row: title + BETA chip */}
+      <View style={styles.qReportHeader}>
+        <Text style={[styles.qReportTitle, { fontFamily: FONTS.body }]}>{questionnaire.title}</Text>
+        {questionnaire.beta && (
+          <View style={styles.qReportBetaChip}>
+            <Text style={[styles.qReportBetaText, { fontFamily: FONTS.body }]}>BETA</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Score + interpretation */}
+      <View style={styles.qReportScoreRow}>
+        <View style={[styles.qReportScoreBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
+          <Text style={[styles.qReportScoreValue, { color: interpretation.color, fontFamily: FONTS.heading }]}>{scoreDisplay}</Text>
+        </View>
+        <View style={styles.qReportInterpText}>
+          <Text style={[styles.qReportInterpLabel, { color: interpretation.color, fontFamily: FONTS.body }]}>{interpretation.label}</Text>
+          <Text style={[styles.qReportInterpDesc, { fontFamily: FONTS.bodyMedium }]}>{interpretation.description}</Text>
+        </View>
+      </View>
+
+      {/* Scale bar */}
+      {!isMCTQ && <ScaleBar questionnaire={questionnaire} score={result.score} />}
+
+      {/* Completion date */}
+      <Text style={[styles.qReportDate, { fontFamily: FONTS.bodyMedium }]}>Completed {completedDate}</Text>
+    </View>
+  );
+};
+
 const StarRow = ({ value, max = 5, color = '#E07A20' }) => (
   <View style={styles.starRow}>
     {Array.from({ length: max }).map((_, i) => <Ionicons key={i} name={i < Math.round(value) ? 'star' : 'star-outline'} size={20} color={color} />)}
@@ -65,18 +190,21 @@ export default function FinalReportScreen() {
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const [metrics, setMetrics] = useState(null);
-  const [userName, setUserName] = useState('');
+  const [metrics, setMetrics]   = useState(null);
+  const [userName, setUserName]   = useState('');
   const [dateRange, setDateRange] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]     = useState(true);
+  const [qResults, setQResults]   = useState([]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [allEntries, name] = await Promise.all([loadEntries(), loadName()]);
+      const [allEntries, name, allQResults] = await Promise.all([loadEntries(), loadName(), loadAllQuestionnaires()]);
       const morning = allEntries.filter((e) => e.type === 'morning');
       setUserName(name ?? '');
       if (morning.length > 0) { const dates = morning.map((e) => e.date).sort(); setDateRange(`${dates[0]} → ${dates[dates.length - 1]}`); setMetrics(computeMetrics(morning)); }
+      // Only show questionnaire results that have a matching definition
+      setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setLoading(false);
     };
     load();
@@ -153,6 +281,23 @@ export default function FinalReportScreen() {
           </Section>
 
           <Text style={[styles.disclaimer, { fontFamily: FONTS.bodyMedium }]}>{t('report.disclaimer')}</Text>
+
+          {qResults.length > 0 && (
+            <Section title={t('report.sectionQuestionnaires')}>
+              {qResults.map((result) => {
+                const questionnaire = QUESTIONNAIRES.find((q) => q.id === result.id);
+                if (!questionnaire) return null;
+                return (
+                  <QuestionnaireReportCard
+                    key={result.id}
+                    result={result}
+                    questionnaire={questionnaire}
+                    locale={locale}
+                  />
+                );
+              })}
+            </Section>
+          )}
         </ScrollView>
       )}
     </View>
@@ -185,4 +330,26 @@ const styles = StyleSheet.create({
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   starLabel:    { fontSize: SIZES.body, marginLeft: 6 },
   disclaimer:   { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
+
+  // Questionnaire report cards
+  qReportCard:       { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16, gap: 12 },
+  qReportHeader:     { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  qReportTitle:      { fontSize: SIZES.body, color: '#1E3A5F', flex: 1 },
+  qReportBetaChip:   { backgroundColor: '#F0E8FA', borderWidth: 1.5, borderColor: '#C4A8E0', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  qReportBetaText:   { fontSize: 11, color: '#6B3FA0', letterSpacing: 0.5 },
+  qReportScoreRow:   { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+  qReportScoreBadge: { borderWidth: 2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', justifyContent: 'center', minWidth: 64 },
+  qReportScoreValue: { fontSize: SIZES.sectionTitle },
+  qReportInterpText: { flex: 1, gap: 4 },
+  qReportInterpLabel:{ fontSize: SIZES.body },
+  qReportInterpDesc: { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 22 },
+  qReportDate:       { fontSize: SIZES.caption, color: '#94A3B8' },
+
+  // Scale bar
+  scaleBarContainer:  { gap: 4 },
+  scaleBarTrack:      { height: 16, borderRadius: 8, flexDirection: 'row', overflow: 'hidden', backgroundColor: '#F1F5F9', position: 'relative' },
+  scaleBarSegment:    { height: '100%' },
+  scaleBarMarker:     { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: '#1E3A5F' },
+  scaleBarEndLabels:  { flexDirection: 'row', justifyContent: 'space-between' },
+  scaleBarEndText:    { fontSize: 12, color: '#94A3B8' },
 });
