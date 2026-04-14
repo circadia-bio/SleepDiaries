@@ -93,7 +93,10 @@ export default function RootLayout() {
       <Stack.Screen name="questionnaire"  options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="past-entries"   options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="export"         options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="final-report"   options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="final-report"              options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="SleepMetricsScreen"         options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="QuestionnairesScreen"        options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="QuestionnaireCreditsScreen" options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
 

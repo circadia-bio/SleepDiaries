@@ -7,7 +7,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES } from '../../theme/typography';
 import { clearAll } from '../../storage/storage';
-import { QUESTIONNAIRES } from '../../data/questionnaires';
 import showAlert from '../../utils/alert';
 import { loadNotificationsEnabled, saveNotificationsEnabled, sendTestNotification, requestNotificationPermission } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
@@ -97,16 +96,9 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionQuestionnaires')}</Text>
         <View style={styles.card}>
-          <Text style={[styles.cardHint, { fontFamily: FONTS.bodyMedium, paddingTop: 14 }]}>{t('settings.questionnairesNote')}</Text>
-          {QUESTIONNAIRES.map((q, i) => (
-            <View key={q.id}>
-              {i > 0 && <View style={styles.divider} />}
-              <View style={styles.creditRow}>
-                <Text style={[styles.creditTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
-                <Text style={[styles.creditBody, { fontFamily: FONTS.bodyMedium }]}>{q.credit}</Text>
-              </View>
-            </View>
-          ))}
+          <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"
+            onPress={() => router.push('/QuestionnaireCreditsScreen')}
+            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
         </View>
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAbout')}</Text>
@@ -159,7 +151,4 @@ const styles = StyleSheet.create({
   aboutSmall:    { fontSize: SIZES.bodySmall, color: '#94A3B8', textAlign: 'center', lineHeight: 24 },
   aboutLink:     { marginTop: 8 },
   aboutLinkText: { fontSize: SIZES.body, color: '#4A7BB5', textDecorationLine: 'underline' },
-  creditRow:     { paddingVertical: 14, gap: 4 },
-  creditTitle:   { fontSize: SIZES.bodySmall, color: '#1E3A5F' },
-  creditBody:    { fontSize: 13, color: '#94A3B8', lineHeight: 20 },
 });
