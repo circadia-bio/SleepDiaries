@@ -25,7 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
-import { saveEntry } from '../storage/storage';
+import { saveEntry, loadMedicationPresets } from '../storage/storage';
 import t from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
 import IMAGES from '../assets/images';
@@ -343,6 +343,18 @@ export default function QuestionnaireScreen() {
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone]                 = useState(false);
+
+  // Prepopulate medication questions from saved presets
+  useEffect(() => {
+    loadMedicationPresets().then((presets) => {
+      if (presets.length === 0) return;
+      const medKey = entryType === 'morning' ? 'mq10b' : 'eq4b';
+      setAnswers((prev) => ({
+        ...prev,
+        [medKey]: presets.map((p) => ({ ...p, id: Date.now() + Math.random() })),
+      }));
+    });
+  }, []);
 
   const flow     = buildFlow(allQuestions, answers);
   const total    = flow.length;

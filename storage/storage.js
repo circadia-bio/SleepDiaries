@@ -38,6 +38,7 @@ const KEYS = {
   RESEARCH_CODE:        'research_code',
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
+  MEDICATION_PRESETS:   'medication_presets',
 };
 
 const questionnaireKey = (id) => `questionnaire_${id}`;
@@ -103,7 +104,7 @@ export const clearAll = async () => {
   // Also remove any stored questionnaire results
   const allKeys = await AsyncStorage.getAllKeys();
   const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, ...qKeys]);
+  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
 };
 
 // ─── One-time questionnaires ──────────────────────────────────────────────────
@@ -142,6 +143,24 @@ export const loadAllQuestionnaires = async () => {
   return pairs
     .map(([, val]) => (val ? JSON.parse(val) : null))
     .filter(Boolean);
+};
+
+// ─── Medication presets ──────────────────────────────────────────────────────
+
+/**
+ * Load the participant's saved medication presets.
+ * Returns an array of { id, name, dose, times } objects.
+ */
+export const loadMedicationPresets = async () => {
+  const raw = await AsyncStorage.getItem(KEYS.MEDICATION_PRESETS);
+  return raw ? JSON.parse(raw) : [];
+};
+
+/**
+ * Save the participant's medication presets.
+ */
+export const saveMedicationPresets = async (presets) => {
+  await AsyncStorage.setItem(KEYS.MEDICATION_PRESETS, JSON.stringify(presets));
 };
 
 // ─── Instructions ──────────────────────────────────────────────────────────────

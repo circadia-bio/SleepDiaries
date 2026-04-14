@@ -307,4 +307,13 @@ export default {
     done:            'Concluír',
     betaBanner:      'Beta — pontuação e resultados são experimentais e podem não ser totalmente precisos.',
   },
+
+  // ── Tela de medicamentos ────────────────────────────────────────────────────────────────
+  medications: {
+    title:           'Meus Medicamentos',
+    hint:            'Salve seus medicamentos regulares aqui. Eles serão preenchidos automaticamente nos registros matinais e noturnos do diário, para que você não precise digitá-los todos os dias.',
+    empty:           'Nenhum medicamento salvo ainda. Toque no botão abaixo para adicionar um.',
+    namePlaceholder: 'Nome do medicamento',
+    add:             'Adicionar Medicamento',
+  },
 };

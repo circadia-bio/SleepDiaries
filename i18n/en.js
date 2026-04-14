@@ -288,4 +288,13 @@ export default {
       },
     ],
   },
+
+  // ── Medications screen ───────────────────────────────────────────────────────────────
+  medications: {
+    title:           'My Medications',
+    hint:            'Save your regular medications here. They will be pre-filled in your morning and evening diary entries so you don’t have to re-enter them each day.',
+    empty:           'No medications saved yet. Tap the button below to add one.',
+    namePlaceholder: 'Medication name',
+    add:             'Add Medication',
+  },
 };
