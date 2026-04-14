@@ -94,13 +94,6 @@ export default function SettingsScreen() {
           <Text style={[styles.cardHint, { fontFamily: FONTS.bodyMedium }]}>{t('settings.exportDataHint')}</Text>
         </View>
 
-        <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionQuestionnaires')}</Text>
-        <View style={styles.card}>
-          <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"
-            onPress={() => router.push('/QuestionnaireCreditsScreen')}
-            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
-        </View>
-
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAbout')}</Text>
         <View style={[styles.card, styles.aboutCard]}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
@@ -114,6 +107,11 @@ export default function SettingsScreen() {
             <Text style={[styles.aboutLinkText, { fontFamily: FONTS.body }]}>circadia-lab.uk</Text>
           </TouchableOpacity>
           <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>Made with ❤️</Text>
+        </View>
+        <View style={styles.card}>
+          <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"
+            onPress={() => router.push('/QuestionnaireCreditsScreen')}
+            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
         </View>
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccount')}</Text>
