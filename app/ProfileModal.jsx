@@ -5,9 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires } from '../storage/storage';
-import { QUESTIONNAIRES } from '../data/questionnaires';
-import QuestionnaireModal from './QuestionnaireModal';
+import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
+import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
 import t, { locale } from '../i18n';
@@ -33,17 +32,6 @@ const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   </View>
 );
 
-const GLOSSARY_ITEMS = [
-  { key: 'sleepDuration',     icon: 'time-outline',         color: '#4A7BB5' },
-  { key: 'sleepEfficiency',   icon: 'speedometer-outline',  color: '#2E7D32' },
-  { key: 'sleepOnsetLatency', icon: 'hourglass-outline',    color: '#4A7BB5' },
-  { key: 'waso',              icon: 'moon-outline',          color: '#2A6CB5' },
-  { key: 'nightWakings',      icon: 'alert-circle-outline', color: '#4A7BB5' },
-  { key: 'sleepQuality',      icon: 'star-outline',         color: '#E07A20' },
-  { key: 'restedness',        icon: 'sunny-outline',        color: '#E07A20' },
-  { key: 'earlyWaking',       icon: 'alarm-outline',        color: '#C25E00' },
-];
-
 export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const insets = useSafeAreaInsets();
   const [name, setName]               = useState('');
@@ -56,8 +44,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [eveningCount, setEveningCount] = useState(0);
   const [streak, setStreak]             = useState(0);
   const [memberSince, setMemberSince]   = useState(null);
-  const [qResults, setQResults]         = useState({});
-  const [activeQ, setActiveQ]           = useState(null);
+  const router = useRouter();
 
   const load = useCallback(async () => {
     const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
@@ -67,8 +54,6 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
     setStreak(computeStreak(entries));
     setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
-    const qr = await loadAllQuestionnaires();
-    setQResults(Object.fromEntries(qr.map((r) => [r.id, r])));
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
@@ -131,104 +116,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <StatChip icon="calendar-outline" value={formatDate(memberSince)}                    label={t('profile.statSince')}   color="#4A7BB5" />
           </View>
 
-          <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profileQuestionnaires.sectionTitle')}</Text>
-          <View style={styles.glossaryCard}>
-            {QUESTIONNAIRES.map((q, i, arr) => {
-              const result = qResults[q.id];
-              const resultsUnlocked = morningCount >= 14;
-              const interpretation = (result && resultsUnlocked) ? q.interpret(result.score) : null;
-              return (
-                <View key={q.id}>
-                  <View style={styles.qRow}>
-                    <View style={styles.qInfo}>
-                      <View style={styles.qTitleRow}>
-                        <Text style={[styles.qTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
-                        {q.beta && (
-                          <View style={styles.betaChip}>
-                            <Text style={[styles.betaChipText, { fontFamily: FONTS.body }]}>BETA</Text>
-                          </View>
-                        )}
-                      </View>
-                      {result && resultsUnlocked ? (
-                        <View style={styles.qResultRow}>
-                          <View style={[styles.qBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
-                            <Text style={[styles.qBadgeText, { color: interpretation.color, fontFamily: FONTS.body }]}>
-                              {result.score} — {interpretation.label}
-                            </Text>
-                          </View>
-                          <Text style={[styles.qDate, { fontFamily: FONTS.bodyMedium }]}>
-                            {formatDate(result.completedAt?.split('T')[0])}
-                          </Text>
-                        </View>
-                      ) : result && !resultsUnlocked ? (
-                        <View style={styles.qResultRow}>
-                          <View style={[styles.qBadge, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
-                            <Ionicons name="time-outline" size={13} color="#94A3B8" />
-                            <Text style={[styles.qBadgeText, { color: '#94A3B8', fontFamily: FONTS.body }]}>
-                              {t('profileQuestionnaires.resultsAfter14')}
-                            </Text>
-                          </View>
-                          <Text style={[styles.qDate, { fontFamily: FONTS.bodyMedium }]}>
-                            {t('profileQuestionnaires.completed')} {formatDate(result.completedAt?.split('T')[0])}
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text style={[styles.qPending, { fontFamily: FONTS.bodyMedium }]}>{t('profileQuestionnaires.notYetCompleted')}</Text>
-                      )}
-                    </View>
-                    <TouchableOpacity
-                      style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
-                      onPress={() => {
-                        if (result) {
-                          showAlert(
-                            t('profileQuestionnaires.redoTitle'),
-                            t('profileQuestionnaires.redoBody', { title: q.shortTitle }),
-                            [
-                              { text: t('profileQuestionnaires.redoCancel'), style: 'cancel' },
-                              { text: t('profileQuestionnaires.redoConfirm'), style: 'destructive', onPress: () => setActiveQ(q) },
-                            ]
-                          );
-                        } else {
-                          setActiveQ(q);
-                        }
-                      }}
-                    >
-                      <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
-                        {result ? t('profileQuestionnaires.redo') : t('profileQuestionnaires.start')}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {i < arr.length - 1 && <View style={styles.glossaryDivider} />}
-                </View>
-              );
-            })}
-          </View>
-          {QUESTIONNAIRES.some((q) => q.beta) && (
-            <Text style={[styles.betaFootnote, { fontFamily: FONTS.bodyMedium }]}>
-              {t('profileQuestionnaires.betaFootnote')}
-            </Text>
-          )}
-
-          <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
-          <View style={styles.glossaryCard}>
-            {GLOSSARY_ITEMS.map((item, i, arr) => (
-              <View key={item.key}>
-                <View style={styles.glossaryRow}>
-                  <View style={[styles.glossaryIcon, { backgroundColor: item.color + '18' }]}>
-                    <Ionicons name={item.icon} size={22} color={item.color} />
-                  </View>
-                  <View style={styles.glossaryText}>
-                    <Text style={[styles.glossaryTitle, { color: item.color, fontFamily: FONTS.body }]}>{t(`profile.glossary.${item.key}.title`)}</Text>
-                    <Text style={[styles.glossaryBody, { fontFamily: FONTS.bodyMedium }]}>{t(`profile.glossary.${item.key}.body`)}</Text>
-                  </View>
-                </View>
-                {i < arr.length - 1 && <View style={styles.glossaryDivider} />}
-              </View>
-            ))}
-          </View>
-
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionActions')}</Text>
           <View style={styles.card}>
+            <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/QuestionnairesScreen'), 400); }}>
+              <Ionicons name="clipboard-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profileQuestionnaires.sectionTitle')}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+            <View style={styles.divider} />
+            <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/SleepMetricsScreen'), 400); }}>
+              <Ionicons name="bar-chart-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+            <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(onShowInstructions, 400); }}>
               <Ionicons name="book-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.replayInstructions')}</Text>
@@ -244,19 +145,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
         </ScrollView>
       </View>
 
-      {/* One-time questionnaire modal */}
-      {activeQ && (
-        <QuestionnaireModal
-          visible={!!activeQ}
-          questionnaire={activeQ}
-          resultsUnlocked={morningCount >= 14}
-          onClose={() => setActiveQ(null)}
-          onComplete={async (result) => {
-            setQResults((prev) => ({ ...prev, [result.id]: result }));
-            setActiveQ(null);
-          }}
-        />
-      )}
+
     </Modal>
   );
 }
@@ -282,33 +171,10 @@ const styles = StyleSheet.create({
   statChip:      { flex: 1, minWidth: '45%', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', alignItems: 'center', paddingVertical: 14, gap: 4 },
   statValue:     { fontSize: SIZES.body },
   statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
-  glossaryCard:    { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
-  glossaryRow:     { flexDirection: 'row', alignItems: 'flex-start', gap: 14, padding: 16 },
-  glossaryIcon:    { width: 44, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  glossaryText:    { flex: 1, gap: 4 },
-  glossaryTitle:   { fontSize: SIZES.body },
-  glossaryBody:    { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 24 },
-  glossaryDivider: { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
   card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   divider:       { height: 1, backgroundColor: '#E2EAF4', marginHorizontal: 16 },
-
-  // Questionnaires
-  qRow:          { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
-  qInfo:         { flex: 1, gap: 6 },
-  qTitle:        { fontSize: SIZES.body, color: '#1E3A5F' },
-  qTitleRow:     { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  betaChip:      { backgroundColor: '#F0E8FA', borderWidth: 1.5, borderColor: '#C4A8E0', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  betaChipText:  { fontSize: 11, color: '#6B3FA0', letterSpacing: 0.5 },
-  betaFootnote:  { fontSize: 13, color: '#94A3B8', lineHeight: 20, paddingHorizontal: 4, marginTop: 4 },
-  qResultRow:    { gap: 4 },
-  qBadge:        { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  qBadgeText:    { fontSize: SIZES.label },
-  qDate:         { fontSize: SIZES.caption, color: '#94A3B8' },
-  qPending:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
-  qBtn:          { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
-  qBtnText:      { fontSize: SIZES.label },
 
 });
