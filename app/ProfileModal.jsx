@@ -124,6 +124,12 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
             <View style={styles.divider} />
+            <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/MedicationsScreen'), 400); }}>
+              <Ionicons name="medkit-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
+              <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('medications.title')}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+            <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/SleepMetricsScreen'), 400); }}>
               <Ionicons name="bar-chart-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
