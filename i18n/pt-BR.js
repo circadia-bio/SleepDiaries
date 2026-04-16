@@ -308,6 +308,17 @@ export default {
     betaBanner:      'Beta — pontuação e resultados são experimentais e podem não ser totalmente precisos.',
   },
 
+  // ── Comum ────────────────────────────────────────────────────────────────────────────────
+  common: {
+    ok: 'OK',
+  },
+
+  // ── Erros do questionário ──────────────────────────────────────────────────────────────
+  questionnaire: {
+    saveErrorTitle: 'Não foi possível salvar o registro',
+    saveErrorBody:  'Ocorreu um erro ao salvar o seu registro. Por favor, tente novamente.',
+  },
+
   // ── Tela de medicamentos ────────────────────────────────────────────────────────────────
   medications: {
     title:           'Meus Medicamentos',

@@ -289,6 +289,17 @@ export default {
     ],
   },
 
+  // ── Common ───────────────────────────────────────────────────────────────────────────
+  common: {
+    ok: 'OK',
+  },
+
+  // ── Questionnaire errors ──────────────────────────────────────────────────────────────
+  questionnaire: {
+    saveErrorTitle: 'Could not save entry',
+    saveErrorBody:  'Something went wrong saving your entry. Please try again.',
+  },
+
   // ── Medications screen ───────────────────────────────────────────────────────────────
   medications: {
     title:           'My Medications',
