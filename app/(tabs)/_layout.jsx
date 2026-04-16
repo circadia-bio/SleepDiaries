@@ -24,7 +24,10 @@ function CustomTabBar({ state, navigation }) {
   const { width: screenW } = useWindowDimensions();
   const isStandalone = Platform.OS === 'web' &&
     typeof window !== 'undefined' && window.navigator.standalone === true;
-  const W = (Platform.OS === 'web' && !isStandalone) ? Math.min(screenW, 390) : screenW;
+  // On web (non-standalone) the tab bar lives inside the maxWidth container,
+  // so left:0/right:0 in the stylesheet already gives the correct width.
+  // Only pass an explicit width on native and standalone PWA.
+  const W = (Platform.OS === 'web' && !isStandalone) ? undefined : screenW;
 
   return (
     <View style={[styles.container, { width: W, paddingBottom: insets.bottom }]}>

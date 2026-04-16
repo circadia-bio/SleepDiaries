@@ -2,7 +2,8 @@
  * app/index.jsx — Login / onboarding screen
  */
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import ScreenBackground from '../components/ScreenBackground';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveName, saveResearchCode } from '../storage/storage';
@@ -27,8 +28,9 @@ export default function LoginScreen() {
   };
 
   return (
-    <ImageBackground source={require('../assets/images/login-bg.png')} style={styles.root} imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined} resizeMode="cover">
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={styles.root}>
+      <ScreenBackground variant="login" />
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <View style={[styles.inner, { paddingBottom: insets.bottom + 40 }]}>
 
           {error ? <Text style={[styles.errorText, { fontFamily: FONTS.body }]}>{error}</Text> : null}
@@ -50,7 +52,7 @@ export default function LoginScreen() {
 
         </View>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 }
 

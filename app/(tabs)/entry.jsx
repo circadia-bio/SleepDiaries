@@ -2,7 +2,7 @@
  * app/(tabs)/entry.jsx — Entry tab
  */
 import React, { useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Platform, ImageBackground } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
@@ -10,6 +10,7 @@ import { loadTodayStatus, loadEntries } from '../../storage/storage';
 import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
+import ScreenBackground from '../../components/ScreenBackground';
 
 const computeStats = (entries) => {
   const morningEntries = entries.filter((e) => e.type === 'morning');
@@ -59,7 +60,7 @@ export default function EntryTab() {
 
   return (
     <View style={styles.root}>
-      <ImageBackground source={IMAGES.homepageBg} style={StyleSheet.absoluteFill} imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined} resizeMode="cover" />
+      <ScreenBackground variant="home" />
       <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
 
         <View style={styles.streakBanner}>
