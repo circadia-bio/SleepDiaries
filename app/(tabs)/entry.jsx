@@ -1,7 +1,7 @@
 /**
  * app/(tabs)/entry.jsx — Entry tab
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,7 +49,7 @@ export default function EntryTab() {
 
   const morningCompleted = todayStatus.morningCompleted;
   const eveningCompleted = todayStatus.eveningCompleted;
-  const stats            = computeStats(entries);
+  const stats            = useMemo(() => computeStats(entries), [entries]);
   const eveningLocked    = !morningCompleted;
   const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
   const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;

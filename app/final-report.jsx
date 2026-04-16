@@ -1,7 +1,7 @@
 /**
  * app/final-report.jsx — Sleep metrics summary report
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Share, useWindowDimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -104,8 +104,10 @@ const buildBands = (questionnaire) => {
 };
 
 const ScaleBar = ({ questionnaire, score: rawScore }) => {
+  // buildBands probes 40 evenly-spaced values — memoize so it only runs when
+  // the questionnaire definition changes (i.e. never during normal app use).
+  const built = useMemo(() => buildBands(questionnaire), [questionnaire]);
   if (typeof rawScore !== 'number') return null;
-  const built = buildBands(questionnaire);
   if (!built) return null;
   const { bands, maxScore } = built;
   const pctScore = rawScore / maxScore;
@@ -198,24 +200,36 @@ export default function FinalReportScreen() {
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const { entries: allEntries, userName, loading: entriesLoading, refresh } = useEntries();
-  const [metrics,   setMetrics]   = useState(null);
-  const [dateRange, setDateRange] = useState('');
-  const [loading,   setLoading]   = useState(true);
-  const [qResults,  setQResults]  = useState([]);
+  const { entries: allEntries, userName, refresh } = useEntries();
+  const [loading,  setLoading]  = useState(true);
+  const [qResults, setQResults] = useState([]);
+
+  // Derive morning entries, metrics, and date range from context — recomputes
+  // only when allEntries changes, not on every render.
+  const morning = useMemo(
+    () => allEntries.filter((e) => e.type === 'morning'),
+    [allEntries],
+  );
+  const metrics = useMemo(
+    () => (morning.length > 0 ? computeMetrics(morning) : null),
+    [morning],
+  );
+  const dateRange = useMemo(() => {
+    if (morning.length === 0) return '';
+    const dates = morning.map((e) => e.date).sort();
+    return `${dates[0]} → ${dates[dates.length - 1]}`;
+  }, [morning]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
       const [, allQResults] = await Promise.all([refresh(), loadAllQuestionnaires()]);
-      const morning = allEntries.filter((e) => e.type === 'morning');
-      if (morning.length > 0) { const dates = morning.map((e) => e.date).sort(); setDateRange(`${dates[0]} → ${dates[dates.length - 1]}`); setMetrics(computeMetrics(morning)); }
       // Only show questionnaire results that have a matching definition
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setLoading(false);
     };
     load();
-  }, [refresh, allEntries]));
+  }, [refresh]));
 
   const handleShare = async () => {
     if (!metrics) return;
