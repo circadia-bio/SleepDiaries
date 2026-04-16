@@ -9,11 +9,11 @@ import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { loadAllQuestionnaires } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
+import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 
-export const MIN_ENTRIES_FOR_REPORT = 14;
 
 const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);
 const durationToMinutes = (d) => (d ? d.hours * 60 + d.minutes : 0);

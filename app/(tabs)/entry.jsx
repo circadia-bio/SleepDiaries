@@ -7,26 +7,13 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
 import { useEntries } from '../../storage/EntriesContext';
+import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
+import { computeStats } from '../../utils/stats';
 import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 import ScreenBackground from '../../components/ScreenBackground';
 
-const computeStats = (entries) => {
-  const morningEntries = entries.filter((e) => e.type === 'morning');
-  const eveningEntries = entries.filter((e) => e.type === 'evening');
-  const today = new Date().toISOString().split('T')[0];
-  const dates = entries.map((e) => e.date).sort();
-  const firstDate = dates[0];
-  const daysInStudy = firstDate ? Math.floor((new Date(today) - new Date(firstDate)) / 86400000) + 1 : 0;
-  let streak = 0;
-  const morningDates = new Set(morningEntries.map((e) => e.date));
-  let d = new Date(today);
-  while (morningDates.has(d.toISOString().split('T')[0])) { streak++; d.setDate(d.getDate() - 1); }
-  return { morningCount: morningEntries.length, eveningCount: eveningEntries.length, daysInStudy, streak };
-};
-
-const MIN_STATS_ENTRIES = 14;
 
 const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View
@@ -78,11 +65,11 @@ export default function EntryTab() {
           <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label={t('entry.daysInStudy')}   color="#4A7BB5" />
         </View>
 
-        {s && s.morningCount < MIN_STATS_ENTRIES && (
+        {s && s.morningCount < MIN_ENTRIES_FOR_REPORT && (
           <View style={styles.statsUnlockHint}>
             <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
             <Text style={[styles.statsUnlockText, { fontFamily: FONTS.bodyMedium }]}>
-              {t('entry.statsUnlock', { count: MIN_STATS_ENTRIES - s.morningCount })}
+              {t('entry.statsUnlock', { count: MIN_ENTRIES_FOR_REPORT - s.morningCount })}
             </Text>
           </View>
         )}

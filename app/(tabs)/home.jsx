@@ -15,7 +15,7 @@ import { hasSeenInstructions } from '../../storage/storage';
 import { useEntries } from '../../storage/EntriesContext';
 import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
-import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
+import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
