@@ -27,7 +27,7 @@ const formatDate = (dateStr) => {
 const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statChip}>
     <Ionicons name={icon} size={22} color={color} />
-    <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+    <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
 );
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statChip:      { flex: 1, minWidth: '45%', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', alignItems: 'center', paddingVertical: 14, gap: 4 },
-  statValue:     { fontSize: SIZES.body },
+  statValue:     { fontSize: SIZES.body, textAlign: 'center', paddingHorizontal: 6 },
   statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
   card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },

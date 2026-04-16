@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, Image, useWindowDimensions,
+  StyleSheet, StatusBar, Image, useWindowDimensions, Platform,
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +23,8 @@ import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
   const isLocked  = !isMorning && !morningDone;
+  const { width } = useWindowDimensions();
+  const cardHeight = Platform.OS === 'web' ? Math.min(width / 3, 150) : 110;
   let image;
   if (isMorning) {
     image = completed ? IMAGES.morningCompleted : IMAGES.morningPending;
@@ -31,7 +33,7 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
   }
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={isLocked ? 1 : 0.9} disabled={isLocked}>
-      <Image source={image} style={styles.entryCardImage} resizeMode="stretch" />
+      <Image source={image} style={[styles.entryCardImage, { height: cardHeight }]} resizeMode="stretch" />
     </TouchableOpacity>
   );
 };

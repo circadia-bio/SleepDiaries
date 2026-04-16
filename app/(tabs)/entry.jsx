@@ -2,7 +2,7 @@
  * app/(tabs)/entry.jsx — Entry tab
  */
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
@@ -30,6 +30,8 @@ const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
 export default function EntryTab() {
   const router = useRouter();
   const insets = useInsets();
+  const { width } = useWindowDimensions();
+  const cardHeight = Platform.OS === 'web' ? Math.min(width / 3, 150) : 110;
   const { entries, todayStatus, refresh } = useEntries();
 
   useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
@@ -80,7 +82,7 @@ export default function EntryTab() {
           accessibilityRole="button"
           accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
         >
-          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <Image source={morningImage} style={[styles.cardImage, { height: cardHeight }]} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
@@ -90,7 +92,7 @@ export default function EntryTab() {
           accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
           accessibilityState={{ disabled: eveningLocked }}
         >
-          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <Image source={eveningImage} style={[styles.cardImage, { height: cardHeight }]} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
       </View>
     </View>
