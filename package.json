@@ -7,7 +7,20 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "deploy": "bash scripts/deploy.sh"
+    "deploy": "bash scripts/deploy.sh",
+    "test": "jest --watchAll=false",
+    "test:watch": "jest --watchAll"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": ["**/__tests__/**/*.test.[jt]s?(x)"],
+    "moduleNameMapper": {
+      "\\.svg$": "<rootDir>/__mocks__/svgMock.js",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/__mocks__/asyncStorageMock.js"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
+    ]
   },
   "dependencies": {
     "@expo/metro-runtime": "~55.0.6",
@@ -32,6 +45,9 @@
   },
   "private": true,
   "devDependencies": {
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "jest-expo": "^55.0.16",
     "react-native-svg-transformer": "^1.5.3"
   }
 }
