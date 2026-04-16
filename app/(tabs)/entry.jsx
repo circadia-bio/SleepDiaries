@@ -1,12 +1,12 @@
 /**
  * app/(tabs)/entry.jsx — Entry tab
  */
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
-import { loadTodayStatus, loadEntries } from '../../storage/storage';
+import { useEntries } from '../../storage/EntriesContext';
 import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
@@ -43,24 +43,17 @@ const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
 export default function EntryTab() {
   const router = useRouter();
   const insets = useInsets();
-  const [morningCompleted, setMorningCompleted] = useState(false);
-  const [eveningCompleted, setEveningCompleted] = useState(false);
-  const [stats, setStats] = useState(null);
+  const { entries, todayStatus, refresh } = useEntries();
 
-  useFocusEffect(useCallback(() => {
-    const load = async () => {
-      const [status, entries] = await Promise.all([loadTodayStatus(), loadEntries()]);
-      setMorningCompleted(status.morningCompleted);
-      setEveningCompleted(status.eveningCompleted);
-      setStats(computeStats(entries));
-    };
-    load();
-  }, []));
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
-  const eveningLocked = !morningCompleted;
+  const morningCompleted = todayStatus.morningCompleted;
+  const eveningCompleted = todayStatus.eveningCompleted;
+  const stats            = computeStats(entries);
+  const eveningLocked    = !morningCompleted;
   const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
   const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
-  const s = stats;
+  const s = stats ?? {};
 
   return (
     <View style={styles.root}>

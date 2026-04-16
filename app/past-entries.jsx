@@ -6,7 +6,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { loadEntries } from '../storage/storage';
+import { useEntries } from '../storage/EntriesContext';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
@@ -96,13 +96,9 @@ export default function PastEntriesScreen() {
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { height: windowHeight } = useWindowDimensions();
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { entries, loading, refresh } = useEntries();
 
-  useFocusEffect(useCallback(() => {
-    const load = async () => { setLoading(true); setEntries(await loadEntries()); setLoading(false); };
-    load();
-  }, []));
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
   const grouped   = groupByDate(entries);
   const dates     = Object.keys(grouped).sort((a, b) => b.localeCompare(a));

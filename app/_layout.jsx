@@ -15,6 +15,7 @@ import { useFonts } from 'expo-font';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
+import { EntriesProvider } from '../storage/EntriesContext';
 
 const isStandalone =
   Platform.OS === 'web' &&
@@ -85,6 +86,7 @@ export default function RootLayout() {
   if (!checked) return null;
 
   const content = (
+    <EntriesProvider>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
@@ -97,6 +99,7 @@ export default function RootLayout() {
       <Stack.Screen name="QuestionnaireCreditsScreen" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="MedicationsScreen"           options={{ animation: 'slide_from_right' }} />
     </Stack>
+    </EntriesProvider>
   );
 
   if (Platform.OS === 'web') {

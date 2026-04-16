@@ -7,7 +7,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadEntries, loadName, loadAllQuestionnaires } from '../storage/storage';
+import { loadAllQuestionnaires } from '../storage/storage';
+import { useEntries } from '../storage/EntriesContext';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
@@ -197,25 +198,24 @@ export default function FinalReportScreen() {
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const [metrics, setMetrics]   = useState(null);
-  const [userName, setUserName]   = useState('');
+  const { entries: allEntries, userName, loading: entriesLoading, refresh } = useEntries();
+  const [metrics,   setMetrics]   = useState(null);
   const [dateRange, setDateRange] = useState('');
-  const [loading, setLoading]     = useState(true);
-  const [qResults, setQResults]   = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [qResults,  setQResults]  = useState([]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [allEntries, name, allQResults] = await Promise.all([loadEntries(), loadName(), loadAllQuestionnaires()]);
+      const [, allQResults] = await Promise.all([refresh(), loadAllQuestionnaires()]);
       const morning = allEntries.filter((e) => e.type === 'morning');
-      setUserName(name ?? '');
       if (morning.length > 0) { const dates = morning.map((e) => e.date).sort(); setDateRange(`${dates[0]} → ${dates[dates.length - 1]}`); setMetrics(computeMetrics(morning)); }
       // Only show questionnaire results that have a matching definition
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setLoading(false);
     };
     load();
-  }, []));
+  }, [refresh, allEntries]));
 
   const handleShare = async () => {
     if (!metrics) return;
