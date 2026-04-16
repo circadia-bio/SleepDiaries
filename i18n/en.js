@@ -27,6 +27,13 @@ export default {
   entry: {
     daysInStudy:  'Days in study',
     statsUnlock:  'Sleep stats unlock after {{count}} more morning entries',
+    a11y: {
+      morningStart:     'Start morning entry',
+      morningCompleted: 'Morning entry completed. Tap to edit.',
+      eveningStart:     'Start evening entry',
+      eveningCompleted: 'Evening entry completed. Tap to edit.',
+      eveningLocked:    'Evening entry locked. Complete the morning entry first.',
+    },
   },
 
   // ── Profile modal ─────────────────────────────────────────────────────────
@@ -137,6 +144,8 @@ export default {
     avgSleepDurationSub: 'Total sleep time per night',
     sleepEfficiency:     'Sleep efficiency',
     sleepEfficiencySub:  'Time asleep ÷ time in bed (≥85% is healthy)',
+    efficiencyGood:      '✓ Target met',
+    efficiencyLow:       '↓ Below target',
     sleepOnsetLatency:   'Sleep onset latency',
     sleepOnsetLatencySub:'Average time to fall asleep',
     waso:                'Wake after sleep onset',
@@ -249,6 +258,8 @@ export default {
     medNamePlaceholder: 'Medication name',
     hrs:                'hrs',
     min:                'min',
+    saveErrorTitle:     'Could not save entry',
+    saveErrorBody:      'Something went wrong saving your entry. Please try again.',
   },
 
   // ── Instructions slideshow ────────────────────────────────────────────────
@@ -287,6 +298,11 @@ export default {
         body:  'On iPhone: open this page in Safari, tap the Share button ↑, and choose Add to Home Screen.\n\nOn Android: open in Chrome, tap the menu (⋮), and choose Add to Home Screen.\n\nOnce installed the app runs full-screen and works offline — just like a native app.',
       },
     ],
+  },
+
+  // ── Common ───────────────────────────────────────────────────────────────────────────
+  common: {
+    ok: 'OK',
   },
 
   // ── Medications screen ───────────────────────────────────────────────────────────────

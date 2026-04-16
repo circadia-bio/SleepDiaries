@@ -27,6 +27,13 @@ export default {
   entry: {
     daysInStudy: 'Dias no estudo',
     statsUnlock: 'As estatísticas desbloqueiam após mais {{count}} registros matinais',
+    a11y: {
+      morningStart:     'Iniciar registro matinal',
+      morningCompleted: 'Registro matinal concluído. Toque para editar.',
+      eveningStart:     'Iniciar registro noturno',
+      eveningCompleted: 'Registro noturno concluído. Toque para editar.',
+      eveningLocked:    'Registro noturno bloqueado. Conclua o registro matinal primeiro.',
+    },
   },
 
   // ── Profile modal ─────────────────────────────────────────────────────────
@@ -137,6 +144,8 @@ export default {
     avgSleepDurationSub: 'Tempo total de sono por noite',
     sleepEfficiency:     'Eficiência do sono',
     sleepEfficiencySub:  'Tempo dormindo ÷ tempo na cama (≥85% é saudável)',
+    efficiencyGood:      '✓ Meta atingida',
+    efficiencyLow:       '↓ Abaixo da meta',
     sleepOnsetLatency:   'Latência do início do sono',
     sleepOnsetLatencySub:'Tempo médio para adormecer',
     waso:                'Vigília após o início do sono',
@@ -205,25 +214,6 @@ export default {
     delete:               'Excluir',
   },
 
-  // ── Questionnaire ─────────────────────────────────────────────────────────
-  questionnaire: {
-    back:               'Voltar',
-    next:               'Próximo',
-    yes:                'Sim',
-    no:                 'Não',
-    addMedicine:        'Adicionar Medicamento',
-    addNewTime:         'Adicionar Horário',
-    dose:               'Dose:',
-    time:               'Horário:',
-    mgUnit:             'mg',
-    dosePlaceholder:    'ex.: 5',
-    timePlaceholder:    'ex.: 22:30',
-    newMedication:      'Novo Medicamento',
-    medNamePlaceholder: 'Nome do medicamento',
-    hrs:                'h',
-    min:                'min',
-  },
-
   // ── Instructions slideshow ────────────────────────────────────────────────
   instructions: {
     close:      'Fechar',
@@ -279,6 +269,8 @@ export default {
     medNamePlaceholder: 'Nome do medicamento',
     hrs:                'h',
     min:                'min',
+    saveErrorTitle:     'Não foi possível salvar o registro',
+    saveErrorBody:      'Ocorreu um erro ao salvar o seu registro. Por favor, tente novamente.',
   },
 
   // ── Perfil — seção de questionários ─────────────────────────────────
@@ -306,6 +298,11 @@ export default {
     pendingDesc:     'Suas respostas foram salvas. Os resultados do {{shortTitle}} estarão disponíveis após 14 dias de registros do diário de sono.',
     done:            'Concluír',
     betaBanner:      'Beta — pontuação e resultados são experimentais e podem não ser totalmente precisos.',
+  },
+
+  // ── Comum ────────────────────────────────────────────────────────────────────────────────
+  common: {
+    ok: 'OK',
   },
 
   // ── Tela de medicamentos ────────────────────────────────────────────────────────────────

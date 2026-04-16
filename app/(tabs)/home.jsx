@@ -11,10 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 import ScreenBackground from '../../components/ScreenBackground';
 import { useInsets } from '../../theme/useInsets';
 import { FONTS, SIZES } from '../../theme/typography';
-import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../../storage/storage';
+import { hasSeenInstructions } from '../../storage/storage';
+import { useEntries } from '../../storage/EntriesContext';
 import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
-import { MIN_ENTRIES_FOR_REPORT } from '../final-report';
+import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
@@ -40,29 +41,22 @@ export default function HomeScreen() {
   const insets = useInsets();
   const { height: H } = useWindowDimensions();
   const { showInstructions: showInstructionsParam } = useLocalSearchParams();
-  const [userName, setUserName]                 = useState('');
-  const [morningCompleted, setMorningCompleted] = useState(false);
-  const [eveningCompleted, setEveningCompleted] = useState(false);
-  const [reportUnlocked, setReportUnlocked]     = useState(false);
-  const [morningCount, setMorningCount]         = useState(0);
+  const { entries, todayStatus, userName, refresh } = useEntries();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showProfile, setShowProfile]           = useState(false);
 
+  const morningCompleted = todayStatus.morningCompleted;
+  const eveningCompleted = todayStatus.eveningCompleted;
+  const morningCount     = entries.filter((e) => e.type === 'morning').length;
+  const reportUnlocked   = morningCount >= MIN_ENTRIES_FOR_REPORT;
+
   useFocusEffect(useCallback(() => {
     const load = async () => {
-      const [name, status, allEntries, seen] = await Promise.all([
-        loadName(), loadTodayStatus(), loadEntries(), hasSeenInstructions(),
-      ]);
-      const mCount = allEntries.filter((e) => e.type === 'morning').length;
-      setUserName(name ?? '');
-      setMorningCompleted(status.morningCompleted);
-      setEveningCompleted(status.eveningCompleted);
-      setMorningCount(mCount);
-      setReportUnlocked(mCount >= MIN_ENTRIES_FOR_REPORT);
-      if (!seen && (name || showInstructionsParam === '1')) setShowInstructions(true);
+      const [, seen] = await Promise.all([refresh(), hasSeenInstructions()]);
+      if (!seen && (userName || showInstructionsParam === '1')) setShowInstructions(true);
     };
     load();
-  }, []));
+  }, [refresh, userName, showInstructionsParam]));
 
   const remaining = MIN_ENTRIES_FOR_REPORT - morningCount;
 

@@ -1,18 +1,19 @@
 /**
  * app/final-report.jsx — Sleep metrics summary report
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Share, useWindowDimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadEntries, loadName, loadAllQuestionnaires } from '../storage/storage';
+import { loadAllQuestionnaires } from '../storage/storage';
+import { useEntries } from '../storage/EntriesContext';
+import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 
-export const MIN_ENTRIES_FOR_REPORT = 14;
 
 const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);
 const durationToMinutes = (d) => (d ? d.hours * 60 + d.minutes : 0);
@@ -36,12 +37,19 @@ const computeMetrics = (morningEntries) => {
   return { n: morningEntries.length, avgSleepDuration: avg(sd), avgSleepEfficiency: avg(se), avgSleepOnsetLatency: avg(sol), avgWASO: avg(w), avgQuality: avg(q), avgRestedness: avg(r), avgNightWakings: avg(nw), avgAlcohol: avg(al), earlyWakingPct: pct(ew.filter(Boolean).length, ew.length) };
 };
 
-const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5' }) => (
-  <View style={styles.metricCard}>
-    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={24} color={color} /></View>
+const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel }) => (
+  <View
+    style={styles.metricCard}
+    accessible={true}
+    accessibilityLabel={[label, value, statusLabel, subtext].filter(Boolean).join(', ')}
+  >
+    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" /></View>
     <View style={styles.metricText}>
       <Text style={[styles.metricLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
-      <Text style={[styles.metricValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+      <View style={styles.metricValueRow}>
+        <Text style={[styles.metricValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+        {statusLabel ? <Text style={[styles.metricStatusLabel, { color, fontFamily: FONTS.bodyMedium }]}>{statusLabel}</Text> : null}
+      </View>
       {subtext ? <Text style={[styles.metricSubtext, { fontFamily: FONTS.bodyMedium }]}>{subtext}</Text> : null}
     </View>
   </View>
@@ -96,8 +104,10 @@ const buildBands = (questionnaire) => {
 };
 
 const ScaleBar = ({ questionnaire, score: rawScore }) => {
+  // buildBands probes 40 evenly-spaced values — memoize so it only runs when
+  // the questionnaire definition changes (i.e. never during normal app use).
+  const built = useMemo(() => buildBands(questionnaire), [questionnaire]);
   if (typeof rawScore !== 'number') return null;
-  const built = buildBands(questionnaire);
   if (!built) return null;
   const { bands, maxScore } = built;
   const pctScore = rawScore / maxScore;
@@ -190,25 +200,36 @@ export default function FinalReportScreen() {
   const { height } = useWindowDimensions();
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const [metrics, setMetrics]   = useState(null);
-  const [userName, setUserName]   = useState('');
-  const [dateRange, setDateRange] = useState('');
-  const [loading, setLoading]     = useState(true);
-  const [qResults, setQResults]   = useState([]);
+  const { entries: allEntries, userName, refresh } = useEntries();
+  const [loading,  setLoading]  = useState(true);
+  const [qResults, setQResults] = useState([]);
+
+  // Derive morning entries, metrics, and date range from context — recomputes
+  // only when allEntries changes, not on every render.
+  const morning = useMemo(
+    () => allEntries.filter((e) => e.type === 'morning'),
+    [allEntries],
+  );
+  const metrics = useMemo(
+    () => (morning.length > 0 ? computeMetrics(morning) : null),
+    [morning],
+  );
+  const dateRange = useMemo(() => {
+    if (morning.length === 0) return '';
+    const dates = morning.map((e) => e.date).sort();
+    return `${dates[0]} → ${dates[dates.length - 1]}`;
+  }, [morning]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [allEntries, name, allQResults] = await Promise.all([loadEntries(), loadName(), loadAllQuestionnaires()]);
-      const morning = allEntries.filter((e) => e.type === 'morning');
-      setUserName(name ?? '');
-      if (morning.length > 0) { const dates = morning.map((e) => e.date).sort(); setDateRange(`${dates[0]} → ${dates[dates.length - 1]}`); setMetrics(computeMetrics(morning)); }
+      const [, allQResults] = await Promise.all([refresh(), loadAllQuestionnaires()]);
       // Only show questionnaire results that have a matching definition
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setLoading(false);
     };
     load();
-  }, []));
+  }, [refresh]));
 
   const handleShare = async () => {
     if (!metrics) return;
@@ -255,7 +276,7 @@ export default function FinalReportScreen() {
 
           <Section title={t('report.sleepTiming')}>
             <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color="#4A7BB5" />
-            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')}     value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} />
+            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} statusLabel={metrics.avgSleepEfficiency !== null ? (metrics.avgSleepEfficiency >= 85 ? t('report.efficiencyGood') : t('report.efficiencyLow')) : null} />
             <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color="#4A7BB5" />
             <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color="#4A7BB5" />
           </Section>
@@ -319,12 +340,14 @@ const styles = StyleSheet.create({
   summaryEntries: { fontSize: SIZES.bodySmall, color: 'rgba(255,255,255,0.75)' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
-  metricCard:    { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
-  metricIcon:    { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  metricText:    { flex: 1, gap: 3 },
-  metricLabel:   { fontSize: SIZES.bodySmall, color: '#94A3B8' },
-  metricValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
-  metricSubtext: { fontSize: SIZES.caption, color: '#B0CCEE' },
+  metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
+  metricIcon:        { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  metricText:        { flex: 1, gap: 3 },
+  metricLabel:       { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  metricValueRow:    { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  metricValue:       { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
+  metricStatusLabel: { fontSize: SIZES.caption, fontWeight: '600' },
+  metricSubtext:     { fontSize: SIZES.caption, color: '#B0CCEE' },
   qualityCard:  { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16, gap: 10 },
   qualityLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },

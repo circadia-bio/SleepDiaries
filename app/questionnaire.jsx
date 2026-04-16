@@ -19,7 +19,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, Pressable, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Image,
+  Platform, Image, Alert,
 } from 'react-native';
 import ScreenBackground from '../components/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
@@ -344,6 +344,7 @@ export default function QuestionnaireScreen() {
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone]                 = useState(false);
+  const [saving, setSaving]             = useState(false);
 
   // Prepopulate medication questions from saved presets
   useEffect(() => {
@@ -383,12 +384,22 @@ export default function QuestionnaireScreen() {
   }, [done]);
 
   const handleNext = async () => {
-    if (!canProceed()) return;
+    if (!canProceed() || saving) return;
     if (currentIndex < total - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      await saveEntry(entryType, answers);
-      setDone(true);
+      setSaving(true);
+      try {
+        await saveEntry(entryType, answers);
+        setDone(true);
+      } catch (e) {
+        setSaving(false);
+        Alert.alert(
+          t('questionnaire.saveErrorTitle') || 'Could not save entry',
+          t('questionnaire.saveErrorBody') || 'Something went wrong saving your entry. Please try again.',
+          [{ text: t('common.ok') || 'OK' }],
+        );
+      }
     }
   };
 

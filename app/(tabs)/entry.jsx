@@ -1,36 +1,27 @@
 /**
  * app/(tabs)/entry.jsx — Entry tab
  */
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
-import { loadTodayStatus, loadEntries } from '../../storage/storage';
+import { useEntries } from '../../storage/EntriesContext';
+import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
+import { computeStats } from '../../utils/stats';
 import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 import ScreenBackground from '../../components/ScreenBackground';
 
-const computeStats = (entries) => {
-  const morningEntries = entries.filter((e) => e.type === 'morning');
-  const eveningEntries = entries.filter((e) => e.type === 'evening');
-  const today = new Date().toISOString().split('T')[0];
-  const dates = entries.map((e) => e.date).sort();
-  const firstDate = dates[0];
-  const daysInStudy = firstDate ? Math.floor((new Date(today) - new Date(firstDate)) / 86400000) + 1 : 0;
-  let streak = 0;
-  const morningDates = new Set(morningEntries.map((e) => e.date));
-  let d = new Date(today);
-  while (morningDates.has(d.toISOString().split('T')[0])) { streak++; d.setDate(d.getDate() - 1); }
-  return { morningCount: morningEntries.length, eveningCount: eveningEntries.length, daysInStudy, streak };
-};
-
-const MIN_STATS_ENTRIES = 14;
 
 const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
-  <View style={styles.statBox}>
-    <Ionicons name={icon} size={24} color={color} />
+  <View
+    style={styles.statBox}
+    accessible={true}
+    accessibilityLabel={`${value} ${label}`}
+  >
+    <Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -39,32 +30,29 @@ const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
 export default function EntryTab() {
   const router = useRouter();
   const insets = useInsets();
-  const [morningCompleted, setMorningCompleted] = useState(false);
-  const [eveningCompleted, setEveningCompleted] = useState(false);
-  const [stats, setStats] = useState(null);
+  const { entries, todayStatus, refresh } = useEntries();
 
-  useFocusEffect(useCallback(() => {
-    const load = async () => {
-      const [status, entries] = await Promise.all([loadTodayStatus(), loadEntries()]);
-      setMorningCompleted(status.morningCompleted);
-      setEveningCompleted(status.eveningCompleted);
-      setStats(computeStats(entries));
-    };
-    load();
-  }, []));
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
-  const eveningLocked = !morningCompleted;
+  const morningCompleted = todayStatus.morningCompleted;
+  const eveningCompleted = todayStatus.eveningCompleted;
+  const stats            = useMemo(() => computeStats(entries), [entries]);
+  const eveningLocked    = !morningCompleted;
   const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
   const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
-  const s = stats;
+  const s = stats ?? {};
 
   return (
     <View style={styles.root}>
       <ScreenBackground variant="home" />
       <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
 
-        <View style={styles.streakBanner}>
-          <Text style={styles.streakFlame}>🔥</Text>
+        <View
+          style={styles.streakBanner}
+          accessible={true}
+          accessibilityLabel={`${t('profile.statStreak')}: ${s?.streak ?? 0} ${t('profile.statStreakUnit')}`}
+        >
+          <Text style={styles.streakFlame} accessibilityElementsHidden={true} importantForAccessibility="no">🔥</Text>
           <View>
             <Text style={[styles.streakValue, { fontFamily: FONTS.heading }]}>{s?.streak ?? '—'} {t('profile.statStreakUnit')}</Text>
             <Text style={[styles.streakLabel, { fontFamily: FONTS.bodyMedium }]}>{t('profile.statStreak')}</Text>
@@ -77,20 +65,32 @@ export default function EntryTab() {
           <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label={t('entry.daysInStudy')}   color="#4A7BB5" />
         </View>
 
-        {s && s.morningCount < MIN_STATS_ENTRIES && (
+        {s && s.morningCount < MIN_ENTRIES_FOR_REPORT && (
           <View style={styles.statsUnlockHint}>
             <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
             <Text style={[styles.statsUnlockText, { fontFamily: FONTS.bodyMedium }]}>
-              {t('entry.statsUnlock', { count: MIN_STATS_ENTRIES - s.morningCount })}
+              {t('entry.statsUnlock', { count: MIN_ENTRIES_FOR_REPORT - s.morningCount })}
             </Text>
           </View>
         )}
 
-        <TouchableOpacity onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} activeOpacity={0.9}>
-          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" />
+        <TouchableOpacity
+          onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
+          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
+        >
+          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} activeOpacity={eveningLocked ? 1 : 0.9} disabled={eveningLocked}>
-          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" />
+        <TouchableOpacity
+          onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
+          activeOpacity={eveningLocked ? 1 : 0.9}
+          disabled={eveningLocked}
+          accessibilityRole="button"
+          accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
+          accessibilityState={{ disabled: eveningLocked }}
+        >
+          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
       </View>
     </View>

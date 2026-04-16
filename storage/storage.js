@@ -43,45 +43,92 @@ const KEYS = {
 
 const questionnaireKey = (id) => `questionnaire_${id}`;
 
+// ─── Safe JSON helper ─────────────────────────────────────────────────────────
+
+/**
+ * Safely parse a JSON string. Returns `fallback` if the string is null/undefined
+ * or if parsing throws (e.g. corrupted data). Logs a warning in development so
+ * issues are visible without crashing the app.
+ */
+const safeParseJSON = (raw, fallback, context = '') => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn(`[storage] JSON.parse failed${context ? ` (${context})` : ''}:`, e.message);
+    return fallback;
+  }
+};
+
 // ─── User name ────────────────────────────────────────────────────────────────
 export const saveName = async (name) => {
-  await AsyncStorage.setItem(KEYS.USER_NAME, name);
+  try {
+    await AsyncStorage.setItem(KEYS.USER_NAME, name);
+  } catch (e) {
+    console.warn('[storage] saveName failed:', e.message);
+    throw e;
+  }
 };
 
 export const loadName = async () => {
-  return await AsyncStorage.getItem(KEYS.USER_NAME);
+  try {
+    return await AsyncStorage.getItem(KEYS.USER_NAME);
+  } catch (e) {
+    console.warn('[storage] loadName failed:', e.message);
+    return null;
+  }
 };
 
 // ─── Research code ────────────────────────────────────────────────────────────
 export const saveResearchCode = async (code) => {
-  await AsyncStorage.setItem(KEYS.RESEARCH_CODE, code);
+  try {
+    await AsyncStorage.setItem(KEYS.RESEARCH_CODE, code);
+  } catch (e) {
+    console.warn('[storage] saveResearchCode failed:', e.message);
+    throw e;
+  }
 };
 
 export const loadResearchCode = async () => {
-  return await AsyncStorage.getItem(KEYS.RESEARCH_CODE);
+  try {
+    return await AsyncStorage.getItem(KEYS.RESEARCH_CODE);
+  } catch (e) {
+    console.warn('[storage] loadResearchCode failed:', e.message);
+    return null;
+  }
 };
 
 // ─── Entries ──────────────────────────────────────────────────────────────────
 export const loadEntries = async () => {
-  const raw = await AsyncStorage.getItem(KEYS.ENTRIES);
-  return raw ? JSON.parse(raw) : [];
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.ENTRIES);
+    return safeParseJSON(raw, [], 'entries');
+  } catch (e) {
+    console.warn('[storage] loadEntries failed:', e.message);
+    return [];
+  }
 };
 
 export const saveEntry = async (entryType, answers) => {
-  const entries = await loadEntries();
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const id = `${dateStr}-${entryType}`;
-  const filtered = entries.filter((e) => e.id !== id);
-  const newEntry = {
-    id,
-    type: entryType,
-    date: dateStr,
-    completedAt: now.toISOString(),
-    answers,
-  };
-  await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify([newEntry, ...filtered]));
-  return newEntry;
+  try {
+    const entries = await loadEntries();
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const id = `${dateStr}-${entryType}`;
+    const filtered = entries.filter((e) => e.id !== id);
+    const newEntry = {
+      id,
+      type: entryType,
+      date: dateStr,
+      completedAt: now.toISOString(),
+      answers,
+    };
+    await AsyncStorage.setItem(KEYS.ENTRIES, JSON.stringify([newEntry, ...filtered]));
+    return newEntry;
+  } catch (e) {
+    console.warn('[storage] saveEntry failed:', e.message);
+    throw e;
+  }
 };
 
 export const isTodayComplete = async (entryType) => {
@@ -101,10 +148,15 @@ export const loadTodayStatus = async () => {
 };
 
 export const clearAll = async () => {
-  // Also remove any stored questionnaire results
-  const allKeys = await AsyncStorage.getAllKeys();
-  const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-  await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+  try {
+    // Also remove any stored questionnaire results
+    const allKeys = await AsyncStorage.getAllKeys();
+    const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
+    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+  } catch (e) {
+    console.warn('[storage] clearAll failed:', e.message);
+    throw e;
+  }
 };
 
 // ─── One-time questionnaires ──────────────────────────────────────────────────
@@ -114,35 +166,50 @@ export const clearAll = async () => {
  * Overwrites any previous result for the same questionnaire id.
  */
 export const saveQuestionnaire = async (id, answers, score) => {
-  const result = {
-    id,
-    completedAt: new Date().toISOString(),
-    answers,
-    score,
-  };
-  await AsyncStorage.setItem(questionnaireKey(id), JSON.stringify(result));
-  return result;
+  try {
+    const result = {
+      id,
+      completedAt: new Date().toISOString(),
+      answers,
+      score,
+    };
+    await AsyncStorage.setItem(questionnaireKey(id), JSON.stringify(result));
+    return result;
+  } catch (e) {
+    console.warn('[storage] saveQuestionnaire failed:', e.message);
+    throw e;
+  }
 };
 
 /**
  * Load a single questionnaire result, or null if not yet completed.
  */
 export const loadQuestionnaire = async (id) => {
-  const raw = await AsyncStorage.getItem(questionnaireKey(id));
-  return raw ? JSON.parse(raw) : null;
+  try {
+    const raw = await AsyncStorage.getItem(questionnaireKey(id));
+    return safeParseJSON(raw, null, `questionnaire_${id}`);
+  } catch (e) {
+    console.warn('[storage] loadQuestionnaire failed:', e.message);
+    return null;
+  }
 };
 
 /**
  * Load all completed questionnaire results as an array.
  */
 export const loadAllQuestionnaires = async () => {
-  const allKeys = await AsyncStorage.getAllKeys();
-  const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-  if (qKeys.length === 0) return [];
-  const pairs = await AsyncStorage.multiGet(qKeys);
-  return pairs
-    .map(([, val]) => (val ? JSON.parse(val) : null))
-    .filter(Boolean);
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
+    if (qKeys.length === 0) return [];
+    const pairs = await AsyncStorage.multiGet(qKeys);
+    return pairs
+      .map(([key, val]) => safeParseJSON(val, null, key))
+      .filter(Boolean);
+  } catch (e) {
+    console.warn('[storage] loadAllQuestionnaires failed:', e.message);
+    return [];
+  }
 };
 
 // ─── Medication presets ──────────────────────────────────────────────────────
@@ -152,15 +219,25 @@ export const loadAllQuestionnaires = async () => {
  * Returns an array of { id, name, dose, times } objects.
  */
 export const loadMedicationPresets = async () => {
-  const raw = await AsyncStorage.getItem(KEYS.MEDICATION_PRESETS);
-  return raw ? JSON.parse(raw) : [];
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.MEDICATION_PRESETS);
+    return safeParseJSON(raw, [], 'medication_presets');
+  } catch (e) {
+    console.warn('[storage] loadMedicationPresets failed:', e.message);
+    return [];
+  }
 };
 
 /**
  * Save the participant's medication presets.
  */
 export const saveMedicationPresets = async (presets) => {
-  await AsyncStorage.setItem(KEYS.MEDICATION_PRESETS, JSON.stringify(presets));
+  try {
+    await AsyncStorage.setItem(KEYS.MEDICATION_PRESETS, JSON.stringify(presets));
+  } catch (e) {
+    console.warn('[storage] saveMedicationPresets failed:', e.message);
+    throw e;
+  }
 };
 
 // ─── Instructions ──────────────────────────────────────────────────────────────

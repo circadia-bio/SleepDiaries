@@ -1,12 +1,12 @@
 /**
  * app/past-entries.jsx — Past entries history screen
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, useWindowDimensions, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { loadEntries } from '../storage/storage';
+import { useEntries } from '../storage/EntriesContext';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
@@ -42,7 +42,7 @@ const AnswerRow = ({ question, value, isMorning }) => {
   );
 };
 
-const EntryCard = ({ entry }) => {
+const EntryCard = React.memo(({ entry }) => {
   const [expanded, setExpanded] = useState(false);
   const isMorning    = entry.type === 'morning';
   const questions    = isMorning ? MORNING_QUESTIONS : EVENING_QUESTIONS;
@@ -76,7 +76,7 @@ const EntryCard = ({ entry }) => {
       )}
     </View>
   );
-};
+});
 
 const groupByDate = (entries) => {
   const groups = {};
@@ -96,17 +96,15 @@ export default function PastEntriesScreen() {
   const rawInsets = useSafeAreaInsets();
   const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
   const { height: windowHeight } = useWindowDimensions();
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { entries, loading, refresh } = useEntries();
 
-  useFocusEffect(useCallback(() => {
-    const load = async () => { setLoading(true); setEntries(await loadEntries()); setLoading(false); };
-    load();
-  }, []));
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
-  const grouped   = groupByDate(entries);
-  const dates     = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-  const listItems = buildListItems(grouped, dates);
+  const listItems = useMemo(() => {
+    const grouped = groupByDate(entries);
+    const dates   = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+    return buildListItems(grouped, dates);
+  }, [entries]);
   const HEADER_HEIGHT = 56;
   const listHeight = windowHeight - insets.top - insets.bottom - HEADER_HEIGHT;
 
