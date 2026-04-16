@@ -27,6 +27,13 @@ export default {
   entry: {
     daysInStudy:  'Days in study',
     statsUnlock:  'Sleep stats unlock after {{count}} more morning entries',
+    a11y: {
+      morningStart:     'Start morning entry',
+      morningCompleted: 'Morning entry completed. Tap to edit.',
+      eveningStart:     'Start evening entry',
+      eveningCompleted: 'Evening entry completed. Tap to edit.',
+      eveningLocked:    'Evening entry locked. Complete the morning entry first.',
+    },
   },
 
   // ── Profile modal ─────────────────────────────────────────────────────────
@@ -137,6 +144,8 @@ export default {
     avgSleepDurationSub: 'Total sleep time per night',
     sleepEfficiency:     'Sleep efficiency',
     sleepEfficiencySub:  'Time asleep ÷ time in bed (≥85% is healthy)',
+    efficiencyGood:      '✓ Target met',
+    efficiencyLow:       '↓ Below target',
     sleepOnsetLatency:   'Sleep onset latency',
     sleepOnsetLatencySub:'Average time to fall asleep',
     waso:                'Wake after sleep onset',

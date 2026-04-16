@@ -45,8 +45,10 @@ export function BackButton({ onPress, theme }) {
       onPress={onPress}
       activeOpacity={0.8}
       style={[styles.btn, styles.backBtn, { borderColor: c.border, backgroundColor: CREAM }]}
+      accessibilityRole="button"
+      accessibilityLabel={t('questionnaire.back')}
     >
-      <Ionicons name="chevron-back" size={22} color={c.iconBack} />
+      <Ionicons name="chevron-back" size={22} color={c.iconBack} accessibilityElementsHidden={true} importantForAccessibility="no" />
       <Text style={[styles.label, { color: c.textBack }]}>
         {t('questionnaire.back')}
       </Text>
@@ -62,11 +64,14 @@ export function NextButton({ onPress, theme, disabled }) {
       activeOpacity={disabled ? 1 : 0.8}
       disabled={disabled}
       style={[styles.btn, styles.nextBtn, { backgroundColor: c.fillNext }, disabled && styles.disabled]}
+      accessibilityRole="button"
+      accessibilityLabel={t('questionnaire.next')}
+      accessibilityState={{ disabled }}
     >
       <Text style={[styles.label, { color: c.textNext }]}>
         {t('questionnaire.next')}
       </Text>
-      <Ionicons name="chevron-forward" size={22} color={c.iconNext} />
+      <Ionicons name="chevron-forward" size={22} color={c.iconNext} accessibilityElementsHidden={true} importantForAccessibility="no" />
     </TouchableOpacity>
   );
 }

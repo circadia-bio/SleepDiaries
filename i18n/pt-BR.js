@@ -27,6 +27,13 @@ export default {
   entry: {
     daysInStudy: 'Dias no estudo',
     statsUnlock: 'As estatísticas desbloqueiam após mais {{count}} registros matinais',
+    a11y: {
+      morningStart:     'Iniciar registro matinal',
+      morningCompleted: 'Registro matinal concluído. Toque para editar.',
+      eveningStart:     'Iniciar registro noturno',
+      eveningCompleted: 'Registro noturno concluído. Toque para editar.',
+      eveningLocked:    'Registro noturno bloqueado. Conclua o registro matinal primeiro.',
+    },
   },
 
   // ── Profile modal ─────────────────────────────────────────────────────────
@@ -137,6 +144,8 @@ export default {
     avgSleepDurationSub: 'Tempo total de sono por noite',
     sleepEfficiency:     'Eficiência do sono',
     sleepEfficiencySub:  'Tempo dormindo ÷ tempo na cama (≥85% é saudável)',
+    efficiencyGood:      '✓ Meta atingida',
+    efficiencyLow:       '↓ Abaixo da meta',
     sleepOnsetLatency:   'Latência do início do sono',
     sleepOnsetLatencySub:'Tempo médio para adormecer',
     waso:                'Vigília após o início do sono',

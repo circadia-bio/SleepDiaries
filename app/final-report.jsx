@@ -36,12 +36,19 @@ const computeMetrics = (morningEntries) => {
   return { n: morningEntries.length, avgSleepDuration: avg(sd), avgSleepEfficiency: avg(se), avgSleepOnsetLatency: avg(sol), avgWASO: avg(w), avgQuality: avg(q), avgRestedness: avg(r), avgNightWakings: avg(nw), avgAlcohol: avg(al), earlyWakingPct: pct(ew.filter(Boolean).length, ew.length) };
 };
 
-const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5' }) => (
-  <View style={styles.metricCard}>
-    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={24} color={color} /></View>
+const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel }) => (
+  <View
+    style={styles.metricCard}
+    accessible={true}
+    accessibilityLabel={[label, value, statusLabel, subtext].filter(Boolean).join(', ')}
+  >
+    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" /></View>
     <View style={styles.metricText}>
       <Text style={[styles.metricLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
-      <Text style={[styles.metricValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+      <View style={styles.metricValueRow}>
+        <Text style={[styles.metricValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+        {statusLabel ? <Text style={[styles.metricStatusLabel, { color, fontFamily: FONTS.bodyMedium }]}>{statusLabel}</Text> : null}
+      </View>
       {subtext ? <Text style={[styles.metricSubtext, { fontFamily: FONTS.bodyMedium }]}>{subtext}</Text> : null}
     </View>
   </View>
@@ -255,7 +262,7 @@ export default function FinalReportScreen() {
 
           <Section title={t('report.sleepTiming')}>
             <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color="#4A7BB5" />
-            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')}     value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} />
+            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} statusLabel={metrics.avgSleepEfficiency !== null ? (metrics.avgSleepEfficiency >= 85 ? t('report.efficiencyGood') : t('report.efficiencyLow')) : null} />
             <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color="#4A7BB5" />
             <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color="#4A7BB5" />
           </Section>
@@ -319,12 +326,14 @@ const styles = StyleSheet.create({
   summaryEntries: { fontSize: SIZES.bodySmall, color: 'rgba(255,255,255,0.75)' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
-  metricCard:    { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
-  metricIcon:    { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  metricText:    { flex: 1, gap: 3 },
-  metricLabel:   { fontSize: SIZES.bodySmall, color: '#94A3B8' },
-  metricValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
-  metricSubtext: { fontSize: SIZES.caption, color: '#B0CCEE' },
+  metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
+  metricIcon:        { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  metricText:        { flex: 1, gap: 3 },
+  metricLabel:       { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  metricValueRow:    { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  metricValue:       { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
+  metricStatusLabel: { fontSize: SIZES.caption, fontWeight: '600' },
+  metricSubtext:     { fontSize: SIZES.caption, color: '#B0CCEE' },
   qualityCard:  { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16, gap: 10 },
   qualityLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },

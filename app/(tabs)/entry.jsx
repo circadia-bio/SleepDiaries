@@ -29,8 +29,12 @@ const computeStats = (entries) => {
 const MIN_STATS_ENTRIES = 14;
 
 const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
-  <View style={styles.statBox}>
-    <Ionicons name={icon} size={24} color={color} />
+  <View
+    style={styles.statBox}
+    accessible={true}
+    accessibilityLabel={`${value} ${label}`}
+  >
+    <Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -63,8 +67,12 @@ export default function EntryTab() {
       <ScreenBackground variant="home" />
       <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
 
-        <View style={styles.streakBanner}>
-          <Text style={styles.streakFlame}>🔥</Text>
+        <View
+          style={styles.streakBanner}
+          accessible={true}
+          accessibilityLabel={`${t('profile.statStreak')}: ${s?.streak ?? 0} ${t('profile.statStreakUnit')}`}
+        >
+          <Text style={styles.streakFlame} accessibilityElementsHidden={true} importantForAccessibility="no">🔥</Text>
           <View>
             <Text style={[styles.streakValue, { fontFamily: FONTS.heading }]}>{s?.streak ?? '—'} {t('profile.statStreakUnit')}</Text>
             <Text style={[styles.streakLabel, { fontFamily: FONTS.bodyMedium }]}>{t('profile.statStreak')}</Text>
@@ -86,11 +94,23 @@ export default function EntryTab() {
           </View>
         )}
 
-        <TouchableOpacity onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} activeOpacity={0.9}>
-          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" />
+        <TouchableOpacity
+          onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
+          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
+        >
+          <Image source={morningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} activeOpacity={eveningLocked ? 1 : 0.9} disabled={eveningLocked}>
-          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" />
+        <TouchableOpacity
+          onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
+          activeOpacity={eveningLocked ? 1 : 0.9}
+          disabled={eveningLocked}
+          accessibilityRole="button"
+          accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
+          accessibilityState={{ disabled: eveningLocked }}
+        >
+          <Image source={eveningImage} style={styles.cardImage} resizeMode="stretch" accessibilityElementsHidden={true} importantForAccessibility="no" />
         </TouchableOpacity>
       </View>
     </View>
