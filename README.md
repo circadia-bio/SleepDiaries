@@ -90,7 +90,12 @@ SleepDiaries/
 │   └── pt-BR.js                # Portuguese (Brazil) strings
 ├── storage/
 │   ├── storage.js              # AsyncStorage helpers + CSV/JSON export + import
+│   ├── EntriesContext.jsx      # React Context — shared entry cache consumed by all screens
 │   └── notifications.js        # Push notification scheduling
+├── utils/
+│   ├── alert.js                # Cross-platform Alert helper (web fallback)
+│   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
+│   └── stats.js                # Shared stat helpers (computeStats)
 ├── theme/
 │   ├── typography.js           # Font constants (Livvic, Afacad)
 │   └── useInsets.js            # Cross-platform safe area hook
@@ -567,7 +572,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 1. **Edit `data/questions.js`** to add, remove, or reorder diary questions
 2. **Edit `data/questionnaires.js`** to add, remove, or reorder one-time instruments
 3. **Add new input types** in `app/questionnaire.jsx` or `app/QuestionnaireModal.jsx`
-4. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `app/final-report.jsx` (currently 14); the same constant governs questionnaire result visibility
+4. **Change the unlock threshold** — edit `MIN_ENTRIES_FOR_REPORT` in `utils/constants.js` (currently 14); the same constant governs the final report, questionnaire result visibility, and the entry-tab stats dashboard
 5. **Connect a backend** — replace the `AsyncStorage` calls in `storage/storage.js` with API calls
 
 ---
