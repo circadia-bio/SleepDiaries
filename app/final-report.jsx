@@ -10,32 +10,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { loadAllQuestionnaires } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
+import { computeMetrics } from '../utils/metrics';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 
 
-const timeToMinutes = (t) => (t ? t.hour * 60 + t.minute : null);
-const durationToMinutes = (d) => (d ? d.hours * 60 + d.minutes : 0);
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
 const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h}h ${pad(m)}m` : `${m}m`; };
-const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-const pct = (n, d) => (d > 0 ? Math.round((n / d) * 100) : null);
-
-const computeMetrics = (morningEntries) => {
-  const sd = [], se = [], sol = [], w = [], q = [], r = [], nw = [], al = [], ew = [];
-  for (const entry of morningEntries) {
-    const a = entry.answers; if (!a) continue;
-    const solM = durationToMinutes(a.mq3), wasoM = durationToMinutes(a.mq5);
-    sol.push(solM); w.push(wasoM);
-    const bt = timeToMinutes(a.mq1), rt = timeToMinutes(a.mq7);
-    if (bt !== null && rt !== null) { let tib = rt - bt; if (tib < 0) tib += 1440; const tst = tib - solM - wasoM; sd.push(Math.max(0, tst)); const e = pct(Math.max(0, tst), tib); if (e !== null) se.push(e); }
-    if (a.mq11) q.push(a.mq11); if (a.mq12) r.push(a.mq12);
-    if (a.mq4 === 'yes' && a.mq4b !== undefined) nw.push(a.mq4b); else if (a.mq4 === 'no') nw.push(0);
-    if (a.mq9 !== undefined) al.push(a.mq9); if (a.mq8 !== undefined) ew.push(a.mq8 === 'yes' ? 1 : 0);
-  }
-  return { n: morningEntries.length, avgSleepDuration: avg(sd), avgSleepEfficiency: avg(se), avgSleepOnsetLatency: avg(sol), avgWASO: avg(w), avgQuality: avg(q), avgRestedness: avg(r), avgNightWakings: avg(nw), avgAlcohol: avg(al), earlyWakingPct: pct(ew.filter(Boolean).length, ew.length) };
-};
 
 const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel }) => (
   <View
