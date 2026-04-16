@@ -214,25 +214,6 @@ export default {
     delete:               'Excluir',
   },
 
-  // ── Questionnaire ─────────────────────────────────────────────────────────
-  questionnaire: {
-    back:               'Voltar',
-    next:               'Próximo',
-    yes:                'Sim',
-    no:                 'Não',
-    addMedicine:        'Adicionar Medicamento',
-    addNewTime:         'Adicionar Horário',
-    dose:               'Dose:',
-    time:               'Horário:',
-    mgUnit:             'mg',
-    dosePlaceholder:    'ex.: 5',
-    timePlaceholder:    'ex.: 22:30',
-    newMedication:      'Novo Medicamento',
-    medNamePlaceholder: 'Nome do medicamento',
-    hrs:                'h',
-    min:                'min',
-  },
-
   // ── Instructions slideshow ────────────────────────────────────────────────
   instructions: {
     close:      'Fechar',
@@ -288,6 +269,8 @@ export default {
     medNamePlaceholder: 'Nome do medicamento',
     hrs:                'h',
     min:                'min',
+    saveErrorTitle:     'Não foi possível salvar o registro',
+    saveErrorBody:      'Ocorreu um erro ao salvar o seu registro. Por favor, tente novamente.',
   },
 
   // ── Perfil — seção de questionários ─────────────────────────────────
@@ -320,12 +303,6 @@ export default {
   // ── Comum ────────────────────────────────────────────────────────────────────────────────
   common: {
     ok: 'OK',
-  },
-
-  // ── Erros do questionário ──────────────────────────────────────────────────────────────
-  questionnaire: {
-    saveErrorTitle: 'Não foi possível salvar o registro',
-    saveErrorBody:  'Ocorreu um erro ao salvar o seu registro. Por favor, tente novamente.',
   },
 
   // ── Tela de medicamentos ────────────────────────────────────────────────────────────────

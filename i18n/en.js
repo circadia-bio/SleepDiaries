@@ -258,6 +258,8 @@ export default {
     medNamePlaceholder: 'Medication name',
     hrs:                'hrs',
     min:                'min',
+    saveErrorTitle:     'Could not save entry',
+    saveErrorBody:      'Something went wrong saving your entry. Please try again.',
   },
 
   // ── Instructions slideshow ────────────────────────────────────────────────
@@ -301,12 +303,6 @@ export default {
   // ── Common ───────────────────────────────────────────────────────────────────────────
   common: {
     ok: 'OK',
-  },
-
-  // ── Questionnaire errors ──────────────────────────────────────────────────────────────
-  questionnaire: {
-    saveErrorTitle: 'Could not save entry',
-    saveErrorBody:  'Something went wrong saving your entry. Please try again.',
   },
 
   // ── Medications screen ───────────────────────────────────────────────────────────────
