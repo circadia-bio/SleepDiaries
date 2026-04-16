@@ -19,8 +19,9 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, Pressable, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, ImageBackground, Image,
+  Platform, Image,
 } from 'react-native';
+import ScreenBackground from '../components/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -418,12 +419,8 @@ export default function QuestionnaireScreen() {
   const c = THEME[theme];
 
   return (
-    <ImageBackground
-      source={IMAGES.questionnaireBg}
-      style={styles.root}
-      imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
-      resizeMode="cover"
-    >
+    <View style={styles.root}>
+      <ScreenBackground variant="questionnaire" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
         {/* ── Progress bar ── */}
@@ -456,7 +453,7 @@ export default function QuestionnaireScreen() {
         </View>
 
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 }
 

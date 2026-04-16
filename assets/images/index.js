@@ -45,9 +45,8 @@ const eveningLocked = isPtBR
   : require('./evening_locked.png');
 
 // ─── Non-translated images ────────────────────────────────────────────────────
-const homepageBg       = require('./homepage-bg.png');
-const loginBg          = require('./login-bg.png');
-const questionnaireBg  = require('./questionnaire-bg.png');
+// homepage-bg, login-bg, questionnaire-bg removed — now rendered as inline SVG
+// via components/ScreenBackground.jsx (react-native-svg).
 const splashEndMorning = require('./splash-end-morning.png');
 const splashEndNight   = require('./splash-end-night.png');
 const logo             = require('./logo.png');
@@ -58,9 +57,6 @@ const IMAGES = {
   eveningPending,
   eveningCompleted,
   eveningLocked,
-  homepageBg,
-  loginBg,
-  questionnaireBg,
   splashEndMorning,
   splashEndNight,
   logo,

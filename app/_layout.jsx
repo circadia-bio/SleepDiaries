@@ -29,10 +29,8 @@ const isStandalone =
 //   - past-entries, final-report, final-report-locked (BottomCards.jsx)
 //   - back-day, back-night, next-day, next-night (NavButtons.jsx)
 //   - instructions-1..6 (InstructionsModal.jsx is now fully coded)
+//   - homepage-bg, login-bg, questionnaire-bg (ScreenBackground.jsx, react-native-svg — no preload needed)
 const IMAGE_ASSETS = [
-  require('../assets/images/homepage-bg.png'),
-  require('../assets/images/login-bg.png'),
-  require('../assets/images/questionnaire-bg.png'),
   require('../assets/images/morning_pending.png'),
   require('../assets/images/morning_completed.png'),
   require('../assets/images/evening_pending.png'),
@@ -102,19 +100,34 @@ export default function RootLayout() {
   );
 
   if (Platform.OS === 'web') {
-    const wrapperStyle = isStandalone ? styles.webWrapperMobile : styles.webWrapper;
-    return <View style={wrapperStyle}>{content}</View>;
+    // Standalone PWA (installed to home screen): fixed full-screen shell to
+    // prevent scroll/bounce bleed outside the app.
+    if (isStandalone) return <View style={styles.webWrapperMobile}>{content}</View>;
+
+    // Browser: centre the content column at a max-width that keeps the SVG
+    // backgrounds at a sensible scale (~1.2× their design size at 480px vs
+    // the original 393px viewBox). The outer View fills the browser with the
+    // app's neutral background colour so the sides don't look bare.
+    return (
+      <View style={styles.webOuter}>
+        <View style={styles.webInner}>{content}</View>
+      </View>
+    );
   }
 
   return content;
 }
 
 const styles = StyleSheet.create({
-  webWrapper: {
+  webOuter: {
+    flex: 1,
+    backgroundColor: '#EEF5FF',
+    alignItems: 'center',
+  },
+  webInner: {
     flex: 1,
     width: '100%',
-    maxWidth: 390,
-    alignSelf: 'center',
+    maxWidth: 480,
     overflow: 'hidden',
   },
   webWrapperMobile: {

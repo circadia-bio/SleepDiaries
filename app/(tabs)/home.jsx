@@ -4,11 +4,11 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, ImageBackground, Image, useWindowDimensions,
+  StyleSheet, StatusBar, Image, useWindowDimensions,
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import ScreenBackground from '../../components/ScreenBackground';
 import { useInsets } from '../../theme/useInsets';
 import { FONTS, SIZES } from '../../theme/typography';
 import { loadName, loadTodayStatus, loadEntries, hasSeenInstructions } from '../../storage/storage';
@@ -69,12 +69,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      <ImageBackground
-        source={IMAGES.homepageBg}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-        imageStyle={Platform.OS === 'web' ? { width: '100%', height: '100%' } : undefined}
-        resizeMode="cover"
-      />
+      <ScreenBackground variant="home" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 8, minHeight: H }]}
