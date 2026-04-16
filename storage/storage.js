@@ -354,7 +354,9 @@ const validateImport = (parsed) => {
   const valid = entries.filter(
     (e) => e && e.id && e.type && e.date && e.answers
   );
-  if (valid.length === 0) throw new Error('No valid entries found in file.');
+  // Only throw if entries were supplied but every one failed validation.
+  // An empty entries array is allowed (e.g. questionnaire-only import).
+  if (entries.length > 0 && valid.length === 0) throw new Error('No valid entries found in file.');
   return valid;
 };
 
