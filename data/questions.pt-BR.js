@@ -20,7 +20,7 @@ export const MORNING_QUESTIONS_PT_BR = [
   { id: 'mq7',  text: 'Que horas você se levantou da cama?' },
   { id: 'mq8',  text: 'Você acordou mais cedo do que planejava?' },
   { id: 'mq8b', text: 'Quanto mais cedo você acordou?' },
-  { id: 'mq9',  text: 'Quantas doses de álcool você consumiu ontem?', unit: 'doses' },
+  { id: 'mq9',  text: 'Quantas doses de álcool você consumiu ontem?', hint: '1 dose = 355 mL de cerveja, 150 mL de vinho ou 45 mL de destilado', unit: 'doses' },
   { id: 'mq10', text: 'Você usou algum auxiliar de sono (medicamento, suplemento, etc.)?' },
   { id: 'mq10b',text: 'O que você usou para ajudar a dormir?' },
   {

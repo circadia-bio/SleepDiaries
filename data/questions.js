@@ -87,6 +87,7 @@ export const MORNING_QUESTIONS = [
     id: 'mq9',
     number: 9,
     text: 'How many alcoholic drinks did you have yesterday?',
+    hint: '1 drink = 355 mL beer, 150 mL wine, or 45 mL spirits',
     type: 'number',
     defaultValue: 0,
     min: 0,

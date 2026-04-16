@@ -432,9 +432,12 @@ export default function QuestionnaireScreen() {
         </View>
 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.questionText, { color: c.primary }]}>
+          <Text style={[styles.questionText, { color: c.primary }, question.hint && { marginBottom: 8 }]}>
             {question.number}. {question.text}
           </Text>
+          {question.hint && (
+            <Text style={[styles.questionHint, { color: c.primary }]}>{question.hint}</Text>
+          )}
           <View style={styles.inputArea}>
             {question.type === 'time'       && <TimeInput       value={currentValue} onChange={(v) => setAnswer(question.id, v)} theme={theme} />}
             {question.type === 'duration'   && <DurationInput   value={currentValue} onChange={(v) => setAnswer(question.id, v)} theme={theme} />}
@@ -462,6 +465,7 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 24 },
   questionText:  { fontSize: 26, fontWeight: '800', marginTop: 24, marginBottom: 40, lineHeight: 34 },
+  questionHint:  { fontSize: 13, fontWeight: '500', fontStyle: 'italic', opacity: 0.55, marginBottom: 32 },
   inputArea:     { alignItems: 'center' },
 
   progressRow: {

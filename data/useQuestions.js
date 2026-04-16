@@ -31,6 +31,7 @@ function mergeTranslations(baseQuestions, overrides) {
     return {
       ...q,
       ...(override.text    !== undefined && { text:    override.text }),
+      ...(override.hint    !== undefined && { hint:    override.hint }),
       ...(override.unit    !== undefined && { unit:    override.unit }),
       ...(override.placeholder !== undefined && { placeholder: override.placeholder }),
       ...(override.options !== undefined && { options: override.options }),
