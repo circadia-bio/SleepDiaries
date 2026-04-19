@@ -47,7 +47,7 @@ const metaTags = [
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_8.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
   '<link rel="apple-touch-startup-image" href="/splashscreens/iphone_se.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />',
   '<!-- Fathom - beautiful, simple website analytics -->',
-  '<script src="https://cdn.usefathom.com/script.js" data-site="CKGXUGRT" defer><\/script>',
+  '<script src="https://cdn.usefathom.com/script.js" data-site="CKGXUGRT" data-spa="auto" defer><\/script>',
   '<!-- / Fathom -->',
   '<script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js");});}<\/script>',
 ].join('\n');
