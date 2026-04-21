@@ -3,6 +3,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Platform, Linking } from 'react-native';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES } from '../../theme/typography';
@@ -98,6 +99,7 @@ export default function SettingsScreen() {
         <View style={[styles.card, styles.aboutCard]}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={[styles.aboutText, { fontFamily: FONTS.body }]}>© Circadia Lab</Text>
+          <Text style={[styles.aboutVersion, { fontFamily: FONTS.bodyMedium }]}>v{Constants.expoConfig?.version}</Text>
           <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>MIT Licence</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Lucas França · Mario Leocadio-Miguel</Text>
           <Text style={[styles.aboutLabel, { fontFamily: FONTS.body }]}>{t('settings.aboutDesign')}</Text>
@@ -149,4 +151,5 @@ const styles = StyleSheet.create({
   aboutSmall:    { fontSize: SIZES.bodySmall, color: '#94A3B8', textAlign: 'center', lineHeight: 24 },
   aboutLink:     { marginTop: 8 },
   aboutLinkText: { fontSize: SIZES.body, color: '#4A7BB5', textDecorationLine: 'underline' },
+  aboutVersion:  { fontSize: SIZES.bodySmall, color: '#94A3B8', fontFamily: FONTS.bodyMedium },
 });
