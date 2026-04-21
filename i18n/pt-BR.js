@@ -234,8 +234,8 @@ export default {
         body:  'Se esquecer de preencher o diário ou não conseguir terminá-lo, deixe-o em branco para esse dia.',
       },
       {
-        title: 'E se algo incomum afectar o meu sono ou como me sinto durante o dia?',
-        body:  'Se o seu sono ou funcionamento diurno for afectado por algum acontecimento incomum (como uma doença ou emergência), você pode fazer breves anotações no diário.',
+        title: 'E se algo incomum afetar o meu sono ou como me sinto durante o dia?',
+        body:  'Se o seu sono ou funcionamento diurno for afetado por algum acontecimento incomum (como uma doença ou emergência), você pode fazer breves anotações no diário.',
       },
       {
         title: 'O que significam as palavras "cama" e "dia" no diário?',
@@ -243,7 +243,7 @@ export default {
       },
       {
         title: 'Responder a estas perguntas sobre o meu sono vai me manter acordado?',
-        body:  'Isso geralmente não é um problema. Não se preocupe em fornecer horários exactos e não fique olhando para o relógio. Dê apenas a sua melhor estimativa.',
+        body:  'Isso geralmente não é um problema. Não se preocupe em fornecer horários exatos e não fique olhando para o relógio. Dê apenas a sua melhor estimativa.',
       },
       {
         title: 'Instale o Sleep Diaries no seu dispositivo',
