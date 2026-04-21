@@ -24,7 +24,8 @@
     "scheme": "sleep-diaries",
     "plugins": [
       "expo-router",
-      "expo-localization"
+      "expo-localization",
+      "expo-sharing"
     ],
     "web": {
       "bundler": "metro",
