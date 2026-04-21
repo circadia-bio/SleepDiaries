@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, Image, useWindowDimensions, Platform,
+  StyleSheet, StatusBar, Image, useWindowDimensions,
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,8 +23,6 @@ import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
   const isLocked  = !isMorning && !morningDone;
-  const { width } = useWindowDimensions();
-  const cardHeight = Platform.OS === 'web' ? Math.min(width / 3, 150) : 110;
   let image;
   if (isMorning) {
     image = completed ? IMAGES.morningCompleted : IMAGES.morningPending;
@@ -32,8 +30,13 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
     image = isLocked ? IMAGES.eveningLocked : completed ? IMAGES.eveningCompleted : IMAGES.eveningPending;
   }
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={isLocked ? 1 : 0.9} disabled={isLocked}>
-      <Image source={image} style={[styles.entryCardImage, { height: cardHeight }]} resizeMode="stretch" />
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={isLocked ? 1 : 0.9}
+      disabled={isLocked}
+      style={styles.entryCardWrapper}
+    >
+      <Image source={image} style={styles.entryCardImage} resizeMode="cover" />
     </TouchableOpacity>
   );
 };
@@ -96,8 +99,12 @@ export default function HomeScreen() {
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
-            <Text style={[styles.instructionsTitle, { fontFamily: FONTS.heading }]}>{t('home.instructionsTitle')}</Text>
-            <Text style={[styles.instructionsBody, { fontFamily: FONTS.body }]}>{t('home.instructionsBody')}</Text>
+            <Ionicons name="book-outline" size={28} color="#4A7BB5" style={styles.instructionsIcon} />
+            <View style={styles.instructionsText}>
+              <Text style={[styles.instructionsTitle, { fontFamily: FONTS.heading }]}>{t('home.instructionsTitle')}</Text>
+              <Text style={[styles.instructionsBody, { fontFamily: FONTS.body }]}>{t('home.instructionsBody')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#A8C8E8" />
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
@@ -137,21 +144,26 @@ const styles = StyleSheet.create({
   section: {
     borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
     paddingHorizontal: 10, paddingTop: 20, paddingBottom: 10,
-    backgroundColor: 'rgba(255,255,255,0.92)', position: 'relative',
+    backgroundColor: 'transparent', position: 'relative',
   },
   sectionLabel: {
     position: 'absolute', top: -13, left: 14,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: '#FEFDF8',
     paddingHorizontal: 8, fontSize: SIZES.bodySmall, color: '#4A7BB5',
   },
   cardsContainer: { gap: 8 },
-  entryCardImage: { width: '100%', height: 110, borderRadius: 14 },
+  entryCardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
+  entryCardImage:   { width: '100%', height: '100%' },
   instructionsCard: {
     borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
-    padding: 20, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: 'rgba(168, 200, 232, 0.15)',
+    flexDirection: 'row', alignItems: 'center', gap: 12,
   },
-  instructionsTitle: { fontSize: SIZES.cardTitle, color: '#1A3A5C', marginBottom: 8 },
-  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#4A7BB5', textAlign: 'center', lineHeight: 24 },
+  instructionsIcon: { flexShrink: 0 },
+  instructionsText: { flex: 1 },
+  instructionsTitle: { fontSize: SIZES.cardTitle, color: '#1A3A5C', marginBottom: 4 },
+  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#4A7BB5', lineHeight: 20 },
   bottomRow:      { flexDirection: 'row', gap: 12 },
   bottomCard:     { flex: 1 },
   bottomCardHint: { fontSize: SIZES.caption, color: '#94A3B8', marginTop: 4, textAlign: 'center' },

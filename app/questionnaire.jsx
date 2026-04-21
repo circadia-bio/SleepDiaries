@@ -238,35 +238,78 @@ const NumberInput = ({ value, onChange, min = 0, max = 99, unit = '', theme }) =
   );
 };
 
+const MedTimeInput = ({ value = '', onChange, color, borderColor }) => {
+  const parse = (v) => {
+    const [h, m] = (v || '').split(':').map(Number);
+    return { h: isNaN(h) ? 0 : h, m: isNaN(m) ? 0 : m };
+  };
+  const { h, m } = parse(value);
+  const fmt = (n) => String(n).padStart(2, '0');
+  const update = (newH, newM) => onChange(`${fmt(newH)}:${fmt(newM)}`);
+  const MedStepper = ({ val, max, onVal }) => (
+    <View style={styles.medStepper}>
+      <TouchableOpacity onPress={() => onVal(val <= 0 ? max : val - 1)}
+        style={[styles.medStepBtn, { borderColor }]}>
+        <Ionicons name="remove" size={14} color={color} />
+      </TouchableOpacity>
+      <Text style={[styles.medStepVal, { color }]}>{fmt(val)}</Text>
+      <TouchableOpacity onPress={() => onVal(val >= max ? 0 : val + 1)}
+        style={[styles.medStepBtn, { borderColor }]}>
+        <Ionicons name="add" size={14} color={color} />
+      </TouchableOpacity>
+    </View>
+  );
+  return (
+    <View style={styles.medTimeRow}>
+      <MedStepper val={h} max={23} onVal={(v) => update(v, m)} />
+      <Text style={[styles.medTimeSep, { color }]}>:</Text>
+      <MedStepper val={m} max={59} onVal={(v) => update(h, v)} />
+    </View>
+  );
+};
+
 const MedicationInput = ({ value = [], onChange, theme }) => {
   const c = THEME[theme];
   const [expanded, setExpanded] = useState({});
   const addMed = () => {
-    const newMed = { id: Date.now(), name: t('questionnaire.newMedication'), dose: '', times: [''] };
+    const newMed = { id: Date.now(), name: '', dose: '', times: [''] };
     onChange([...value, newMed]);
     setExpanded((e) => ({ ...e, [newMed.id]: true }));
   };
   const removeMed  = (id) => onChange(value.filter((m) => m.id !== id));
   const updateMed  = (id, field, val) => onChange(value.map((m) => (m.id === id ? { ...m, [field]: val } : m)));
   const addTime    = (id) => onChange(value.map((m) => (m.id === id ? { ...m, times: [...m.times, ''] } : m)));
+  const removeTime = (id, idx) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.filter((_, i) => i !== idx) } : m));
   const updateTime = (id, idx, val) => onChange(value.map((m) => m.id === id ? { ...m, times: m.times.map((tm, i) => (i === idx ? val : tm)) } : m));
   return (
     <View style={styles.medContainer}>
       {value.map((med) => (
         <View key={med.id} style={[styles.medCard, { backgroundColor: c.cardBg, borderColor: c.primaryLight }]}>
+          {/* Card header: actions row */}
           <View style={styles.medHeader}>
-            <TextInput style={[styles.medNameInput, { color: c.primary }]} value={med.name}
-              onChangeText={(txt) => updateMed(med.id, 'name', txt)}
-              placeholder={t('questionnaire.medNamePlaceholder')} placeholderTextColor="#aaa" />
-            <View style={styles.medHeaderActions}>
-              <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.medIconBtn}>
-                <Ionicons name="trash-outline" size={20} color={c.primary} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setExpanded((e) => ({ ...e, [med.id]: !e[med.id] }))} style={styles.medIconBtn}>
-                <Ionicons name={expanded[med.id] ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'} size={22} color={c.primary} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={() => setExpanded((e) => ({ ...e, [med.id]: !e[med.id] }))}
+              style={[styles.medExpandBtn, { borderColor: c.primaryLight }]}>
+              <Ionicons name={expanded[med.id] ? 'chevron-up' : 'chevron-down'} size={16} color={c.primary} />
+              <Text style={[styles.medExpandLabel, { color: c.primary }]}>
+                {expanded[med.id] ? t('questionnaire.collapse') : t('questionnaire.doseAndTime')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.medIconBtn}>
+              <Ionicons name="trash-outline" size={20} color={c.primary} />
+            </TouchableOpacity>
           </View>
+          {/* Name field — always visible, clearly labelled */}
+          <View style={styles.medNameRow}>
+            <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.medName')}</Text>
+            <TextInput
+              style={[styles.medNameInput, { borderColor: c.primaryLight, color: c.primary, backgroundColor: 'rgba(255,255,255,0.6)' }]}
+              value={med.name}
+              onChangeText={(txt) => updateMed(med.id, 'name', txt)}
+              placeholder={t('questionnaire.medNamePlaceholder')}
+              placeholderTextColor="#aaa"
+            />
+          </View>
+          {/* Expandable: dose + times */}
           {expanded[med.id] && (
             <View style={styles.medDetail}>
               <View style={styles.medRow}>
@@ -279,9 +322,13 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
               {med.times.map((tm, i) => (
                 <View key={i} style={styles.medRow}>
                   <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.time')}</Text>
-                  <TextInput style={[styles.medTimeInput, { borderColor: c.primaryLight, color: c.primary }]}
-                    value={tm} onChangeText={(v) => updateTime(med.id, i, v)}
-                    placeholder={t('questionnaire.timePlaceholder')} placeholderTextColor="#aaa" />
+                  <MedTimeInput value={tm} onChange={(v) => updateTime(med.id, i, v)}
+                    color={c.primary} borderColor={c.primaryLight} />
+                  {med.times.length > 1 && (
+                    <TouchableOpacity onPress={() => removeTime(med.id, i)} style={styles.medIconBtn}>
+                      <Ionicons name="close-circle-outline" size={20} color={c.primary} />
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
               <TouchableOpacity style={[styles.addTimeBtn, { borderColor: c.primary }]} onPress={() => addTime(med.id)}>
@@ -532,15 +579,21 @@ const styles = StyleSheet.create({
   numUnit:       { fontSize: 16, fontWeight: '600', marginLeft: 4 },
   medContainer:  { width: '100%', gap: 12 },
   medCard:       { borderRadius: 12, borderWidth: 1.5, overflow: 'hidden' },
-  medHeader:     { flexDirection: 'row', alignItems: 'center', padding: 14, justifyContent: 'space-between' },
-  medNameInput:  { fontSize: 16, fontWeight: '700', flex: 1 },
-  medHeaderActions: { flexDirection: 'row', gap: 8 },
+  medHeader:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, justifyContent: 'space-between' },
+  medExpandBtn:  { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 4 },
+  medExpandLabel:{ fontSize: 12, fontWeight: '600' },
+  medNameRow:    { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingBottom: 12, gap: 8 },
+  medNameInput:  { flex: 1, borderWidth: 1.5, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 15, fontWeight: '600' },
   medIconBtn:    { padding: 4 },
-  medDetail:     { paddingHorizontal: 14, paddingBottom: 14, gap: 10 },
+  medDetail:     { borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.07)', paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
   medRow:        { flexDirection: 'row', alignItems: 'center', gap: 8 },
   medLabel:      { fontSize: 14, fontWeight: '600', minWidth: 40 },
   medDoseInput:  { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, fontSize: 14, minWidth: 60, textAlign: 'center' },
-  medTimeInput:  { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, fontSize: 14, minWidth: 110 },
+  medTimeRow:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  medTimeSep:    { fontSize: 18, fontWeight: '800', marginHorizontal: 2 },
+  medStepper:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  medStepBtn:    { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  medStepVal:    { fontSize: 16, fontWeight: '700', minWidth: 26, textAlign: 'center' },
   addTimeBtn:    { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, gap: 6, alignSelf: 'flex-start', marginTop: 4 },
   addTimeBtnText:{ fontSize: 14, fontWeight: '600' },
   addMedBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 14, gap: 8 },
