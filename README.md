@@ -49,6 +49,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
 - 🌍 **Localisation** — full Portuguese (Brazilian) translation 🇧🇷, locale detected automatically from device settings
 - 📋 **Research questionnaires** *(beta)* — validated one-time instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) accessible from the Profile, with results unlocking after 14 diary days
+- 💊 **My Medications** — save regular treatments to your profile; they auto-populate the morning and evening medication questions
 
 ---
 
@@ -72,7 +73,11 @@ SleepDiaries/
 │   ├── InstructionsModal.jsx   # Full-screen instructions slideshow (coded, no PNGs)
 │   ├── ProfileModal.jsx        # Profile sheet (name, code, stats, glossary, questionnaires)
 │   ├── QuestionnaireModal.jsx  # Step-by-step one-time research questionnaire modal
-│   └── (tabs)/                 # Tab bar screens
+│   ├── MyMedicationsScreen.jsx         # Saved medication presets (accessible from Profile modal)
+│   ├── SleepMetricsScreen.jsx          # Sleep metrics glossary (push screen from Profile modal)
+│   ├── QuestionnairesScreen.jsx        # Questionnaires list (push screen from Profile modal)
+│   ├── QuestionnaireCreditsScreen.jsx  # Questionnaire credits (push screen from Settings)
+│   └── (tabs)/                         # Tab bar screens
 │       ├── _layout.jsx         # Custom tab bar (Ionicons, no image assets)
 │       ├── home.jsx            # Home screen
 │       ├── entry.jsx           # Entry tab with sleep stats dashboard
@@ -489,6 +494,7 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 // 'entries'              → JSON array of diary entry objects
 // 'seen_instructions'    → 'true' once the instructions modal has been dismissed
 // 'questionnaire_{id}'   → one object per completed one-time questionnaire
+// 'medication_presets'    → JSON array of saved medication preset objects
 
 // Diary entry structure:
 {
@@ -578,6 +584,16 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ---
 
+## 📄 Citation
+
+A citable archive of this software will be made available on Zenodo upon first release. The citation block will be added here once the DOI is assigned.
+
+If you use Sleep Diaries in your research in the meantime, please reference the GitHub repository:
+
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2025). *Sleep Diaries* [Software]. Circadia Lab. https://github.com/circadia-bio/SleepDiaries
+
+---
+
 ## 👥 Authors
 
 | Role | Names |
@@ -638,6 +654,14 @@ Contributions are welcome. If you are adapting this for a research study and wan
 
 ---
 
+## 🤝 Related Tools
+
+- 🌀 [**nonparametric-actigraphy-clustering**](https://github.com/circadia-bio/nonparametric-actigraphy-clustering) — unsupervised clustering of actigraphy rest-activity profiles using nonparametric methods
+- ⚡ [**ACTT_validation_study**](https://github.com/circadia-bio/ACTT_validation_study) — validation study for actigraphy-based sleep staging cut-points
+- 🔬 [**circadia-bio**](https://github.com/circadia-bio) — the Circadia Lab GitHub organisation
+
+---
+
 ## 📄 Licence
 
 ![](assets/images/logo.png)
@@ -671,6 +695,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Full Portuguese (Brazil) localisation — strings, questions, and image assets
 - [x] SVG support via react-native-svg-transformer
 - [x] One-time research questionnaires (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) *(beta)*
+- [x] Medication presets — auto-populate diary medication questions from saved treatments
 - [ ] Questionnaire result validation and removal of beta flag per instrument
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
