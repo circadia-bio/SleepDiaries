@@ -28,7 +28,18 @@ export default function ExportScreen() {
     try {
       const name = await loadName(); const entries = await loadEntries();
       if (!entries.length) { showAlert(t('export.noDataTitle'), t('export.noDataBody')); setLoading(null); return; }
-      await Share.share({ title: `sleep-diaries-${name ?? 'export'}-${new Date().toISOString().split('T')[0]}.${format}`, message: format === 'csv' ? await exportToCSV(name) : await exportToJSON(name) });
+      const content = format === 'csv' ? await exportToCSV(name) : await exportToJSON(name);
+      const filename = `sleep-diaries-${name ?? 'export'}-${new Date().toISOString().split('T')[0]}.${format}`;
+      if (Platform.OS === 'web') {
+        const mime = format === 'csv' ? 'text/csv' : 'application/json';
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        await Share.share({ title: filename, message: content });
+      }
     } catch (e) { showAlert(t('export.exportFailTitle'), e.message); }
     setLoading(null);
   };
