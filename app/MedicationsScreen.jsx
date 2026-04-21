@@ -172,14 +172,24 @@ export default function MedicationsScreen() {
                     <Text style={[styles.detailLabel, { fontFamily: FONTS.body }]}>
                       {t('questionnaire.dose')}
                     </Text>
+                    <TouchableOpacity
+                      style={mtStyles.btn}
+                      onPress={() => updateMed(med.id, 'dose', String(Math.max(0, (parseFloat(med.dose) || 0) - 5)))}>
+                      <Ionicons name="remove" size={14} color={ACCENT} />
+                    </TouchableOpacity>
                     <TextInput
                       style={[styles.doseInput, { fontFamily: FONTS.bodyMedium }]}
                       value={med.dose}
                       onChangeText={(v) => updateMed(med.id, 'dose', v)}
-                      placeholder={t('questionnaire.dosePlaceholder')}
+                      placeholder="0"
                       placeholderTextColor={MUTED}
                       keyboardType="numeric"
                     />
+                    <TouchableOpacity
+                      style={mtStyles.btn}
+                      onPress={() => updateMed(med.id, 'dose', String((parseFloat(med.dose) || 0) + 5))}>
+                      <Ionicons name="add" size={14} color={ACCENT} />
+                    </TouchableOpacity>
                     <Text style={[styles.detailLabel, { fontFamily: FONTS.body }]}>
                       {t('questionnaire.mgUnit')}
                     </Text>

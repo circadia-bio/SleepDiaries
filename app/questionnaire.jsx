@@ -314,9 +314,19 @@ const MedicationInput = ({ value = [], onChange, theme }) => {
             <View style={styles.medDetail}>
               <View style={styles.medRow}>
                 <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.dose')}</Text>
+                <TouchableOpacity
+                  style={[styles.medStepBtn, { borderColor: c.primaryLight }]}
+                  onPress={() => updateMed(med.id, 'dose', String(Math.max(0, (parseFloat(med.dose) || 0) - 5)))}>
+                  <Ionicons name="remove" size={14} color={c.primary} />
+                </TouchableOpacity>
                 <TextInput style={[styles.medDoseInput, { borderColor: c.primaryLight, color: c.primary }]}
                   value={med.dose} onChangeText={(txt) => updateMed(med.id, 'dose', txt)}
-                  placeholder={t('questionnaire.dosePlaceholder')} keyboardType="numeric" placeholderTextColor="#aaa" />
+                  placeholder="0" keyboardType="numeric" placeholderTextColor="#aaa" />
+                <TouchableOpacity
+                  style={[styles.medStepBtn, { borderColor: c.primaryLight }]}
+                  onPress={() => updateMed(med.id, 'dose', String((parseFloat(med.dose) || 0) + 5))}>
+                  <Ionicons name="add" size={14} color={c.primary} />
+                </TouchableOpacity>
                 <Text style={[styles.medLabel, { color: c.primary }]}>{t('questionnaire.mgUnit')}</Text>
               </View>
               {med.times.map((tm, i) => (
