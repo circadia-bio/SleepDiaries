@@ -6,6 +6,8 @@ An open-source, research-grade sleep diary app built with React Native and Expo.
 
 [![Tests](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml/badge.svg)](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0--beta.1-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19683378.svg)](https://doi.org/10.5281/zenodo.19683378)
+[![Beta](https://img.shields.io/badge/status-beta-orange)](#)
 [![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
@@ -586,11 +588,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ## 📄 Citation
 
-A citable archive of this software will be made available on Zenodo upon first release. The citation block will be added here once the DOI is assigned.
-
-If you use Sleep Diaries in your research in the meantime, please reference the GitHub repository:
-
-**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2025). *Sleep Diaries* [Software]. Circadia Lab. https://github.com/circadia-bio/SleepDiaries
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.0.0-beta.1) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
 
 ---
 

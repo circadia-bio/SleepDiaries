@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Sleep Diaries"
+version: 1.0.0-beta.1
+date-released: 2026-04-21
+doi: 10.5281/zenodo.19683378
+url: "https://github.com/circadia-bio/SleepDiaries"
+repository-code: "https://github.com/circadia-bio/SleepDiaries"
+license: MIT
+abstract: >
+  An open-source, research-grade sleep diary app built with React Native and
+  Expo. Available on iOS, Android, and the web. Implements the Consensus Sleep
+  Diary methodology and includes validated one-time research questionnaires
+  (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ). Designed to be
+  easily adapted by researchers and clinicians for their own sleep studies.
+authors:
+  - family-names: França
+    given-names: Lucas G. S.
+    affiliation: Northumbria University
+    orcid: "https://orcid.org/0000-0002-6334-7498"
+  - family-names: Leocadio-Miguel
+    given-names: Mario
+    orcid: "https://orcid.org/0000-0002-7248-3529"
+  - family-names: Baehl
+    given-names: Bri
+  - family-names: Howard
+    given-names: Jacob
+  - family-names: Kussow
+    given-names: Frederic
+  - family-names: Luna Colón
+    given-names: Yuliana
+keywords:
+  - sleep diary
+  - sleep research
+  - React Native
+  - Expo
+  - PWA
+  - chronobiology
+  - sleep questionnaires
