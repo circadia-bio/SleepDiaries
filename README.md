@@ -39,6 +39,7 @@ The app is intentionally simple and modular — the question sets, input types, 
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
+- 🖼️ **Share card** — share a branded sleep report image to social media from the final report screen, with the original home screen background; works on iOS, Android, and mobile web (PWA)
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
 - ⚙️ **Settings** — notifications toggle, text-to-speech, language, questionnaire credits, account management
 - 👤 **Profile** — editable name and research code, summary stats, sleep metrics glossary, quick actions
@@ -650,6 +651,8 @@ Contributions are welcome. If you are adapting this for a research study and wan
 | `react-native-svg-transformer` | latest | SVG imports as React components |
 | `babel-preset-expo` | ~55.0.0 | Babel transpilation |
 | `expo-document-picker` | ~55.0.0 | JSON file import |
+| `react-native-view-shot` | latest | Capture React Native views as images (share card) |
+| `expo-sharing` | ~55.0.0 | Native file sharing (share card) |
 | `expo-asset` | ~55.0.0 | Asset preloading at startup |
 
 ---
@@ -696,6 +699,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] SVG support via react-native-svg-transformer
 - [x] One-time research questionnaires (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) *(beta)*
 - [x] Medication presets — auto-populate diary medication questions from saved treatments
+- [x] Share card — share a branded sleep report image from the final report screen
 - [ ] Questionnaire result validation and removal of beta flag per instrument
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
