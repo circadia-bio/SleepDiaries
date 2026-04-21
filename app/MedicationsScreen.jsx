@@ -24,6 +24,42 @@ const CARD     = '#fff';
 const TEXT     = '#1E3A5F';
 const MUTED    = '#94A3B8';
 
+const MedTimeInput = ({ value = '', onChange }) => {
+  const parse = (v) => {
+    const [h, m] = (v || '').split(':').map(Number);
+    return { h: isNaN(h) ? 0 : h, m: isNaN(m) ? 0 : m };
+  };
+  const { h, m } = parse(value);
+  const fmt = (n) => String(n).padStart(2, '0');
+  const update = (newH, newM) => onChange(`${fmt(newH)}:${fmt(newM)}`);
+  const MedStepper = ({ val, max, onVal }) => (
+    <View style={mtStyles.stepper}>
+      <TouchableOpacity onPress={() => onVal(val <= 0 ? max : val - 1)} style={mtStyles.btn}>
+        <Ionicons name="remove" size={14} color={ACCENT} />
+      </TouchableOpacity>
+      <Text style={mtStyles.val}>{fmt(val)}</Text>
+      <TouchableOpacity onPress={() => onVal(val >= max ? 0 : val + 1)} style={mtStyles.btn}>
+        <Ionicons name="add" size={14} color={ACCENT} />
+      </TouchableOpacity>
+    </View>
+  );
+  return (
+    <View style={mtStyles.row}>
+      <MedStepper val={h} max={23} onVal={(v) => update(v, m)} />
+      <Text style={mtStyles.sep}>:</Text>
+      <MedStepper val={m} max={59} onVal={(v) => update(h, v)} />
+    </View>
+  );
+};
+
+const mtStyles = StyleSheet.create({
+  row:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  sep:     { fontSize: 18, fontWeight: '800', color: TEXT, marginHorizontal: 2 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  btn:     { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: BORDER, alignItems: 'center', justifyContent: 'center' },
+  val:     { fontSize: 16, fontWeight: '700', minWidth: 26, textAlign: 'center', color: TEXT },
+});
+
 export default function MedicationsScreen() {
   const router = useRouter();
   const [presets, setPresets] = useState([]);
@@ -95,8 +131,30 @@ export default function MedicationsScreen() {
 
           {presets.map((med) => (
             <View key={med.id} style={styles.card}>
-              {/* Card header row */}
+              {/* Card header: actions row */}
               <View style={styles.cardHeader}>
+                <TouchableOpacity
+                  onPress={() => setExpanded((e) => ({ ...e, [med.id]: !e[med.id] }))}
+                  style={styles.expandBtn}
+                >
+                  <Ionicons
+                    name={expanded[med.id] ? 'chevron-up' : 'chevron-down'}
+                    size={16} color={ACCENT}
+                  />
+                  <Text style={[styles.expandLabel, { fontFamily: FONTS.body }]}>
+                    {expanded[med.id] ? t('questionnaire.collapse') : t('questionnaire.doseAndTime')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.iconBtn}>
+                  <Ionicons name="trash-outline" size={22} color="#C0392B" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Name field — always visible, clearly labelled */}
+              <View style={styles.nameRow}>
+                <Text style={[styles.detailLabel, { fontFamily: FONTS.body }]}>
+                  {t('questionnaire.medName')}
+                </Text>
                 <TextInput
                   style={[styles.nameInput, { fontFamily: FONTS.body }]}
                   value={med.name}
@@ -104,18 +162,6 @@ export default function MedicationsScreen() {
                   placeholder={t('medications.namePlaceholder')}
                   placeholderTextColor={MUTED}
                 />
-                <TouchableOpacity
-                  onPress={() => setExpanded((e) => ({ ...e, [med.id]: !e[med.id] }))}
-                  style={styles.iconBtn}
-                >
-                  <Ionicons
-                    name={expanded[med.id] ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'}
-                    size={24} color={ACCENT}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => removeMed(med.id)} style={styles.iconBtn}>
-                  <Ionicons name="trash-outline" size={22} color="#C0392B" />
-                </TouchableOpacity>
               </View>
 
               {/* Expanded detail */}
@@ -145,13 +191,7 @@ export default function MedicationsScreen() {
                       <Text style={[styles.detailLabel, { fontFamily: FONTS.body }]}>
                         {t('questionnaire.time')}
                       </Text>
-                      <TextInput
-                        style={[styles.timeInput, { fontFamily: FONTS.bodyMedium }]}
-                        value={tm}
-                        onChangeText={(v) => updateTime(med.id, i, v)}
-                        placeholder={t('questionnaire.timePlaceholder')}
-                        placeholderTextColor={MUTED}
-                      />
+                      <MedTimeInput value={tm} onChange={(v) => updateTime(med.id, i, v)} />
                       {med.times.length > 1 && (
                         <TouchableOpacity onPress={() => removeTime(med.id, i)} style={styles.iconBtn}>
                           <Ionicons name="close-circle-outline" size={20} color={MUTED} />
@@ -194,14 +234,16 @@ const styles = StyleSheet.create({
   emptyCard:   { backgroundColor: CARD, borderRadius: 14, borderWidth: 1.5, borderColor: BORDER, alignItems: 'center', paddingVertical: 32, gap: 12 },
   emptyText:   { fontSize: SIZES.bodySmall, color: MUTED, textAlign: 'center' },
   card:        { backgroundColor: CARD, borderRadius: 14, borderWidth: 1.5, borderColor: BORDER, overflow: 'hidden' },
-  cardHeader:  { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, gap: 8 },
-  nameInput:   { flex: 1, fontSize: SIZES.body, color: TEXT },
+  cardHeader:  { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, gap: 8, justifyContent: 'space-between' },
+  expandBtn:   { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: BORDER, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 4 },
+  expandLabel: { fontSize: SIZES.caption, color: ACCENT },
+  nameRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingBottom: 12, gap: 8 },
+  nameInput:   { flex: 1, fontSize: SIZES.body, color: TEXT, borderWidth: 1.5, borderColor: BORDER, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   iconBtn:     { padding: 4 },
   cardDetail:  { borderTopWidth: 1, borderTopColor: '#E2EAF4', paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
   detailRow:   { flexDirection: 'row', alignItems: 'center', gap: 8 },
   detailLabel: { fontSize: SIZES.bodySmall, color: TEXT, minWidth: 38 },
   doseInput:   { borderWidth: 1.5, borderColor: BORDER, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, fontSize: SIZES.bodySmall, minWidth: 64, textAlign: 'center', color: TEXT },
-  timeInput:   { flex: 1, borderWidth: 1.5, borderColor: BORDER, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, fontSize: SIZES.bodySmall, color: TEXT },
   addTimeBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 4 },
   addTimeBtnText: { fontSize: SIZES.bodySmall, color: ACCENT },
   addBtn:      { backgroundColor: ACCENT, borderRadius: 14, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
