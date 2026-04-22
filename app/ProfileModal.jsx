@@ -2,7 +2,7 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
 import t, { locale } from '../i18n';
+import ScreenBackground from '../components/ScreenBackground';
 
 const computeStreak = (entries) => {
   const today = new Date().toISOString().split('T')[0];
@@ -71,8 +72,11 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={[styles.root, { paddingTop: insets.top }]}>
+        <ScreenBackground variant="home" />
+        <View style={styles.overlay} />
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { fontFamily: FONTS.heading }]}>{t('profile.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -163,7 +167,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 }
 
 const styles = StyleSheet.create({
-  root:        { flex: 1, backgroundColor: '#EEF5FF' },
+  root:        { flex: 1, backgroundColor: 'transparent' },
+  overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(238,245,255,0.40)' },
   header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
