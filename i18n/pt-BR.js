@@ -49,6 +49,8 @@ export default {
     statStreak:      'Sequência atual',
     statStreakUnit:  'dias',
     statSince:       'Membro desde',
+    statQuestionnaires: 'Questionários',
+    statMedications:    'Medicamentos',
     noEntries:       'Nenhum registro ainda',
 
     sectionGlossary: 'Métricas do sono explicadas',

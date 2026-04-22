@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
+import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
 import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
@@ -26,7 +26,7 @@ const formatDate = (dateStr) => {
 
 const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statChip}>
-    <Ionicons name={icon} size={22} color={color} />
+    <Ionicons name={icon} size={52} color={color} />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -44,16 +44,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [eveningCount, setEveningCount] = useState(0);
   const [streak, setStreak]             = useState(0);
   const [memberSince, setMemberSince]   = useState(null);
+  const [questionnaireCount, setQuestionnaireCount] = useState(0);
+  const [medicationCount, setMedicationCount]       = useState(0);
   const router = useRouter();
 
   const load = useCallback(async () => {
-    const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
+    const [n, c, entries, qResults, meds] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets()]);
     setName(n ?? ''); setCode(c ?? '');
     const morningCount = entries.filter((e) => e.type === 'morning').length;
     setMorningCount(morningCount);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
     setStreak(computeStreak(entries));
     setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
+    setQuestionnaireCount(qResults.length);
+    setMedicationCount((meds ?? []).length);
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
@@ -114,6 +118,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <StatChip icon="moon-outline"     value={eveningCount}                               label={t('profile.statEvening')} color="#2A6CB5" />
             <StatChip icon="flame-outline"    value={`${streak} ${t('profile.statStreakUnit')}`} label={t('profile.statStreak')}  color="#E07A20" />
             <StatChip icon="calendar-outline" value={formatDate(memberSince)}                    label={t('profile.statSince')}   color="#4A7BB5" />
+            <StatChip icon="clipboard-outline" value={questionnaireCount}                         label={t('profile.statQuestionnaires')} color="#4A7BB5" />
+            <StatChip icon="medkit-outline"    value={medicationCount}                            label={t('profile.statMedications')}   color="#4A7BB5" />
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionActions')}</Text>
@@ -174,10 +180,10 @@ const styles = StyleSheet.create({
   editCancelBtn: { padding: 10 },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statChip:      { flex: 1, minWidth: '45%', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', alignItems: 'center', paddingVertical: 14, gap: 4 },
+  statChip:      { flex: 1, minWidth: '45%', aspectRatio: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 4, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   statValue:     { fontSize: SIZES.body, textAlign: 'center', paddingHorizontal: 6 },
   statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
-  card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
+  card:          { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },

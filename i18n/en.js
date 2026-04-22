@@ -49,6 +49,8 @@ export default {
     statStreak:      'Current streak',
     statStreakUnit:  'days',
     statSince:       'Member since',
+    statQuestionnaires: 'Questionnaires',
+    statMedications:    'Medications',
     noEntries:       'No entries yet',
 
     sectionGlossary: 'Sleep metrics explained',
