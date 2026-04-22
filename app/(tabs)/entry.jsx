@@ -21,7 +21,7 @@ const StatBox = ({ icon, value, label, color = '#4A7BB5' }) => (
     accessible={true}
     accessibilityLabel={`${value} ${label}`}
   >
-    <Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
+    <Ionicons name={icon} size={32} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -52,7 +52,9 @@ export default function EntryTab() {
           accessible={true}
           accessibilityLabel={`${t('profile.statStreak')}: ${s?.streak ?? 0} ${t('profile.statStreakUnit')}`}
         >
-          <Text style={styles.streakFlame} accessibilityElementsHidden={true} importantForAccessibility="no">🔥</Text>
+          <View style={[styles.streakIconWrap, { backgroundColor: (s?.streak ?? 0) === 0 ? '#4A7BB520' : '#E07A2020' }]}>
+            <Ionicons name="flame" size={36} color={(s?.streak ?? 0) === 0 ? '#4A7BB5' : '#E07A20'} accessibilityElementsHidden={true} importantForAccessibility="no" />
+          </View>
           <View>
             <Text style={[styles.streakValue, { fontFamily: FONTS.heading }]}>{s?.streak ?? '—'} {t('profile.statStreakUnit')}</Text>
             <Text style={[styles.streakLabel, { fontFamily: FONTS.bodyMedium }]}>{t('profile.statStreak')}</Text>
@@ -60,8 +62,8 @@ export default function EntryTab() {
         </View>
 
         <View style={styles.statRow}>
-          <StatBox icon="sunny-outline"    value={s?.morningCount ?? '—'} label={t('profile.statMorning')} color="#E07A20" />
-          <StatBox icon="moon-outline"     value={s?.eveningCount ?? '—'} label={t('profile.statEvening')} color="#2A6CB5" />
+          <StatBox icon="sunny-outline"    value={s?.morningCount ?? '—'} label={t('profile.statMorningShort')} color="#E07A20" />
+          <StatBox icon="moon-outline"     value={s?.eveningCount ?? '—'} label={t('profile.statEveningShort')} color="#2A6CB5" />
           <StatBox icon="calendar-outline" value={s?.daysInStudy  ?? '—'} label={t('entry.daysInStudy')}   color="#4A7BB5" />
         </View>
 
@@ -105,24 +107,31 @@ const styles = StyleSheet.create({
   cardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
   cardImage:   { width: '100%', height: '100%' },
   streakBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 16,
-    borderWidth: 1.5, borderColor: '#A8C8E8', paddingHorizontal: 20, paddingVertical: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 20, paddingVertical: 18,
+    shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
-  streakFlame: { fontSize: 36 },
+  streakIconWrap: { width: 64, height: 64, borderRadius: 16, backgroundColor: '#E07A2020', alignItems: 'center', justifyContent: 'center' },
   streakValue: { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
   streakLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8', marginTop: 2 },
   statRow: { flexDirection: 'row', gap: 8 },
   statBox: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 14,
-    borderWidth: 1.5, borderColor: '#A8C8E8', alignItems: 'center', paddingVertical: 14, gap: 6,
+    flex: 1, aspectRatio: 1,
+    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 6,
+    shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
   statValue: { fontSize: SIZES.body },
   statLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
   statsUnlockHint: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 12,
-    borderWidth: 1, borderColor: '#A8C8E8', paddingHorizontal: 14, paddingVertical: 12,
+    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 14, paddingVertical: 12,
+    shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
   },
   statsUnlockText: { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
 });

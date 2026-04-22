@@ -44,8 +44,10 @@ export default {
     researchCodePlaceholder: 'Research code',
 
     sectionSummary:  'Summary',
-    statMorning:     'Morning entries',
-    statEvening:     'Evening entries',
+    statMorning:      'Morning entries',
+    statEvening:      'Evening entries',
+    statMorningShort: 'Morning',
+    statEveningShort: 'Evening',
     statStreak:      'Current streak',
     statStreakUnit:  'days',
     statSince:       'Member since',

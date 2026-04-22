@@ -44,8 +44,10 @@ export default {
     researchCodePlaceholder: 'Código de pesquisa',
 
     sectionSummary:  'Resumo',
-    statMorning:     'Registros matinais',
-    statEvening:     'Registros noturnos',
+    statMorning:      'Registros matinais',
+    statEvening:      'Registros noturnos',
+    statMorningShort: 'Matinal',
+    statEveningShort: 'Noturno',
     statStreak:      'Sequência atual',
     statStreakUnit:  'dias',
     statSince:       'Membro desde',
