@@ -164,7 +164,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 
 const styles = StyleSheet.create({
   root:        { flex: 1, backgroundColor: '#EEF5FF' },
-  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
+  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
@@ -175,9 +175,9 @@ const styles = StyleSheet.create({
   codeRow:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
   codeText:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   editRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%' },
-  editInput:     { flex: 1, backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#7EB0DC', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F' },
-  editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 8, padding: 10 },
-  editCancelBtn: { padding: 10 },
+  editInput:     { flex: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+  editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 12, padding: 12, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
+  editCancelBtn: { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statChip:      { flex: 1, minWidth: '45%', aspectRatio: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 4, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
