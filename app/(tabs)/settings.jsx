@@ -114,6 +114,10 @@ export default function SettingsScreen() {
           <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"
             onPress={() => router.push('/QuestionnaireCreditsScreen')}
             right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
+          <View style={styles.divider} />
+          <Row label={t('settings.sectionThresholds')} icon="stats-chart-outline"
+            onPress={() => router.push('/ThresholdReferencesScreen')}
+            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
         </View>
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccount')}</Text>
