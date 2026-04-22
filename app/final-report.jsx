@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   starLabel:    { fontSize: SIZES.body, marginLeft: 6 },
   disclaimer:   { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
-  thresholdNote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 18, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
+  thresholdNote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
 
   // Questionnaire report cards
   qReportCard:       { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
