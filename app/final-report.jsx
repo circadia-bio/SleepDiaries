@@ -622,8 +622,8 @@ export default function FinalReportScreen() {
           </Section>
 
           <Section title={t('report.sleepQuality')}>
-            <MetricCard icon="star-outline"  label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) : '—'} color="#E07A20" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#E07A20" /> : null} />
-            <MetricCard icon="sunny-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) : '—'} color="#4A7BB5" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#4A7BB5" /> : null} />
+            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
+            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
           </Section>
 
           <Section title={t('report.nightDisruptions')}>
