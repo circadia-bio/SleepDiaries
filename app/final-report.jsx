@@ -345,15 +345,16 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   };
   const eff     = metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '\u2014';
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
+  const effColor  = effGood ? '#2E7D32' : '#F59E0B';
   const stats   = [
-    { label: 'Sleep Duration',   value: fmt(metrics.avgSleepDuration),    accent: '#7EB8F7', emoji: '\u23F1\uFE0F' },
-    { label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#6BCBA0' : '#F4A460', emoji: '\uD83D\uDCCA' },
-    { label: 'Onset Latency',    value: fmt(metrics.avgSleepOnsetLatency), accent: '#7EB8F7', emoji: '\u23F3' },
-    { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: '#7EB8F7', emoji: '\uD83C\uDF19' },
-    { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#7EB8F7', emoji: '\uD83D\uDD14' },
-    { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#7EB8F7', emoji: '\u2600\uFE0F' },
-    { label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: '#7EB8F7', emoji: '\uD83C\uDF77' },
-    { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#7EB8F7', emoji: '\uD83C\uDF05' },
+    { label: 'Sleep Duration',   value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration),         emoji: '\u23F1\uFE0F' },
+    { label: 'Sleep Efficiency', value: eff,                               accent: effColor,                                        emoji: '\uD83D\uDCCA' },
+    { label: 'Onset Latency',    value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency),       emoji: '\u23F3' },
+    { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO),                      emoji: '\uD83C\uDF19' },
+    { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
+    { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
+    { label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
+    { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
   ];
   const cols    = 2;
   const cellW   = (cW - cellGap * (cols - 1)) / cols;
@@ -458,14 +459,14 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
 
   const stats = [
-    { emoji: '⏱️', label: 'Sleep Duration',  value: fmt(metrics.avgSleepDuration),    accent: '#7EB8F7' },
-    { emoji: '📊', label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#6BCBA0' : '#F4A460' },
-    { emoji: '⏳', label: 'Onset Latency',   value: fmt(metrics.avgSleepOnsetLatency), accent: '#7EB8F7' },
-    { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: '#7EB8F7' },
-    { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#7EB8F7' },
-    { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#7EB8F7' },
-    { emoji: '🍷', label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: '#7EB8F7' },
-    { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#7EB8F7' },
+    { emoji: '⏱️', label: 'Sleep Duration',  value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration) },
+    { emoji: '📊', label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#2E7D32' : '#F59E0B' },
+    { emoji: '⏳', label: 'Onset Latency',   value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency) },
+    { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO) },
+    { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#4A7BB5' },
+    { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
+    { emoji: '🍷', label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
+    { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#E07A20' },
   ];
 
   return (
