@@ -2,7 +2,7 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
@@ -71,12 +71,10 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
     await saveResearchCode(draftCode.trim()); setCode(draftCode.trim()); setEditingCode(false);
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      <View style={[styles.root, { paddingTop: insets.top }]}>
-        <ScreenBackground variant="home" />
-        <View style={styles.overlay} />
+  const inner = (
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <ScreenBackground variant="home" />
+      <View style={styles.overlay} />
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { fontFamily: FONTS.heading }]}>{t('profile.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -160,8 +158,17 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </View>
         </ScrollView>
       </View>
+  );
 
+  if (Platform.OS === 'web') {
+    if (!visible) return null;
+    return <View style={styles.webOverlay}>{inner}</View>;
+  }
 
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      {inner}
     </Modal>
   );
 }
@@ -193,5 +200,5 @@ const styles = StyleSheet.create({
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   divider:       { height: 1, backgroundColor: '#E2EAF4', marginHorizontal: 16 },
-
+  webOverlay:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
 });

@@ -19,7 +19,7 @@
  *
  * Theme: purple/violet to distinguish from morning (amber) and evening (blue).
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Modal, View, Text, TouchableOpacity, ScrollView,
   StyleSheet, Platform, TextInput,
@@ -294,15 +294,19 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
   const [currentIndex, setCurrentIndex] = useState(0);
   const [result, setResult]             = useState(null);
 
-  const items = questionnaire?.items ?? [];
-  const total = items.length;
-  const item  = items[currentIndex];
-
   const handleShow = useCallback(() => {
     setAnswers(buildInitialAnswers(questionnaire?.items ?? []));
     setCurrentIndex(0);
     setResult(null);
   }, [questionnaire]);
+
+  useEffect(() => {
+    if (visible) handleShow();
+  }, [visible, handleShow]);
+
+  const items = questionnaire?.items ?? [];
+  const total = items.length;
+  const item  = items[currentIndex];
 
   const currentValue = answers[item?.id];
   const canProceed   = item ? isAnswered(item, currentValue) : false;
@@ -328,15 +332,8 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
 
   if (!questionnaire) return null;
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-      onShow={handleShow}
-    >
-      <View style={[styles.root, { paddingTop: insets.top }]}>
+  const inner = (
+    <View style={[styles.root, { paddingTop: insets.top }]}>
 
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -427,9 +424,24 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
                 <Ionicons name="chevron-forward" size={22} color="#fff" />
               </TouchableOpacity>
             </View>
-          </>
+          </>        
         )}
       </View>
+  );
+
+  if (Platform.OS === 'web') {
+    if (!visible) return null;
+    return <View style={styles.webOverlay}>{inner}</View>;
+  }
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      {inner}
     </Modal>
   );
 }
@@ -558,4 +570,5 @@ const styles = StyleSheet.create({
     backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center',
   },
   doneBtnText:    { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
+  webOverlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
 });
