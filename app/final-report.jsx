@@ -383,22 +383,8 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   const logoH = 48;  const logoW = logoH * (160 / 60);
   const urlY  = H - 28;
   const logoY = urlY - logoH - 28;
-  // Try DOM first (fast), then fetch the asset directly (reliable on PWA)
-  const domLogoSrc = Array.from(document.querySelectorAll('img'))
-    .map(i => i.src)
-    .find(s => s.includes('logo') && !s.includes('icon')) || null;
-  // If not in DOM, scan the JS bundles for the hashed asset path
-  const logoSrc = domLogoSrc || await (async () => {
-    try {
-      const scripts = Array.from(document.querySelectorAll('script[src]')).map(s => s.src);
-      for (const src of scripts) {
-        const text = await fetch(src).then(r => r.text()).catch(() => '');
-        const match = text.match(/["'](\/_expo\/static\/media\/logo\.[a-f0-9]+\.png)["']/);
-        if (match) return window.location.origin + match[1];
-      }
-    } catch (_) {}
-    return '/assets/images/logo.png';
-  })();
+  // Logo is copied to a fixed path by deploy.sh — no DOM scanning needed
+  const logoSrc = '/assets/images/logo.png';
   await new Promise((resolve) => {
     const logoImg = document.createElement('img');
     logoImg.crossOrigin = 'anonymous';
@@ -765,7 +751,7 @@ const shareStyles = StyleSheet.create({
   offscreen: { position: 'absolute', top: -9999, left: -9999, opacity: 0, pointerEvents: 'none', overflow: 'hidden' },
   card:      { borderRadius: 0, overflow: 'hidden' },
   overlay:   { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(238,245,255,0.45)' },
-  content:   { position: 'absolute', top: 0, bottom: 120, left: 0, right: 0, paddingHorizontal: 28, paddingTop: 140, alignItems: 'center', justifyContent: 'center' },
+  content:   { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, paddingHorizontal: 28, paddingTop: 140, paddingBottom: 140, alignItems: 'center', justifyContent: 'center' },
   bottomBrand: { position: 'absolute', bottom: 28, left: 0, right: 0, alignItems: 'center' },
   logo:      { width: 140, height: 52, marginBottom: 8 },
   footer:    { fontSize: 13, color: '#1E3A5F', textAlign: 'center', letterSpacing: 0.4 },

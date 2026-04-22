@@ -148,4 +148,8 @@ cp web/splashscreens/*.png docs/splashscreens/
 # iphone_16_pro uses same dimensions as iphone_15_pro
 cp web/splashscreens/iphone_15_pro.png docs/splashscreens/iphone_16_pro.png
 
+# Copy logo to a fixed unhashed path for use in web share card canvas
+mkdir -p docs/assets/images
+cp assets/images/logo.png docs/assets/images/logo.png
+
 echo "✅ Done — drag docs/ to Netlify"
