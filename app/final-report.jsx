@@ -353,7 +353,7 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO),                      emoji: '\uD83C\uDF19' },
     { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
     { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
-    { label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
+    { label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
     { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
   ];
   const cols    = 2;
@@ -383,33 +383,42 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   const logoH = 48;  const logoW = logoH * (160 / 60);
   const urlY  = H - 28;
   const logoY = urlY - logoH - 28;
-  // Expo hashes asset filenames at build time, so we can't hardcode the path.
-  // Instead, find any <img> in the DOM whose src contains 'logo' to get the
-  // real hashed URL that Expo has already resolved.
-  const logoSrc = Array.from(document.querySelectorAll('img'))
+  // Try DOM first (fast), then fetch the asset directly (reliable on PWA)
+  const domLogoSrc = Array.from(document.querySelectorAll('img'))
     .map(i => i.src)
-    .find(s => s.includes('logo') && !s.includes('icon'))  || null;
-  if (logoSrc) {
-    await new Promise((resolve) => {
-      const logoImg = document.createElement('img');
-      logoImg.crossOrigin = 'anonymous';
-      logoImg.onload = () => {
-        const aspect = logoImg.naturalWidth / logoImg.naturalHeight;
-        const drawH = logoH;
-        const drawW = drawH * aspect;
-        ctx.drawImage(logoImg, (W - drawW) / 2, logoY, drawW, drawH);
-        resolve();
-      };
-      logoImg.onerror = resolve;
-      logoImg.src = logoSrc;
-    });
-  } else {
-    // Fallback: draw text if logo image not found in DOM
-    ctx.fillStyle = '#4A7BB5';
-    ctx.font = 'bold 16px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sleep Diaries', W / 2, logoY + logoH / 2);
-  }
+    .find(s => s.includes('logo') && !s.includes('icon')) || null;
+  // If not in DOM, scan the JS bundles for the hashed asset path
+  const logoSrc = domLogoSrc || await (async () => {
+    try {
+      const scripts = Array.from(document.querySelectorAll('script[src]')).map(s => s.src);
+      for (const src of scripts) {
+        const text = await fetch(src).then(r => r.text()).catch(() => '');
+        const match = text.match(/["'](\/_expo\/static\/media\/logo\.[a-f0-9]+\.png)["']/);
+        if (match) return window.location.origin + match[1];
+      }
+    } catch (_) {}
+    return '/assets/images/logo.png';
+  })();
+  await new Promise((resolve) => {
+    const logoImg = document.createElement('img');
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.onload = () => {
+      const aspect = logoImg.naturalWidth / logoImg.naturalHeight;
+      const drawH = logoH;
+      const drawW = drawH * aspect;
+      ctx.drawImage(logoImg, (W - drawW) / 2, logoY, drawW, drawH);
+      resolve();
+    };
+    logoImg.onerror = () => {
+      // Last resort: draw text
+      ctx.fillStyle = '#4A7BB5';
+      ctx.font = 'bold 16px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sleep Diaries', W / 2, logoY + logoH / 2);
+      resolve();
+    };
+    logoImg.src = logoSrc;
+  });
   ctx.fillStyle = '#1E3A5F';
   ctx.font = '13px system-ui, sans-serif';
   ctx.textAlign = 'center';
@@ -465,7 +474,7 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
     { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO) },
     { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#4A7BB5' },
     { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
-    { emoji: '🍷', label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
+    { emoji: '🍷', label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
     { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#E07A20' },
   ];
 
