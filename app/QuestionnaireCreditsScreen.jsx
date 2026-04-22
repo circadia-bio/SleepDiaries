@@ -47,14 +47,14 @@ export default function QuestionnaireCreditsScreen() {
 
 const styles = StyleSheet.create({
   root:        { flex: 1, backgroundColor: '#EEF5FF' },
-  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
+  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   backBtn:     { width: 44, alignItems: 'flex-start' },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
-  note:        { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24 },
+  note:        { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24, textAlign: 'center' },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
-  card:        { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden', paddingHorizontal: 16 },
-  divider:     { height: 1, backgroundColor: '#E2EAF4' },
+  card:        { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', paddingHorizontal: 16, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  divider:     { height: 1, backgroundColor: 'rgba(226,234,244,0.8)' },
   creditRow:   { paddingVertical: 14, gap: 4 },
   creditTitle: { fontSize: SIZES.bodySmall, color: '#1E3A5F' },
   creditBody:  { fontSize: 13, color: '#94A3B8', lineHeight: 20 },
