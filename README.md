@@ -28,6 +28,8 @@ Sleep Diaries is a cross-platform app (iOS, Android, and web) that guides users 
 
 The app is intentionally simple and modular — the question sets, input types, themes, and data storage can all be customised without touching the core navigation or UI logic.
 
+It also includes a suite of validated one-time research questionnaires (ESS, ISI, MEQ, PSQI, and others), a scored final report unlocking after 14 diary days, and support for researcher-assigned participant codes — making it suitable for deployment in structured sleep studies.
+
 ---
 
 ## ✨ Features
@@ -80,6 +82,7 @@ SleepDiaries/
 │   ├── SleepMetricsScreen.jsx          # Sleep metrics glossary (push screen from Profile modal)
 │   ├── QuestionnairesScreen.jsx        # Questionnaires list (push screen from Profile modal)
 │   ├── QuestionnaireCreditsScreen.jsx  # Questionnaire credits (push screen from Settings)
+│   ├── ThresholdReferencesScreen.jsx   # References for the metric thresholds used in the final report
 │   └── (tabs)/                         # Tab bar screens
 │       ├── _layout.jsx         # Custom tab bar (Ionicons, no image assets)
 │       ├── home.jsx            # Home screen
@@ -87,7 +90,8 @@ SleepDiaries/
 │       └── settings.jsx        # Settings (includes questionnaire credits)
 ├── components/
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
-│   └── NavButtons.jsx          # Questionnaire Back / Next buttons
+│   ├── NavButtons.jsx          # Questionnaire Back / Next buttons
+│   └── ScreenBackground.jsx    # Shared gradient/background wrapper used across screens
 ├── data/
 │   ├── questions.js            # ⭐ Daily diary question definitions — start here to customise
 │   ├── questions.pt-BR.js      # Portuguese (BR) translations of question text
@@ -482,7 +486,7 @@ final-report        → Sleep metrics report
 export              → CSV / JSON export + JSON import
 ```
 
-The `ProfileModal` also hosts the `QuestionnaireModal` inline — tapping Start or Redo on a questionnaire opens it as a page sheet on top of the profile, without leaving the screen.
+The `ProfileModal` also hosts the `QuestionnaireModal` inline — tapping Start or Redo on a questionnaire opens it as a page sheet on top of the profile, without leaving the screen. `InstructionsModal` is a standalone screen in `app/` pushed from the home screen.
 
 ---
 
@@ -635,24 +639,24 @@ Contributions are welcome. If you are adapting this for a research study and wan
 |---------|---------|---------|
 | `expo` | ~55.0.0 | Core Expo SDK |
 | `expo-router` | ~55.0.0 | File-based navigation |
-| `expo-localization` | ~55.0.0 | Device locale detection |
+| `expo-localization` | ~55.0.12 | Device locale detection |
 | `react-native` | 0.83.2 | Cross-platform mobile framework |
 | `react` | 19.2.0 | React framework |
 | `@expo/vector-icons` | ^15.0.2 | Ionicons icon set |
 | `@react-native-async-storage/async-storage` | 2.2.0 | Local data persistence |
 | `expo-notifications` | ~55.0.0 | Push notification reminders |
 | `expo-status-bar` | ~55.0.0 | Status bar control |
+| `expo-font` | ~55.0.4 | Custom font loading |
 | `react-native-paper` | ^5.12.0 | UI component library |
 | `react-native-safe-area-context` | 5.6.2 | Safe area handling |
 | `react-native-screens` | 4.23.0 | Native screen management |
-| `react-native-svg` | ~15.0.0 | SVG rendering (instructions background) |
-| `react-native-svg-transformer` | latest | SVG imports as React components |
+| `react-native-svg` | 15.15.3 | SVG rendering (instructions background) |
+| `react-native-svg-transformer` | ^1.5.3 | SVG imports as React components |
 | `babel-preset-expo` | ~55.0.0 | Babel transpilation |
-| `expo-document-picker` | ~55.0.0 | JSON file import |
-| `react-native-view-shot` | latest | Capture React Native views as images (share card) |
-| `expo-sharing` | ~55.0.0 | Native file sharing (share card) |
-| `expo-asset` | ~55.0.0 | Asset preloading at startup |
-| `expo-blur` | ~14.0.0 | Blur effects (final report background, profile modal) |
+| `expo-document-picker` | ~55.0.9 | JSON file import |
+| `react-native-view-shot` | 4.0.3 | Capture React Native views as images (share card) |
+| `expo-sharing` | ~55.0.18 | Native file sharing (share card) |
+| `expo-blur` | ~55.0.14 | Blur effects (final report background, profile modal) |
 
 ---
 
