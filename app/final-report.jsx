@@ -16,7 +16,6 @@ import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import { BlurView } from 'expo-blur';
 import ScreenBackground from '../components/ScreenBackground';
 import IMAGES from '../assets/images';
 
@@ -305,11 +304,11 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   // ── 3. Stats panel (vertically centred) ──────────────────────────────────
   const pad     = 28;
   const cW      = W - pad * 2;
-  const cellH   = 100;
+  const cellH   = 90;
   const cellGap = 10;
-  const gridH   = cellH * 2 + cellGap;
-  const totalH  = 22 + 8 + 34 + 8 + 20 + 1 + 20 + gridH; // logo-row+title+sub+div+grid
-  let y = H / 2 - totalH / 2;
+  const gridH   = cellH * 4 + cellGap * 3;
+  const totalH  = 22 + 8 + 34 + 8 + 20 + 1 + 20 + gridH; // logo-row+title+sub+div+grid (4 rows of 2)
+  let y = 120; // fixed top anchor — leaves room for logo+URL at bottom
 
   ctx.textAlign = 'center';
 
@@ -351,12 +350,17 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     { label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#6BCBA0' : '#F4A460', emoji: '\uD83D\uDCCA' },
     { label: 'Onset Latency',    value: fmt(metrics.avgSleepOnsetLatency), accent: '#7EB8F7', emoji: '\u23F3' },
     { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: '#7EB8F7', emoji: '\uD83C\uDF19' },
+    { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#7EB8F7', emoji: '\uD83D\uDD14' },
+    { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#7EB8F7', emoji: '\u2600\uFE0F' },
+    { label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: '#7EB8F7', emoji: '\uD83C\uDF77' },
+    { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#7EB8F7', emoji: '\uD83C\uDF05' },
   ];
-  const cellW = (cW - cellGap) / 2;
+  const cols    = 2;
+  const cellW   = (cW - cellGap * (cols - 1)) / cols;
 
   stats.forEach((s, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     const cx  = pad + col * (cellW + cellGap);
     const cy  = y   + row * (cellH + cellGap);
     ctx.fillStyle = 'rgba(255,255,255,0.75)';
@@ -383,21 +387,28 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   // real hashed URL that Expo has already resolved.
   const logoSrc = Array.from(document.querySelectorAll('img'))
     .map(i => i.src)
-    .find(s => s.includes('logo')) || '/assets/images/logo.png';
-  await new Promise((resolve) => {
-    const logoImg = document.createElement('img');
-    logoImg.crossOrigin = 'anonymous';
-    logoImg.onload = () => {
-      // Use the image's natural aspect ratio — don't assume 160/60
-      const aspect = logoImg.naturalWidth / logoImg.naturalHeight;
-      const drawH = logoH;
-      const drawW = drawH * aspect;
-      ctx.drawImage(logoImg, (W - drawW) / 2, logoY, drawW, drawH);
-      resolve();
-    };
-    logoImg.onerror = resolve;
-    logoImg.src = logoSrc;
-  });
+    .find(s => s.includes('logo') && !s.includes('icon'))  || null;
+  if (logoSrc) {
+    await new Promise((resolve) => {
+      const logoImg = document.createElement('img');
+      logoImg.crossOrigin = 'anonymous';
+      logoImg.onload = () => {
+        const aspect = logoImg.naturalWidth / logoImg.naturalHeight;
+        const drawH = logoH;
+        const drawW = drawH * aspect;
+        ctx.drawImage(logoImg, (W - drawW) / 2, logoY, drawW, drawH);
+        resolve();
+      };
+      logoImg.onerror = resolve;
+      logoImg.src = logoSrc;
+    });
+  } else {
+    // Fallback: draw text if logo image not found in DOM
+    ctx.fillStyle = '#4A7BB5';
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sleep Diaries', W / 2, logoY + logoH / 2);
+  }
   ctx.fillStyle = '#1E3A5F';
   ctx.font = '13px system-ui, sans-serif';
   ctx.textAlign = 'center';
@@ -451,6 +462,10 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
     { emoji: '📊', label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#6BCBA0' : '#F4A460' },
     { emoji: '⏳', label: 'Onset Latency',   value: fmt(metrics.avgSleepOnsetLatency), accent: '#7EB8F7' },
     { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: '#7EB8F7' },
+    { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#7EB8F7' },
+    { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#7EB8F7' },
+    { emoji: '🍷', label: 'Alcohol',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: '#7EB8F7' },
+    { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#7EB8F7' },
   ];
 
   return (
@@ -491,7 +506,7 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
 
       {/* Logo + URL pinned to bottom */}
       <View style={shareStyles.bottomBrand}>
-        <Image source={IMAGES.logo} style={shareStyles.logo} resizeMode="contain" />
+        <Image source={require('../assets/images/logo.png')} style={shareStyles.logo} resizeMode="contain" />
         <Text style={[shareStyles.footer, { fontFamily: FONTS.bodyMedium }]}>sleepdiaries.circadia-lab.uk</Text>
       </View>
     </ViewShot>
@@ -507,6 +522,7 @@ export default function FinalReportScreen() {
   const [loading,  setLoading]  = useState(true);
   const [qResults, setQResults] = useState([]);
   const [researchCode, setResearchCode] = useState('');
+  const [sharing, setSharing] = useState(false);
   const shareCardRef = useRef(null);
 
   const morning = useMemo(
@@ -541,8 +557,11 @@ export default function FinalReportScreen() {
         await handleShareWeb({ metrics, userName, dateRange });
         return;
       }
-      // Native: capture share card as PNG, then share
+      // Mount the share card, wait for it to render, then capture
+      setSharing(true);
+      await new Promise(r => setTimeout(r, 500));
       const uri = await shareCardRef.current.capture();
+      setSharing(false);
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
         await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Share Sleep Report' });
@@ -550,6 +569,7 @@ export default function FinalReportScreen() {
         await Share.share({ message: `My Sleep Report — ${userName} · ${dateRange}` });
       }
     } catch (e) {
+      setSharing(false);
       if (e?.message !== 'User did not share') {
         console.warn('[handleShare]', e);
         if (Platform.OS === 'web') alert('Share failed: ' + e.message);
@@ -561,8 +581,9 @@ export default function FinalReportScreen() {
 
   return (
     <View style={[styles.root, { minHeight: height }]}>
-      <ScreenBackground variant="home" />
-      <BlurView intensity={30} tint="light" style={styles.blur} />
+      <View style={styles.bgContainer}>
+        <ScreenBackground variant="home" />
+      </View>
       <View style={styles.bgOverlay} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}><Ionicons name="arrow-back" size={24} color="#1E3A5F" /></TouchableOpacity>
@@ -580,10 +601,12 @@ export default function FinalReportScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Off-screen share card — captured as PNG when user taps share */}
-          <View style={shareStyles.offscreen} aria-hidden>
-            <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} />
-          </View>
+          {/* Share card — only mounted during capture to avoid background bleed */}
+          {sharing && (
+            <View style={shareStyles.offscreen} aria-hidden>
+              <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} />
+            </View>
+          )}
 
           <View style={styles.summaryCard}>
             <View style={styles.summaryLeft}>
@@ -666,7 +689,7 @@ export default function FinalReportScreen() {
 
 const styles = StyleSheet.create({
   root:    { flex: 1, backgroundColor: 'transparent' },
-  blur:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  bgContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 },
   bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.60)' },
   header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, backgroundColor: 'transparent' },
   backBtn:  { padding: 4 }, shareBtn: { padding: 4 },
@@ -729,12 +752,12 @@ const styles = StyleSheet.create({
 
 // ─── Share card styles ────────────────────────────────────────────────────────
 const shareStyles = StyleSheet.create({
-  offscreen: { position: 'absolute', top: -2000, left: 0, opacity: 0, pointerEvents: 'none' },
+  offscreen: { position: 'absolute', top: -9999, left: -9999, opacity: 0, pointerEvents: 'none', overflow: 'hidden' },
   card:      { borderRadius: 0, overflow: 'hidden' },
   overlay:   { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(238,245,255,0.45)' },
-  content:   { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, padding: 28, justifyContent: 'center', alignItems: 'center' },
+  content:   { position: 'absolute', top: 0, bottom: 120, left: 0, right: 0, paddingHorizontal: 28, paddingTop: 60, alignItems: 'center', justifyContent: 'center' },
   bottomBrand: { position: 'absolute', bottom: 28, left: 0, right: 0, alignItems: 'center' },
-  logo:      { width: 140, height: 52, marginBottom: 50 },
+  logo:      { width: 140, height: 52, marginBottom: 8 },
   footer:    { fontSize: 13, color: '#1E3A5F', textAlign: 'center', letterSpacing: 0.4 },
   header:    { alignItems: 'center', gap: 6, paddingBottom: 16, width: '100%' },
   logoText:  { fontSize: 14, color: '#4A7BB5', letterSpacing: 1.2, textTransform: 'uppercase' },
@@ -743,9 +766,9 @@ const shareStyles = StyleSheet.create({
   subtitle:  { fontSize: 13, color: '#64748B', textAlign: 'center' },
   divider:   { height: 1, backgroundColor: 'rgba(74,123,181,0.2)', marginVertical: 16, width: '100%' },
   grid:      { flexDirection: 'row', flexWrap: 'wrap', gap: 10, width: '100%' },
-  statCell:  { width: '47%', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 16, padding: 12 },
+  statCell:  { width: '47%', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 14, padding: 10 },
   statEmoji: { fontSize: 26, lineHeight: 32 },
   statValue: { fontSize: 20, lineHeight: 26 },
   statLabel: { fontSize: 11, color: '#94A3B8', textAlign: 'center', lineHeight: 15 },
-  footer:    { position: 'absolute', bottom: 28, left: 0, right: 0, textAlign: 'center', fontSize: 14, color: '#1E3A5F', fontFamily: undefined, letterSpacing: 0.4 },
+  footer:    { fontSize: 13, color: '#1E3A5F', textAlign: 'center', letterSpacing: 0.4 },
 });
