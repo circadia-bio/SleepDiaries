@@ -1,16 +1,23 @@
 /**
- * app/QuestionnaireCreditsScreen.jsx — Questionnaire credits and permissions screen
- * Lifted from Settings; pushed via router.push('/QuestionnaireCreditsScreen').
+ * app/ThresholdReferencesScreen.jsx — Sleep metric threshold references
+ * Accessible from Settings; pushed via router.push('/ThresholdReferencesScreen').
  */
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
-import { QUESTIONNAIRES } from '../data/questionnaires';
 import t from '../i18n';
 
-export default function QuestionnaireCreditsScreen() {
+const THRESHOLDS = (tt) => [
+  { title: tt('settings.thresholdDuration'),   body: tt('settings.thresholdDurationRef') },
+  { title: tt('settings.thresholdEfficiency'), body: tt('settings.thresholdEfficiencyRef') },
+  { title: tt('settings.thresholdLatency'),    body: tt('settings.thresholdLatencyRef') },
+  { title: tt('settings.thresholdWaso'),       body: tt('settings.thresholdWasoRef') },
+  { title: tt('settings.thresholdAlcohol'),    body: tt('settings.thresholdAlcoholRef') },
+];
+
+export default function ThresholdReferencesScreen() {
   const router = useRouter();
 
   return (
@@ -20,22 +27,22 @@ export default function QuestionnaireCreditsScreen() {
           <Ionicons name="chevron-back" size={26} color="#1E3A5F" />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { fontFamily: FONTS.heading }]}>
-          {t('settings.sectionQuestionnaires')}
+          {t('settings.sectionThresholds')}
         </Text>
         <View style={styles.backBtn} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={[styles.note, { fontFamily: FONTS.bodyMedium }]}>
-          {t('settings.questionnairesNote')}
+          {t('settings.thresholdsNote')}
         </Text>
         <View style={styles.card}>
-          {QUESTIONNAIRES.map((q, i) => (
-            <View key={q.id}>
+          {THRESHOLDS(t).map((item, i) => (
+            <View key={item.title}>
               {i > 0 && <View style={styles.divider} />}
               <View style={styles.creditRow}>
-                <Text style={[styles.creditTitle, { fontFamily: FONTS.body }]}>{q.title}</Text>
-                <Text style={[styles.creditBody, { fontFamily: FONTS.bodyMedium }]}>{q.credit}</Text>
+                <Text style={[styles.creditTitle, { fontFamily: FONTS.body }]}>{item.title}</Text>
+                <Text style={[styles.creditBody, { fontFamily: FONTS.bodyMedium }]}>{item.body}</Text>
               </View>
             </View>
           ))}
@@ -52,7 +59,6 @@ const styles = StyleSheet.create({
   backBtn:     { width: 44, alignItems: 'flex-start' },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
   note:        { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24, textAlign: 'center' },
-  sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   card:        { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', paddingHorizontal: 16, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   divider:     { height: 1, backgroundColor: 'rgba(226,234,244,0.8)' },
   creditRow:   { paddingVertical: 14, gap: 4 },

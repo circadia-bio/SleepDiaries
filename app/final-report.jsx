@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadAllQuestionnaires } from '../storage/storage';
+import { loadAllQuestionnaires, loadResearchCode } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { computeMetrics } from '../utils/metrics';
@@ -16,6 +16,7 @@ import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
+import { BlurView } from 'expo-blur';
 import ScreenBackground from '../components/ScreenBackground';
 import IMAGES from '../assets/images';
 
@@ -23,13 +24,13 @@ import IMAGES from '../assets/images';
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
 const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h}h ${pad(m)}m` : `${m}m`; };
 
-const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel }) => (
+const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel, bar }) => (
   <View
     style={styles.metricCard}
     accessible={true}
     accessibilityLabel={[label, value, statusLabel, subtext].filter(Boolean).join(', ')}
   >
-    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={24} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" /></View>
+    <View style={[styles.metricIcon, { backgroundColor: color + '20' }]}><Ionicons name={icon} size={52} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" /></View>
     <View style={styles.metricText}>
       <Text style={[styles.metricLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
       <View style={styles.metricValueRow}>
@@ -37,6 +38,7 @@ const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabe
         {statusLabel ? <Text style={[styles.metricStatusLabel, { color, fontFamily: FONTS.bodyMedium }]}>{statusLabel}</Text> : null}
       </View>
       {subtext ? <Text style={[styles.metricSubtext, { fontFamily: FONTS.bodyMedium }]}>{subtext}</Text> : null}
+      {bar ?? null}
     </View>
   </View>
 );
@@ -150,10 +152,115 @@ const QuestionnaireReportCard = ({ result, questionnaire, locale }) => {
   );
 };
 
+// Renders a scale bar with boundary tick labels positioned as % of bar width.
+// ticks: [{ pct: number, label: string }] — boundary positions (0–100)
+const BandBar = ({ segments, marker, ticks, endLabels }) => (
+  <View style={styles.scaleBarContainer}>
+    <View style={styles.scaleBarTrack}>
+      {segments.map((s, i) => (
+        <View key={i} style={[styles.scaleBarSegment, { width: `${s.width}%`, backgroundColor: s.color + '33' }]} />
+      ))}
+      <View style={[styles.scaleBarMarker, { left: `${Math.min(marker, 97)}%` }]} />
+    </View>
+    <View style={styles.scaleBarTickRow}>
+      <Text style={[styles.scaleBarEndText, { fontFamily: FONTS.bodyMedium }]}>{endLabels[0]}</Text>
+      {ticks.map((tick) => (
+        <Text key={tick.label} style={[styles.scaleBarTickLabel, { left: `${tick.pct}%`, fontFamily: FONTS.bodyMedium }]}>{tick.label}</Text>
+      ))}
+      <Text style={[styles.scaleBarEndText, { fontFamily: FONTS.bodyMedium }]}>{endLabels[1]}</Text>
+    </View>
+  </View>
+);
+
+const DurationBar = ({ value }) => {
+  if (value === null || isNaN(value)) return null;
+  const MAX = 600;
+  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
+  return <BandBar
+    segments={[
+      { width: 60, color: '#DC2626' },
+      { width: 10, color: '#F59E0B' },
+      { width: 20, color: '#2E7D32' },
+      { width: 10, color: '#F59E0B' },
+    ]}
+    marker={marker}
+    ticks={[{ pct: 60, label: '6h' }, { pct: 70, label: '7h' }, { pct: 90, label: '9h' }]}
+    endLabels={['0h', '']}
+  />;
+};
+
+const EfficiencyBar = ({ value }) => {
+  if (value === null || isNaN(value)) return null;
+  const marker = Math.min(Math.max(value, 0), 100);
+  return <BandBar
+    segments={[
+      { width: 75, color: '#DC2626' },
+      { width: 10, color: '#F59E0B' },
+      { width: 15, color: '#2E7D32' },
+    ]}
+    marker={marker}
+    ticks={[{ pct: 73, label: '75%' }, { pct: 87, label: '85%' }]}
+    endLabels={['0%', '']}
+  />;
+};
+
+const LatencyBar = ({ value }) => {
+  if (value === null || isNaN(value)) return null;
+  const MAX = 60;
+  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
+  return <BandBar
+    segments={[
+      { width: 25, color: '#2E7D32' },
+      { width: 25, color: '#F59E0B' },
+      { width: 50, color: '#DC2626' },
+    ]}
+    marker={marker}
+    ticks={[{ pct: 25, label: '15m' }, { pct: 50, label: '30m' }]}
+    endLabels={['0m', '']}
+  />;
+};
+
+const WasoBar = ({ value }) => {
+  if (value === null || isNaN(value)) return null;
+  const MAX = 60;
+  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
+  return <BandBar
+    segments={[
+      { width: 33, color: '#2E7D32' },
+      { width: 17, color: '#F59E0B' },
+      { width: 50, color: '#DC2626' },
+    ]}
+    marker={marker}
+    ticks={[{ pct: 33, label: '20m' }, { pct: 50, label: '30m' }]}
+    endLabels={['0m', '']}
+  />;
+};
+
+const durationColor  = (m) => m === null ? '#4A7BB5' : m >= 420 && m <= 540 ? '#2E7D32' : m >= 360 && m <= 600 ? '#F59E0B' : '#DC2626';
+const alcoholColor   = (n) => n === null ? '#4A7BB5' : n < 1 ? '#2E7D32' : n <= 2 ? '#F59E0B' : '#DC2626';
+const latencyColor   = (m) => m === null ? '#4A7BB5' : m <= 15 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
+const wasoColor      = (m) => m === null ? '#4A7BB5' : m <= 20 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
+
+const AlcoholBar = ({ value }) => {
+  // NHS guideline: ≤14 units/week = 2 units/night avg; max display 5
+  if (value === null || isNaN(value)) return null;
+  const MAX = 5;
+  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
+  return <BandBar
+    segments={[
+      { width: 20, color: '#2E7D32' },  // 0–1 drink
+      { width: 20, color: '#F59E0B' },  // 1–2 drinks
+      { width: 60, color: '#DC2626' },  // >2 drinks
+    ]}
+    marker={marker}
+    ticks={[{ pct: 20, label: '1' }, { pct: 40, label: '2' }]}
+    endLabels={['0', '']}
+  />;
+};
+
 const StarRow = ({ value, max = 5, color = '#E07A20' }) => (
   <View style={styles.starRow}>
     {Array.from({ length: max }).map((_, i) => <Ionicons key={i} name={i < Math.round(value) ? 'star' : 'star-outline'} size={20} color={color} />)}
-    <Text style={[styles.starLabel, { color, fontFamily: FONTS.body }]}>{value?.toFixed(1)} / {max}</Text>
   </View>
 );
 
@@ -399,6 +506,7 @@ export default function FinalReportScreen() {
   const { entries: allEntries, userName, refresh } = useEntries();
   const [loading,  setLoading]  = useState(true);
   const [qResults, setQResults] = useState([]);
+  const [researchCode, setResearchCode] = useState('');
   const shareCardRef = useRef(null);
 
   const morning = useMemo(
@@ -418,8 +526,9 @@ export default function FinalReportScreen() {
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [, allQResults] = await Promise.all([refresh(), loadAllQuestionnaires()]);
+      const [, allQResults, code] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode()]);
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
+      setResearchCode(code ?? '');
       setLoading(false);
     };
     load();
@@ -452,6 +561,9 @@ export default function FinalReportScreen() {
 
   return (
     <View style={[styles.root, { minHeight: height }]}>
+      <ScreenBackground variant="home" />
+      <BlurView intensity={30} tint="light" style={styles.blur} />
+      <View style={styles.bgOverlay} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}><Ionicons name="arrow-back" size={24} color="#1E3A5F" /></TouchableOpacity>
         <Text style={[styles.title, { fontFamily: FONTS.heading }]}>{t('report.title')}</Text>
@@ -474,27 +586,48 @@ export default function FinalReportScreen() {
           </View>
 
           <View style={styles.summaryCard}>
-            <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]}>{userName}</Text>
-            <Text style={[styles.summaryRange, { fontFamily: FONTS.bodyMedium }]}>{dateRange}</Text>
-            <Text style={[styles.summaryEntries, { fontFamily: FONTS.bodyMedium }]}>{entriesLabel}</Text>
+            <View style={styles.summaryLeft}>
+              <View style={styles.summaryAvatar}>
+                <Ionicons name="person" size={36} color="#4A7BB5" />
+              </View>
+              <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]}>{userName}</Text>
+              {researchCode ? <Text style={[styles.summaryCode, { fontFamily: FONTS.bodyMedium }]}>{researchCode}</Text> : null}
+            </View>
+            <View style={styles.summaryInfo}>
+              <View style={styles.summaryStat}>
+                <Ionicons name="calendar-outline" size={15} color="#94A3B8" />
+                <View>
+                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort()[0]}</Text>
+                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort().slice(-1)[0]}</Text>
+                </View>
+              </View>
+              <View style={styles.summaryStat}>
+                <Ionicons name="sunny-outline" size={15} color="#94A3B8" />
+                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{entriesLabel}</Text>
+              </View>
+              <View style={styles.summaryStat}>
+                <Ionicons name="moon-outline" size={15} color="#94A3B8" />
+                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{allEntries.filter(e => e.type === 'evening').length} {t('report.eveningEntries')}</Text>
+              </View>
+              <View style={styles.summaryStat}>
+                <Ionicons name="clipboard-outline" size={15} color="#94A3B8" />
+                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length}</Text>
+                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length === 1 ? t('report.questionnaireOne') : t('report.questionnaireOther')}</Text>
+              </View>
+            </View>
           </View>
 
           <Section title={t('report.sleepTiming')}>
-            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color="#4A7BB5" />
-            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} statusLabel={metrics.avgSleepEfficiency !== null ? (metrics.avgSleepEfficiency >= 85 ? t('report.efficiencyGood') : t('report.efficiencyLow')) : null} />
-            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color="#4A7BB5" />
-            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color="#4A7BB5" />
+            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color={durationColor(metrics.avgSleepDuration)}  bar={<DurationBar value={metrics.avgSleepDuration} />} />
+            <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} bar={<EfficiencyBar value={metrics.avgSleepEfficiency} />} />
+            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color={latencyColor(metrics.avgSleepOnsetLatency)}  bar={<LatencyBar value={metrics.avgSleepOnsetLatency} />} />
+            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color={wasoColor(metrics.avgWASO)}               bar={<WasoBar value={metrics.avgWASO} />} />
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.thresholdNote')}</Text>
           </Section>
 
           <Section title={t('report.sleepQuality')}>
-            <View style={styles.qualityCard}>
-              <Text style={[styles.qualityLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.nightQuality')}</Text>
-              {metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#E07A20" /> : <Text style={styles.metricValue}>—</Text>}
-            </View>
-            <View style={[styles.qualityCard, { marginTop: 10 }]}>
-              <Text style={[styles.qualityLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.morningRestedness')}</Text>
-              {metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#2A6CB5" /> : <Text style={styles.metricValue}>—</Text>}
-            </View>
+            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
+            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
           </Section>
 
           <Section title={t('report.nightDisruptions')}>
@@ -503,10 +636,9 @@ export default function FinalReportScreen() {
           </Section>
 
           <Section title={t('report.lifestyle')}>
-            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color="#4A7BB5" />
+            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color={alcoholColor(metrics.avgAlcohol)} bar={<AlcoholBar value={metrics.avgAlcohol} />} />
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.alcoholNote')}</Text>
           </Section>
-
-          <Text style={[styles.disclaimer, { fontFamily: FONTS.bodyMedium }]}>{t('report.disclaimer')}</Text>
 
           {qResults.length > 0 && (
             <Section title={t('report.sectionQuestionnaires')}>
@@ -524,6 +656,8 @@ export default function FinalReportScreen() {
               })}
             </Section>
           )}
+
+          <Text style={[styles.disclaimer, { fontFamily: FONTS.bodyMedium }]}>{t('report.disclaimer')}</Text>
         </ScrollView>
       )}
     </View>
@@ -531,36 +665,45 @@ export default function FinalReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:    { flex: 1, backgroundColor: '#EEF5FF' },
-  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#B0CCEE', backgroundColor: '#EEF5FF' },
+  root:    { flex: 1, backgroundColor: 'transparent' },
+  blur:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.60)' },
+  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, backgroundColor: 'transparent' },
   backBtn:  { padding: 4 }, shareBtn: { padding: 4 },
   title:    { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   centred:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12, paddingTop: 80 },
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
   emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
   scrollContent: { padding: 16, gap: 20, paddingBottom: 40 },
-  summaryCard:    { backgroundColor: '#4A7BB5', borderRadius: 16, padding: 20, alignItems: 'center', gap: 4 },
-  summaryName:    { fontSize: SIZES.sectionTitle, color: '#fff' },
-  summaryRange:   { fontSize: SIZES.bodySmall, color: 'rgba(255,255,255,0.85)' },
-  summaryEntries: { fontSize: SIZES.bodySmall, color: 'rgba(255,255,255,0.75)' },
+  summaryCard:    { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  summaryLeft:    { alignItems: 'center', gap: 6 },
+  summaryAvatar:   { width: 72, height: 72, borderRadius: 36, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
+  summaryInfo:     { flex: 1, gap: 4, justifyContent: 'center', paddingRight: 8 },
+  summaryName:     { fontSize: SIZES.body, color: '#1A3A5C' },
+  summaryCode:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  summaryDivider:  { height: 1, backgroundColor: 'rgba(74,123,181,0.15)', width: '100%' },
+  summaryStats:    { gap: 8, width: '100%' },
+  summaryStat:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  summaryStatText: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
-  metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
-  metricIcon:        { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  metricIcon:        { width: 72, height: 72, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   metricText:        { flex: 1, gap: 3 },
   metricLabel:       { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   metricValueRow:    { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   metricValue:       { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
   metricStatusLabel: { fontSize: SIZES.caption, fontWeight: '600' },
-  metricSubtext:     { fontSize: SIZES.caption, color: '#B0CCEE' },
-  qualityCard:  { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16, gap: 10 },
+  metricSubtext:     { fontSize: SIZES.caption, color: '#94A3B8' },
+  qualityCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   qualityLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   starLabel:    { fontSize: SIZES.body, marginLeft: 6 },
   disclaimer:   { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
+  thresholdNote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
 
   // Questionnaire report cards
-  qReportCard:       { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16, gap: 12 },
+  qReportCard:       { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   qReportHeader:     { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   qReportTitle:      { fontSize: SIZES.body, color: '#1E3A5F', flex: 1 },
   qReportBetaChip:   { backgroundColor: '#F0E8FA', borderWidth: 1.5, borderColor: '#C4A8E0', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
@@ -580,6 +723,8 @@ const styles = StyleSheet.create({
   scaleBarMarker:     { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: '#1E3A5F' },
   scaleBarEndLabels:  { flexDirection: 'row', justifyContent: 'space-between' },
   scaleBarEndText:    { fontSize: 12, color: '#94A3B8' },
+  scaleBarTickRow:    { flexDirection: 'row', justifyContent: 'space-between', position: 'relative', height: 16 },
+  scaleBarTickLabel:  { position: 'absolute', fontSize: 12, color: '#94A3B8', transform: [{ translateX: -10 }] },
 });
 
 // ─── Share card styles ────────────────────────────────────────────────────────

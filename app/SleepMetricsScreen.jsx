@@ -16,7 +16,7 @@ const GLOSSARY_ITEMS = [
   { key: 'waso',              icon: 'moon-outline',          color: '#2A6CB5' },
   { key: 'nightWakings',      icon: 'alert-circle-outline', color: '#4A7BB5' },
   { key: 'sleepQuality',      icon: 'star-outline',         color: '#E07A20' },
-  { key: 'restedness',        icon: 'sunny-outline',        color: '#E07A20' },
+  { key: 'restedness',        icon: 'battery-half-outline', color: '#E07A20' },
   { key: 'earlyWaking',       icon: 'alarm-outline',        color: '#C25E00' },
 ];
 
@@ -41,7 +41,7 @@ export default function SleepMetricsScreen() {
             <View key={item.key}>
               <View style={styles.glossaryRow}>
                 <View style={[styles.glossaryIcon, { backgroundColor: item.color + '18' }]}>
-                  <Ionicons name={item.icon} size={22} color={item.color} />
+                  <Ionicons name={item.icon} size={26} color={item.color} />
                 </View>
                 <View style={styles.glossaryText}>
                   <Text style={[styles.glossaryTitle, { color: item.color, fontFamily: FONTS.body }]}>
@@ -63,15 +63,15 @@ export default function SleepMetricsScreen() {
 
 const styles = StyleSheet.create({
   root:          { flex: 1, backgroundColor: '#EEF5FF' },
-  header:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
+  header:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle:   { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   backBtn:       { width: 44, alignItems: 'flex-start' },
   content:       { padding: 20, paddingBottom: 40 },
-  glossaryCard:  { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
+  glossaryCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   glossaryRow:   { flexDirection: 'row', alignItems: 'flex-start', gap: 14, padding: 16 },
-  glossaryIcon:  { width: 44, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  glossaryIcon:  { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   glossaryText:  { flex: 1, gap: 4 },
   glossaryTitle: { fontSize: SIZES.body },
   glossaryBody:  { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 24 },
-  divider:       { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
+  divider:       { height: 1, backgroundColor: 'rgba(241,245,249,0.8)', marginHorizontal: 16 },
 });

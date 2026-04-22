@@ -99,12 +99,14 @@ export default function HomeScreen() {
           </View>
 
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
-            <Ionicons name="book-outline" size={28} color="#4A7BB5" style={styles.instructionsIcon} />
+            <View style={styles.instructionsIconWrap}>
+              <Ionicons name="book-outline" size={48} color="#4A7BB5" />
+            </View>
             <View style={styles.instructionsText}>
               <Text style={[styles.instructionsTitle, { fontFamily: FONTS.heading }]}>{t('home.instructionsTitle')}</Text>
               <Text style={[styles.instructionsBody, { fontFamily: FONTS.body }]}>{t('home.instructionsBody')}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#A8C8E8" />
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
@@ -142,28 +144,26 @@ const styles = StyleSheet.create({
   profileLabel:  { fontSize: SIZES.caption, color: '#4A7BB5', marginTop: 2 },
   body: { paddingHorizontal: 16, paddingTop: 12, gap: 14 },
   section: {
-    borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
-    paddingHorizontal: 10, paddingTop: 20, paddingBottom: 10,
-    backgroundColor: 'transparent', position: 'relative',
+    gap: 8,
   },
   sectionLabel: {
-    position: 'absolute', top: -13, left: 14,
-    backgroundColor: '#FEFDF8',
-    paddingHorizontal: 8, fontSize: SIZES.bodySmall, color: '#4A7BB5',
+    fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8,
   },
   cardsContainer: { gap: 8 },
   entryCardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
   entryCardImage:   { width: '100%', height: '100%' },
   instructionsCard: {
-    borderWidth: 1.5, borderColor: '#A8C8E8', borderRadius: 18,
-    paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: 'rgba(168, 200, 232, 0.15)',
+    borderRadius: 18,
+    paddingHorizontal: 16, paddingVertical: 16,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
     flexDirection: 'row', alignItems: 'center', gap: 12,
+    shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
-  instructionsIcon: { flexShrink: 0 },
+  instructionsIconWrap: { width: 72, height: 72, borderRadius: 18, backgroundColor: '#4A7BB520', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   instructionsText: { flex: 1 },
   instructionsTitle: { fontSize: SIZES.cardTitle, color: '#1A3A5C', marginBottom: 4 },
-  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#4A7BB5', lineHeight: 20 },
+  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 20 },
   bottomRow:      { flexDirection: 'row', gap: 12 },
   bottomCard:     { flex: 1 },
   bottomCardHint: { fontSize: SIZES.caption, color: '#94A3B8', marginTop: 4, textAlign: 'center' },

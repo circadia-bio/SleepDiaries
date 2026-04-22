@@ -76,7 +76,7 @@ SleepDiaries/
 │   ├── InstructionsModal.jsx   # Full-screen instructions slideshow (coded, no PNGs)
 │   ├── ProfileModal.jsx        # Profile sheet (name, code, stats, glossary, questionnaires)
 │   ├── QuestionnaireModal.jsx  # Step-by-step one-time research questionnaire modal
-│   ├── MyMedicationsScreen.jsx         # Saved medication presets (accessible from Profile modal)
+│   ├── MedicationsScreen.jsx           # Saved medication presets (accessible from Profile modal)
 │   ├── SleepMetricsScreen.jsx          # Sleep metrics glossary (push screen from Profile modal)
 │   ├── QuestionnairesScreen.jsx        # Questionnaires list (push screen from Profile modal)
 │   ├── QuestionnaireCreditsScreen.jsx  # Questionnaire credits (push screen from Settings)
@@ -652,6 +652,7 @@ Contributions are welcome. If you are adapting this for a research study and wan
 | `react-native-view-shot` | latest | Capture React Native views as images (share card) |
 | `expo-sharing` | ~55.0.0 | Native file sharing (share card) |
 | `expo-asset` | ~55.0.0 | Asset preloading at startup |
+| `expo-blur` | ~14.0.0 | Blur effects (final report background, profile modal) |
 
 ---
 
@@ -698,6 +699,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] One-time research questionnaires (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) *(beta)*
 - [x] Medication presets — auto-populate diary medication questions from saved treatments
 - [x] Share card — share a branded sleep report image from the final report screen
+- [x] Full UI modernisation — glassy card system, gradient backgrounds, blur effects, refined typography and icons throughout
 - [ ] Questionnaire result validation and removal of beta flag per instrument
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration

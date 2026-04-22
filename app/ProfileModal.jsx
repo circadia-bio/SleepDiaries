@@ -2,14 +2,15 @@
  * app/ProfileModal.jsx — Profile modal
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries } from '../storage/storage';
+import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
 import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
 import t, { locale } from '../i18n';
+import ScreenBackground from '../components/ScreenBackground';
 
 const computeStreak = (entries) => {
   const today = new Date().toISOString().split('T')[0];
@@ -26,7 +27,7 @@ const formatDate = (dateStr) => {
 
 const StatChip = ({ icon, value, label, color = '#4A7BB5' }) => (
   <View style={styles.statChip}>
-    <Ionicons name={icon} size={22} color={color} />
+    <Ionicons name={icon} size={52} color={color} />
     <Text style={[styles.statValue, { color, fontFamily: FONTS.heading }]} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
     <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
@@ -44,16 +45,20 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [eveningCount, setEveningCount] = useState(0);
   const [streak, setStreak]             = useState(0);
   const [memberSince, setMemberSince]   = useState(null);
+  const [questionnaireCount, setQuestionnaireCount] = useState(0);
+  const [medicationCount, setMedicationCount]       = useState(0);
   const router = useRouter();
 
   const load = useCallback(async () => {
-    const [n, c, entries] = await Promise.all([loadName(), loadResearchCode(), loadEntries()]);
+    const [n, c, entries, qResults, meds] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets()]);
     setName(n ?? ''); setCode(c ?? '');
     const morningCount = entries.filter((e) => e.type === 'morning').length;
     setMorningCount(morningCount);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
     setStreak(computeStreak(entries));
     setMemberSince(entries.map((e) => e.date).sort()[0] ?? null);
+    setQuestionnaireCount(qResults.length);
+    setMedicationCount((meds ?? []).length);
   }, []);
 
   useEffect(() => { if (visible) load(); }, [visible]);
@@ -67,8 +72,11 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <View style={[styles.root, { paddingTop: insets.top }]}>
+        <ScreenBackground variant="home" />
+        <View style={styles.overlay} />
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { fontFamily: FONTS.heading }]}>{t('profile.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -114,6 +122,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <StatChip icon="moon-outline"     value={eveningCount}                               label={t('profile.statEvening')} color="#2A6CB5" />
             <StatChip icon="flame-outline"    value={`${streak} ${t('profile.statStreakUnit')}`} label={t('profile.statStreak')}  color="#E07A20" />
             <StatChip icon="calendar-outline" value={formatDate(memberSince)}                    label={t('profile.statSince')}   color="#4A7BB5" />
+            <StatChip icon="clipboard-outline" value={questionnaireCount}                         label={t('profile.statQuestionnaires')} color="#4A7BB5" />
+            <StatChip icon="medkit-outline"    value={medicationCount}                            label={t('profile.statMedications')}   color="#4A7BB5" />
           </View>
 
           <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('profile.sectionActions')}</Text>
@@ -157,8 +167,9 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 }
 
 const styles = StyleSheet.create({
-  root:        { flex: 1, backgroundColor: '#EEF5FF' },
-  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#B0CCEE' },
+  root:        { flex: 1, backgroundColor: 'transparent' },
+  overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(238,245,255,0.40)' },
+  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
@@ -169,15 +180,15 @@ const styles = StyleSheet.create({
   codeRow:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
   codeText:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
   editRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%' },
-  editInput:     { flex: 1, backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#7EB0DC', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F' },
-  editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 8, padding: 10 },
-  editCancelBtn: { padding: 10 },
+  editInput:     { flex: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+  editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 12, padding: 12, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
+  editCancelBtn: { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statChip:      { flex: 1, minWidth: '45%', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', alignItems: 'center', paddingVertical: 14, gap: 4 },
+  statChip:      { flex: 1, minWidth: '45%', aspectRatio: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 4, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   statValue:     { fontSize: SIZES.body, textAlign: 'center', paddingHorizontal: 6 },
   statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
-  card:          { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', overflow: 'hidden' },
+  card:          { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
