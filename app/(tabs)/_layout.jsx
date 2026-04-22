@@ -5,32 +5,30 @@
  * No image assets — works identically across all locales.
  */
 import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FONTS, SIZES } from '../../theme/typography';
+import t from '../../i18n';
 
 const TABS = [
-  { name: 'home',     icon: 'home',     iconOutline: 'home-outline'      },
-  { name: 'entry',    icon: 'clipboard', iconOutline: 'clipboard-outline' },
-  { name: 'settings', icon: 'settings', iconOutline: 'settings-outline'  },
+  { name: 'home',     icon: 'home',     iconOutline: 'home-outline',      label: () => t('tabs.home')     },
+  { name: 'entry',    icon: 'clipboard', iconOutline: 'clipboard-outline', label: () => t('tabs.entry')    },
+  { name: 'settings', icon: 'settings', iconOutline: 'settings-outline',  label: () => t('tabs.settings') },
 ];
 
 const ACTIVE_COLOR   = '#E07A20';
-const INACTIVE_COLOR = '#737373';
-const BAR_BG         = '#FAFAF7';
+const INACTIVE_COLOR = '#94A3B8';
 
 function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
   const isStandalone = Platform.OS === 'web' &&
     typeof window !== 'undefined' && window.navigator.standalone === true;
-  // On web (non-standalone) the tab bar lives inside the maxWidth container,
-  // so left:0/right:0 in the stylesheet already gives the correct width.
-  // Only pass an explicit width on native and standalone PWA.
   const W = (Platform.OS === 'web' && !isStandalone) ? undefined : screenW;
 
   return (
-    <View style={[styles.container, { width: W, paddingBottom: insets.bottom }]}>
+    <View style={[styles.container, { width: W, paddingBottom: Math.max(insets.bottom, 8) }]}>
       {state.routes.map((route, index) => {
         const tab = TABS.find((t) => t.name === route.name) ?? TABS[0];
         const isFocused = state.index === index;
@@ -53,7 +51,8 @@ function CustomTabBar({ state, navigation }) {
               }
             }}
           >
-            <Ionicons name={iconName} size={28} color={color} />
+            <Ionicons name={iconName} size={26} color={color} />
+            <Text style={[styles.label, { color, fontFamily: FONTS.bodyMedium }]}>{tab.label()}</Text>
           </TouchableOpacity>
         );
       })}
@@ -77,18 +76,26 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: BAR_BG,
+    backgroundColor: 'rgba(254,253,248,0.85)',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopWidth: 1,
-    borderTopColor: '#E2EAF4',
     paddingTop: 10,
+    shadowColor: '#4A7BB5',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 16,
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' } : {}),
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingBottom: 6,
+    gap: 3,
+    paddingBottom: 4,
+  },
+  label: {
+    fontSize: 11,
   },
 });

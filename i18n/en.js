@@ -325,6 +325,13 @@ export default {
     ok: 'OK',
   },
 
+  // ── Tab bar ──────────────────────────────────────────────────────────────────────────
+  tabs: {
+    home:     'Home',
+    entry:    'Diary',
+    settings: 'Settings',
+  },
+
   // ── Medications screen ───────────────────────────────────────────────────────────────
   medications: {
     title:           'My Medications',
