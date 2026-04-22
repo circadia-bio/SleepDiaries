@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0-beta.1] — 2026-04-22
+
+### Added
+
+- **Final report — share card**: shareable image card showing all sleep metrics in a 2×4 grid with threshold-coloured stat chips; works on native (via `react-native-view-shot` + `expo-sharing`) and web PWA
+- **Final report — thresholds**: metric chips now colour-coded against clinical reference values
+- **Export screen**: modernised with glassy cards and a shadow header
+- **Medication dose stepper**: 5 mg increment stepper added to medication dose input
+- **Alcohol question**: standard drink definition hint added to the diary alcohol question
+- **SVG backgrounds**: PNG background assets replaced with adaptive SVG components via `react-native-svg`
+- **Unit test suite**: tests for storage helpers, stat computations, sleep metrics, and i18n; run automatically on every push via GitHub Actions
+- **CI badge**: test status badge added to README
+
+### Improved
+
+- **Home screen**: entry card aspect ratio fixed; improved medication UX
+- **Profile and questionnaire modals**: constrained to app width on web
+- **Fathom analytics**: SPA page tracking enabled via `data-spa=auto`
+- **Stability**: all AsyncStorage operations wrapped in try/catch with safe JSON parsing
+- **Accessibility**: accessible labels added throughout; decorative emoji hidden from screen readers; colour-only distinctions resolved
+- **Performance**: heavy computations memoised to avoid redundant re-renders on re-render
+- **Architecture**: entry state centralised in `EntriesContext`; `MIN_ENTRIES` threshold and `computeStats` moved to `utils/`
+
+### Fixed
+
+- Entry button distortion on web and profile layout issues
+- Duplicate i18n questionnaire keys that broke Back/Next buttons
+- PWA splash dismissal on Android (`display-mode` standalone detection)
+
+---
+
 ## [1.0.0-beta.1] — 2026-04-21
 
 First public beta release of Sleep Diaries. This release covers the full core feature set intended for research use.
