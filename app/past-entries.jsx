@@ -31,7 +31,7 @@ const formatAnswer = (question, value) => {
 };
 
 const AnswerRow = ({ question, value, isMorning }) => {
-  const color = isMorning ? '#C25E00' : '#1E4A8A';
+  const color = isMorning ? '#E07A20' : '#4A7BB5';
   const formatted = formatAnswer(question, value);
   if (formatted === '—' && question.optional) return null;
   return (
@@ -46,23 +46,23 @@ const EntryCard = React.memo(({ entry }) => {
   const [expanded, setExpanded] = useState(false);
   const isMorning    = entry.type === 'morning';
   const questions    = isMorning ? MORNING_QUESTIONS : EVENING_QUESTIONS;
-  const primaryColor = isMorning ? '#C25E00' : '#1E4A8A';
-  const bgColor      = isMorning ? '#FFF8EE' : '#EEF5FF';
-  const borderColor  = isMorning ? '#F5C96A' : '#7EB0E0';
-  const headerBg     = isMorning ? '#F5C96A' : '#7EB0E0';
+  const bgColor      = isMorning ? 'rgba(255,248,238,0.6)' : 'rgba(238,245,255,0.6)';
+  const accentColor  = isMorning ? '#E07A20' : '#4A7BB5';
 
   return (
-    <View style={[styles.card, { borderColor }]}>
-      <TouchableOpacity style={[styles.cardHeader, { backgroundColor: headerBg }]} onPress={() => setExpanded(!expanded)} activeOpacity={0.8}>
+    <View style={styles.card}>
+      <TouchableOpacity style={styles.cardHeader} onPress={() => setExpanded(!expanded)} activeOpacity={0.8}>
         <View style={styles.cardHeaderLeft}>
-          <Ionicons name={isMorning ? 'sunny-outline' : 'moon-outline'} size={20} color={primaryColor} />
-          <Text style={[styles.cardType, { color: primaryColor, fontFamily: FONTS.body }]}>
+          <View style={[styles.cardIconWrap, { backgroundColor: accentColor + '20' }]}>
+            <Ionicons name={isMorning ? 'sunny-outline' : 'moon-outline'} size={20} color={accentColor} />
+          </View>
+          <Text style={[styles.cardType, { color: accentColor, fontFamily: FONTS.body }]}>
             {isMorning ? t('pastEntries.morningEntry') : t('pastEntries.eveningEntry')}
           </Text>
         </View>
         <View style={styles.cardHeaderRight}>
-          <Text style={[styles.cardTime, { color: primaryColor, fontFamily: FONTS.bodyMedium }]}>{formatTime(entry.completedAt)}</Text>
-          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={primaryColor} />
+          <Text style={[styles.cardTime, { color: '#94A3B8', fontFamily: FONTS.bodyMedium }]}>{formatTime(entry.completedAt)}</Text>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color="#94A3B8" />
         </View>
       </TouchableOpacity>
       {expanded && (
@@ -139,16 +139,17 @@ export default function PastEntriesScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#EEF5FF' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: '#B0CCEE', backgroundColor: '#EEF5FF' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, backgroundColor: '#EEF5FF', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   backBtn: { padding: 4 },
   title:   { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   listContent: { padding: 16, gap: 10 },
   centred: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12 },
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
   emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
-  dateLabel:     { fontSize: SIZES.bodySmall, color: '#4A7BB5', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 16, marginBottom: 4 },
-  card:            { borderRadius: 14, borderWidth: 1.5, overflow: 'hidden', marginBottom: 4 },
+  dateLabel:     { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 16, marginBottom: 4 },
+  card:            { borderRadius: 16, overflow: 'hidden', marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   cardHeader:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
+  cardIconWrap:    { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   cardHeaderLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardType:        { fontSize: SIZES.body },
