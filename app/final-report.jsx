@@ -16,6 +16,7 @@ import { FONTS, SIZES } from '../theme/typography';
 import t, { locale } from '../i18n';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
+import { BlurView } from 'expo-blur';
 import ScreenBackground from '../components/ScreenBackground';
 import IMAGES from '../assets/images';
 
@@ -560,6 +561,9 @@ export default function FinalReportScreen() {
 
   return (
     <View style={[styles.root, { minHeight: height }]}>
+      <ScreenBackground variant="home" />
+      <BlurView intensity={30} tint="light" style={styles.blur} />
+      <View style={styles.bgOverlay} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}><Ionicons name="arrow-back" size={24} color="#1E3A5F" /></TouchableOpacity>
         <Text style={[styles.title, { fontFamily: FONTS.heading }]}>{t('report.title')}</Text>
@@ -661,8 +665,10 @@ export default function FinalReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:    { flex: 1, backgroundColor: '#EEF5FF' },
-  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#B0CCEE', backgroundColor: '#EEF5FF' },
+  root:    { flex: 1, backgroundColor: 'transparent' },
+  blur:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  bgOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.60)' },
+  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, backgroundColor: 'transparent' },
   backBtn:  { padding: 4 }, shareBtn: { padding: 4 },
   title:    { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   centred:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12, paddingTop: 80 },
