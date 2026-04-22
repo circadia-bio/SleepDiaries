@@ -131,19 +131,19 @@ export default function ExportScreen() {
 
 const styles = StyleSheet.create({
   root:    { flex: 1, backgroundColor: '#EEF5FF' },
-  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#B0CCEE', backgroundColor: '#EEF5FF' },
+  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, backgroundColor: '#EEF5FF' },
   backBtn: { padding: 4 },
   title:   { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   content: { flex: 1, padding: 20, gap: 16 },
-  infoCard:       { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 18 },
+  infoCard:       { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', padding: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   infoText:       { flex: 1, fontSize: SIZES.body, color: '#4A7BB5', lineHeight: 26 },
-  exportCard:     { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#B0CCEE', padding: 16 },
+  exportCard:     { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', padding: 16, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   exportIcon:     { width: 56, height: 56, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   exportText:     { flex: 1, gap: 4 },
   exportTitle:    { fontSize: SIZES.body, color: '#1E3A5F' },
   exportSubtitle: { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24 },
   note:    { fontSize: SIZES.bodySmall, color: '#94A3B8', textAlign: 'center', lineHeight: 24, paddingHorizontal: 8 },
-  divider: { height: 1, backgroundColor: '#E2EAF4', marginVertical: 4 },
+  divider: { height: 1, backgroundColor: 'rgba(226,234,244,0.8)', marginVertical: 4 },
   splashOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 9999, backgroundColor: '#C8DFF5', alignItems: 'center', justifyContent: 'center' },
   splashImage:   { width: '100%', aspectRatio: 1 },
 });
