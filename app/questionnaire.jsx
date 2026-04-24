@@ -192,7 +192,7 @@ const YesNoInput = ({ value, onChange, theme }) => {
         const selected = value === opt;
         return (
           <TouchableOpacity key={opt}
-            style={[styles.yesNoBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : { backgroundColor: '#fff', borderColor: c.primary }]}
+            style={[styles.yesNoBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : {}]}
             onPress={() => onChange(opt)} activeOpacity={0.8}>
             <Text style={[styles.yesNoText, { color: selected ? '#fff' : c.primary }]}>
               {opt === 'yes' ? t('questionnaire.yes') : t('questionnaire.no')}
@@ -212,7 +212,7 @@ const RatingInput = ({ value, onChange, options, theme }) => {
         const selected = value === opt.value;
         return (
           <TouchableOpacity key={opt.value}
-            style={[styles.ratingBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : { backgroundColor: '#fff', borderColor: c.primary }]}
+            style={[styles.ratingBtn, selected ? { backgroundColor: c.primary, borderColor: c.primary } : {}]}
             onPress={() => onChange(opt.value)} activeOpacity={0.8}>
             <Text style={[styles.ratingText, { color: selected ? '#fff' : c.primary }]}>{opt.label}</Text>
           </TouchableOpacity>
@@ -226,11 +226,11 @@ const NumberInput = ({ value, onChange, min = 0, max = 99, unit = '', theme }) =
   const c = THEME[theme];
   return (
     <View style={styles.numberRow}>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: c.primary }]} onPress={() => onChange(clamp(value - 1, min, max))}>
+      <TouchableOpacity style={styles.numBtn} onPress={() => onChange(clamp(value - 1, min, max))}>
         <Ionicons name="remove" size={24} color={c.primary} />
       </TouchableOpacity>
       <Text style={[styles.numValue, { color: c.primary }]}>{value}</Text>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: c.primary }]} onPress={() => onChange(clamp(value + 1, min, max))}>
+      <TouchableOpacity style={styles.numBtn} onPress={() => onChange(clamp(value + 1, min, max))}>
         <Ionicons name="add" size={24} color={c.primary} />
       </TouchableOpacity>
       {unit ? <Text style={[styles.numUnit, { color: c.primary }]}>{unit}</Text> : null}
@@ -371,13 +371,10 @@ const ProgressBar = ({ current, total, theme }) => {
   const progress = current / total;
   return (
     <View style={styles.progressRow}>
-      <View style={[styles.progressIcon, { borderColor: c.primary }]}>
+      <View style={[styles.progressIcon]}>
         <Ionicons name="person-outline" size={20} color={c.primary} />
       </View>
-      <View style={[styles.progressTrack, {
-        borderColor: c.progressTrackBorder,
-        backgroundColor: c.progressTrackBg,
-      }]}>
+      <View style={[styles.progressTrack]}>
         <View style={[styles.progressFill, {
           width: `${progress * 100}%`,
           backgroundColor: c.progressFill,
@@ -545,6 +542,7 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.72)',
@@ -559,7 +557,14 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.72)',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
   },
   progressFill: {
     height: '100%',
@@ -583,13 +588,13 @@ const styles = StyleSheet.create({
   durationRow:   { flexDirection: 'row', alignItems: 'center' },
   durationGap:   { width: 32 },
   yesNoRow:      { flexDirection: 'row', gap: 20, marginTop: 8 },
-  yesNoBtn:      { width: 130, height: 56, borderRadius: 28, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  yesNoBtn:      { width: 130, height: 56, borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   yesNoText:     { fontSize: 20, fontWeight: '700' },
   ratingCol:     { width: '100%', gap: 12 },
-  ratingBtn:     { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1.5, alignItems: 'center' },
+  ratingBtn:     { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   ratingText:    { fontSize: 16, fontWeight: '600' },
   numberRow:     { flexDirection: 'row', alignItems: 'center', gap: 20 },
-  numBtn:        { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  numBtn:        { width: 52, height: 52, borderRadius: 26, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   numValue:      { fontSize: 48, fontWeight: '800', minWidth: 60, textAlign: 'center' },
   numUnit:       { fontSize: 16, fontWeight: '600', marginLeft: 4 },
   medContainer:  { width: '100%', gap: 12 },

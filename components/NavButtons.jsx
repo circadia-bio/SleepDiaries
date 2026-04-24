@@ -44,7 +44,7 @@ export function BackButton({ onPress, theme }) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      style={[styles.btn, styles.backBtn, { borderColor: c.border, backgroundColor: CREAM }]}
+      style={[styles.btn, styles.backBtn]}
       accessibilityRole="button"
       accessibilityLabel={t('questionnaire.back')}
     >
@@ -87,7 +87,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   backBtn: {
-    borderWidth: 2,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  nextBtn: {
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   label: {
     fontFamily: FONTS.body,
