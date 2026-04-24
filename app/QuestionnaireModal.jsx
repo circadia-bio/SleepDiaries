@@ -55,7 +55,7 @@ const OptionListInput = ({ value, onChange, options }) => (
           key={opt.value}
           style={[styles.scaleBtn, selected
             ? { backgroundColor: C.primary, borderColor: C.primary }
-            : { backgroundColor: '#fff', borderColor: C.primary }]}
+            : { borderColor: 'rgba(255,255,255,0.9)' }]}
           onPress={() => onChange(opt.value)}
           activeOpacity={0.8}
         >
@@ -113,7 +113,7 @@ const YesNoInput = ({ value, onChange }) => (
           key={opt}
           style={[styles.yesNoBtn, selected
             ? { backgroundColor: C.primary, borderColor: C.primary }
-            : { backgroundColor: '#fff', borderColor: C.primary }]}
+            : { borderColor: 'rgba(255,255,255,0.9)' }]}
           onPress={() => onChange(opt)}
           activeOpacity={0.8}
         >
@@ -473,13 +473,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12, gap: 10,
   },
   progressIcon: {
-    width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: C.primary,
+    width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
   },
   progressTrack: {
     flex: 1, height: 28, borderRadius: 14, borderWidth: 1,
-    borderColor: C.primaryLight, backgroundColor: 'rgba(255,255,255,0.8)', overflow: 'hidden',
+    borderColor: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(255,255,255,0.72)', overflow: 'hidden',
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 1,
   },
   progressFill:  { height: '100%', borderRadius: 14, backgroundColor: C.progressFill },
   progressLabel: { fontSize: 16, fontFamily: FONTS.heading, color: C.primary, minWidth: 40, textAlign: 'right' },
@@ -488,8 +489,9 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
 
   instructionsBox: {
-    backgroundColor: 'rgba(237,224,250,0.7)', borderRadius: 12, borderWidth: 1,
-    borderColor: 'rgba(196,168,224,0.5)', padding: 16, marginTop: 16, marginBottom: 8,
+    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12, borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)', padding: 16, marginTop: 16, marginBottom: 8,
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2,
   },
   instructionsText: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#3B1F6A', lineHeight: 24 },
 
@@ -504,7 +506,9 @@ const styles = StyleSheet.create({
   scaleBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 16, paddingVertical: 13,
-    borderRadius: 12, borderWidth: 1.5,
+    borderRadius: 12, borderWidth: 1,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
   },
   scaleBtnValue: { fontSize: 20, fontFamily: FONTS.heading, minWidth: 26, textAlign: 'center' },
   scaleBtnLabel: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, flex: 1 },
@@ -514,9 +518,10 @@ const styles = StyleSheet.create({
   scale010Row:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   scale010Btn: {
     width: 46, height: 46, borderRadius: 23,
-    borderWidth: 1.5, borderColor: C.primary,
+    borderWidth: 1, borderColor: 'rgba(107,63,160,0.3)',
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3, elevation: 1,
   },
   scale010BtnText:  { fontSize: 17, fontFamily: FONTS.heading },
   scale010Labels:   { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
@@ -524,7 +529,7 @@ const styles = StyleSheet.create({
 
   // Yes / No
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
-  yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   yesNoText: { fontSize: 20, fontFamily: FONTS.body },
 
   // Time stepper
@@ -536,7 +541,7 @@ const styles = StyleSheet.create({
 
   // Number / duration steppers
   numberRow: { flexDirection: 'row', alignItems: 'center', gap: 20, justifyContent: 'center' },
-  numBtn:    { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  numBtn:    { width: 52, height: 52, borderRadius: 26, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   numValue:  { fontSize: 48, fontFamily: FONTS.heading, minWidth: 60, textAlign: 'center' },
   numUnit:   { fontSize: 16, fontFamily: FONTS.bodyMedium, marginLeft: 4 },
 
@@ -544,12 +549,15 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', paddingHorizontal: 24, paddingTop: 12, gap: 12 },
   backBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 14, paddingVertical: 14, gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
   },
   backBtnText:     { fontSize: SIZES.body, fontFamily: FONTS.body, color: C.primary },
   nextBtn: {
     flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     backgroundColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4,
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 4,
   },
   nextBtnDisabled: { opacity: 0.35 },
   nextBtnText:     { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
