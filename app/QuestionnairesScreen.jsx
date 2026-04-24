@@ -94,7 +94,7 @@ export default function QuestionnairesScreen() {
                     )}
                   </View>
                   <TouchableOpacity
-                    style={[styles.qBtn, { borderColor: result ? '#94A3B8' : '#4A7BB5' }]}
+                    style={styles.qBtn}
                     onPress={() => {
                       if (result) {
                         showAlert(
@@ -110,7 +110,7 @@ export default function QuestionnairesScreen() {
                       }
                     }}
                   >
-                    <Text style={[styles.qBtnText, { color: result ? '#94A3B8' : '#4A7BB5', fontFamily: FONTS.body }]}>
+                    <Text style={[styles.qBtnText, { fontFamily: FONTS.body }]}>
                       {result ? t('profileQuestionnaires.redo') : t('profileQuestionnaires.start')}
                     </Text>
                   </TouchableOpacity>
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   qBadgeText:   { fontSize: SIZES.label, flexShrink: 1 },
   qDate:        { fontSize: SIZES.caption, color: '#94A3B8' },
   qPending:     { fontSize: SIZES.bodySmall, color: '#94A3B8' },
-  qBtn:         { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
-  qBtnText:     { fontSize: SIZES.label },
+  qBtn:         { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: 'rgba(74,123,181,0.12)', borderWidth: 0, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6, elevation: 3 },
+  qBtnText:     { fontSize: SIZES.label, color: '#4A7BB5' },
   divider:      { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
 });
