@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0-beta.2] — 2026-04-24
+
+### Improved
+
+- **Questionnaire UI refresh**: daily (morning/evening) and one-time questionnaire screens fully modernised — glassy progress bar, yes/no, rating and number buttons with soft shadows; themed tint on progress track for contrast; glassy Back button; shadow lift on Next button; borderless unselected button states throughout
+- **Minor visual polish**: button shadow depths increased across questionnaire screens; progress icon and track borders softened to match glassy language
+
+---
+
+## [1.2.0-beta.1] — 2026-04-24
+
+### Improved
+
+- **UI modernisation — glassy card system**: unified semi-transparent card treatment (`rgba(255,255,255,0.72)`) with white borders and blue-tinted shadows applied across all screens; replaces hard `borderWidth: 1.5` / `#B0CCEE` borders throughout
+- **Home screen**: instructions card and bottom shortcut cards (Past Entries, Final Report) refreshed with glassy treatment, icon pills, and inline label + chevron rows
+- **Tab bar**: labels added (Home / Diary / Settings; EN + PT-BR), semi-transparent background with blur on web, upward shadow, refined inactive colour
+- **Diary tab**: streak banner and stat chips refreshed; streak emoji replaced with themed flame icon (orange when active, blue when zero); stat box labels shortened to prevent wrapping
+- **Login screen**: logo added as a soft footer element; glassy inputs; dynamic CTA button colour (grey → blue based on input)
+- **Final report**: blurred home gradient background with white overlay; battery-half icon for morning restedness; sleep quality swapped to blue star
+- **Profile modal**: full-screen gradient background with overlay; glassy edit inputs and action buttons
+- **Past entries**: glassy entry cards; orange uppercase date labels; icon pills for morning/evening
+- **Questionnaires screen**: blue-tinted borderless Start/Redo buttons
+- **Daily questionnaire**: glassy progress bar, yes/no, rating, and number buttons; themed tint on progress track; glassy Back button; shadow on Next button
+- **One-time questionnaire modal**: gradient background with purple overlay; glassy progress bar, scale buttons, instructions box, and nav buttons; purple border only on selected state
+- **Export, Medications, Sleep Metrics, Questionnaire Credits, Threshold References screens**: all modernised with glassy cards and shadow headers
+- **`expo-blur`**: added as a dependency for blur effects on the final report and profile modal
+
+---
+
 ## [1.1.0-beta.1] — 2026-04-22
 
 ### Added
