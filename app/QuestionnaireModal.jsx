@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
 
   betaBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#F0E8FA', borderBottomWidth: 1, borderBottomColor: '#C4A8E0',
+    backgroundColor: 'rgba(240,232,250,0.8)', borderBottomWidth: 0,
     paddingHorizontal: 20, paddingVertical: 10,
   },
   betaBannerText: { fontSize: SIZES.caption, color: '#6B3FA0', flex: 1, lineHeight: 20 },
@@ -469,12 +469,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12, gap: 10,
   },
   progressIcon: {
-    width: 42, height: 42, borderRadius: 21, borderWidth: 2, borderColor: C.primary,
-    alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.7)',
+    width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: C.primary,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
   },
   progressTrack: {
-    flex: 1, height: 28, borderRadius: 14, borderWidth: 1.5,
-    borderColor: C.primaryLight, backgroundColor: '#fff', overflow: 'hidden',
+    flex: 1, height: 28, borderRadius: 14, borderWidth: 1,
+    borderColor: C.primaryLight, backgroundColor: 'rgba(255,255,255,0.8)', overflow: 'hidden',
   },
   progressFill:  { height: '100%', borderRadius: 14, backgroundColor: C.progressFill },
   progressLabel: { fontSize: 16, fontFamily: FONTS.heading, color: C.primary, minWidth: 40, textAlign: 'right' },
@@ -483,14 +484,14 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
 
   instructionsBox: {
-    backgroundColor: '#EDE0FA', borderRadius: 12, borderWidth: 1.5,
-    borderColor: C.primaryLight, padding: 16, marginTop: 16, marginBottom: 8,
+    backgroundColor: 'rgba(237,224,250,0.7)', borderRadius: 12, borderWidth: 1,
+    borderColor: 'rgba(196,168,224,0.5)', padding: 16, marginTop: 16, marginBottom: 8,
   },
   instructionsText: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#3B1F6A', lineHeight: 24 },
 
   itemNumber: { fontSize: SIZES.label, fontFamily: FONTS.body, color: C.primaryLight, textTransform: 'uppercase', marginTop: 20, marginBottom: 6 },
   itemText:   { fontSize: 20, fontFamily: FONTS.heading, color: C.primary, lineHeight: 28, marginBottom: 12 },
-  hintBox:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#EDE0FA', borderRadius: 10, padding: 12, marginBottom: 16 },
+  hintBox:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: 'rgba(237,224,250,0.7)', borderRadius: 10, padding: 12, marginBottom: 16 },
   hintText:   { flex: 1, fontSize: SIZES.bodySmall, color: C.primary, lineHeight: 22 },
   inputArea:  { alignItems: 'stretch' },
 
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
   scaleBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 16, paddingVertical: 13,
-    borderRadius: 12, borderWidth: 2,
+    borderRadius: 12, borderWidth: 1.5,
   },
   scaleBtnValue: { fontSize: 20, fontFamily: FONTS.heading, minWidth: 26, textAlign: 'center' },
   scaleBtnLabel: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, flex: 1 },
@@ -509,9 +510,9 @@ const styles = StyleSheet.create({
   scale010Row:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   scale010Btn: {
     width: 46, height: 46, borderRadius: 23,
-    borderWidth: 2, borderColor: C.primary,
+    borderWidth: 1.5, borderColor: C.primary,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.8)',
   },
   scale010BtnText:  { fontSize: 17, fontFamily: FONTS.heading },
   scale010Labels:   { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
@@ -519,7 +520,7 @@ const styles = StyleSheet.create({
 
   // Yes / No
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
-  yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   yesNoText: { fontSize: 20, fontFamily: FONTS.body },
 
   // Time stepper
@@ -531,7 +532,7 @@ const styles = StyleSheet.create({
 
   // Number / duration steppers
   numberRow: { flexDirection: 'row', alignItems: 'center', gap: 20, justifyContent: 'center' },
-  numBtn:    { width: 52, height: 52, borderRadius: 26, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  numBtn:    { width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   numValue:  { fontSize: 48, fontFamily: FONTS.heading, minWidth: 60, textAlign: 'center' },
   numUnit:   { fontSize: 16, fontFamily: FONTS.bodyMedium, marginLeft: 4 },
 
@@ -539,7 +540,7 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', paddingHorizontal: 24, paddingTop: 12, gap: 12 },
   backBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4,
+    borderWidth: 1.5, borderColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4,
   },
   backBtnText:     { fontSize: SIZES.body, fontFamily: FONTS.body, color: C.primary },
   nextBtn: {
@@ -552,13 +553,14 @@ const styles = StyleSheet.create({
   // Result screen
   resultContainer: { flex: 1, padding: 24, justifyContent: 'center', gap: 20 },
   resultCard: {
-    backgroundColor: '#fff', borderRadius: 18, borderWidth: 1.5,
-    borderColor: C.primaryLight, padding: 28, alignItems: 'center', gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18, borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)', padding: 28, alignItems: 'center', gap: 12,
+    shadowColor: '#6B3FA0', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
   resultTitle:    { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading, color: '#1E3A5F' },
   scoreBadge: {
     flexDirection: 'row', alignItems: 'baseline', gap: 4,
-    borderWidth: 2, borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10, marginVertical: 4,
+    borderWidth: 1.5, borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10, marginVertical: 4,
   },
   scoreNumber:    { fontSize: 52, fontFamily: FONTS.heading },
   scoreMax:       { fontSize: 22, fontFamily: FONTS.bodyMedium },
