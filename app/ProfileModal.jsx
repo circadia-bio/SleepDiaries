@@ -82,7 +82,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: (Platform.OS === 'web' ? 80 : 0) + insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <View style={styles.avatarSection}>
             <View style={styles.avatar}><Ionicons name="person" size={52} color="#4A7BB5" /></View>
 
