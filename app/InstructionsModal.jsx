@@ -188,6 +188,7 @@ export default function InstructionsModal({ visible, onClose }) {
           </View>
 
         </View>
+        </View>
       )}
     </Modal>
   );
