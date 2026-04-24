@@ -1,32 +1,18 @@
 /**
- * app/QuestionnaireModal.jsx — One-time research questionnaire modal
+ * app/QuestionnaireScreen.jsx — Full-screen questionnaire route
  *
- * Presents a single questionnaire (e.g. ESS, ISI, MEQ) in the same step-by-step
- * style as the daily diary. Opened from the Profile modal.
- *
- * Props:
- *   visible         {boolean}
- *   questionnaire   {object}  — a questionnaire definition from data/questionnaires.js
- *   onClose         {function}
- *   onComplete      {function(result)} — called after saving, with the result object
- *   resultsUnlocked {boolean} — if false, shows a holding screen instead of the score
- *
- * Supported input types:
- *   scale_0_3      single_choice    yes_no
- *   scale_0_4      frequency_3      frequency_4
- *   scale_0_10     scale_1_10
- *   time           duration_min     number
- *
- * Theme: purple/violet to distinguish from morning (amber) and evening (blue).
+ * Replaces QuestionnaireModal for the QuestionnairesScreen flow.
+ * Receives `id` and `resultsUnlocked` as route params.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Modal, View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Platform, TextInput,
+  View, Text, TouchableOpacity, ScrollView, StyleSheet, useWindowDimensions,
 } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveQuestionnaire } from '../storage/storage';
+import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
 import ScreenBackground from '../components/ScreenBackground';
@@ -36,7 +22,6 @@ const C = {
   primary:      '#6B3FA0',
   primaryLight: '#C4A8E0',
   progressFill: '#7B52B0',
-  bg:           '#F0E8FA',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -44,8 +29,6 @@ const pad = (n) => String(n).padStart(2, '0');
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
 // ─── Input components ─────────────────────────────────────────────────────────
-
-/** Vertical stacked options (scale_0_3, scale_0_4, scale_1_10, single_choice, frequency_3, frequency_4) */
 const OptionListInput = ({ value, onChange, options }) => (
   <View style={styles.scaleCol}>
     {options.map((opt) => {
@@ -73,7 +56,6 @@ const OptionListInput = ({ value, onChange, options }) => (
   </View>
 );
 
-/** 0–10 large numeric slider-style picker (DBAS-16) */
 const Scale010Input = ({ value, onChange }) => {
   const current = value ?? 5;
   return (
@@ -88,9 +70,7 @@ const Scale010Input = ({ value, onChange }) => {
               onPress={() => onChange(i)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.scale010BtnText, { color: selected ? '#fff' : C.primary }]}>
-                {i}
-              </Text>
+              <Text style={[styles.scale010BtnText, { color: selected ? '#fff' : C.primary }]}>{i}</Text>
             </TouchableOpacity>
           );
         })}
@@ -103,7 +83,6 @@ const Scale010Input = ({ value, onChange }) => {
   );
 };
 
-/** Yes / No */
 const YesNoInput = ({ value, onChange }) => (
   <View style={styles.yesNoRow}>
     {['yes', 'no'].map((opt) => {
@@ -126,11 +105,10 @@ const YesNoInput = ({ value, onChange }) => (
   </View>
 );
 
-/** HH:MM time stepper */
 const TimeInput = ({ value, onChange }) => {
   const { hour, minute } = value ?? { hour: 23, minute: 0 };
   const adjust = (field, delta) => {
-    if (field === 'hour')   onChange({ hour: (hour   + delta + 24) % 24, minute });
+    if (field === 'hour')   onChange({ hour: (hour + delta + 24) % 24, minute });
     if (field === 'minute') onChange({ hour, minute: (minute + delta + 60) % 60 });
   };
   const Stepper = ({ field, display }) => (
@@ -153,7 +131,6 @@ const TimeInput = ({ value, onChange }) => {
   );
 };
 
-/** Integer minutes stepper */
 const DurationMinInput = ({ value, onChange, min = 0, max = 180, unit = 'min' }) => {
   const v = value ?? 0;
   return (
@@ -170,7 +147,6 @@ const DurationMinInput = ({ value, onChange, min = 0, max = 180, unit = 'min' })
   );
 };
 
-/** Generic integer stepper */
 const NumberInput = ({ value, onChange, min = 0, max = 99, unit = '' }) => {
   const v = value ?? min;
   return (
@@ -200,8 +176,8 @@ const ProgressBar = ({ current, total }) => (
   </View>
 );
 
-// ─── Score result screen ──────────────────────────────────────────────────────
-const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
+// ─── Result screen ────────────────────────────────────────────────────────────
+const ResultScreen = ({ questionnaire, score, resultsUnlocked, onDone }) => {
   if (!resultsUnlocked) {
     return (
       <View style={styles.resultContainer}>
@@ -212,7 +188,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
             {t('questionnaireModal.pendingDesc', { shortTitle: questionnaire.shortTitle })}
           </Text>
         </View>
-        <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
+        <TouchableOpacity style={styles.doneBtn} onPress={onDone}>
           <Text style={styles.doneBtnText}>{t('questionnaireModal.done')}</Text>
         </TouchableOpacity>
       </View>
@@ -220,8 +196,6 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
   }
 
   const interpretation = questionnaire.interpret(score);
-
-  // Format score for display — handle object scores (e.g. MCTQ)
   let scoreDisplay = '';
   let scoreMax = '';
   if (typeof score === 'object' && score !== null) {
@@ -235,8 +209,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
     scoreDisplay = String(score);
     const maxScore = questionnaire.items.reduce((mx, item) => {
       if (!item.options) return mx;
-      const itemMax = Math.max(...item.options.map((o) => o.value));
-      return mx + itemMax;
+      return mx + Math.max(...item.options.map((o) => o.value));
     }, null);
     scoreMax = maxScore !== null ? `/ ${maxScore}` : '';
   }
@@ -253,14 +226,14 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
         <Text style={styles.interpretDesc}>{interpretation.description}</Text>
         <Text style={styles.referenceText}>{questionnaire.reference}</Text>
       </View>
-      <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
-      <Text style={styles.doneBtnText}>{t('questionnaireModal.done')}</Text>
+      <TouchableOpacity style={styles.doneBtn} onPress={onDone}>
+        <Text style={styles.doneBtnText}>{t('questionnaireModal.done')}</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-// ─── Helpers for default answer values ────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const buildInitialAnswers = (items) => {
   const a = {};
   for (const item of items) {
@@ -277,38 +250,42 @@ const buildInitialAnswers = (items) => {
 
 const isAnswered = (item, value) => {
   switch (item.type) {
-    case 'time':         return value !== null && value !== undefined;
-    case 'duration_min': return value !== null && value !== undefined;
-    case 'number':       return value !== null && value !== undefined;
-    case 'scale_0_10':   return value !== null && value !== undefined;
-    case 'yes_no':       return value === 'yes' || value === 'no';
-    default:             return value !== null && value !== undefined;
+    case 'time':
+    case 'duration_min':
+    case 'number':
+    case 'scale_0_10': return value !== null && value !== undefined;
+    case 'yes_no':     return value === 'yes' || value === 'no';
+    default:           return value !== null && value !== undefined;
   }
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
-export default function QuestionnaireModal({ visible, questionnaire, onClose, onComplete, resultsUnlocked = true }) {
-  const rawInsets = useSafeAreaInsets();
-  const insets = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
+// ─── Main screen ──────────────────────────────────────────────────────────────
+export default function QuestionnaireScreen() {
+  const router = useRouter();
+  const { id, resultsUnlocked: ruParam } = useLocalSearchParams();
+  const resultsUnlocked = ruParam === 'true';
+
+  const questionnaire = QUESTIONNAIRES.find((q) => q.id === id);
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
 
   const [answers, setAnswers]           = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [result, setResult]             = useState(null);
 
-  const handleShow = useCallback(() => {
-    setAnswers(buildInitialAnswers(questionnaire?.items ?? []));
-    setCurrentIndex(0);
-    setResult(null);
-  }, [questionnaire]);
-
   useEffect(() => {
-    if (visible) handleShow();
-  }, [visible, handleShow]);
+    if (questionnaire) {
+      setAnswers(buildInitialAnswers(questionnaire.items));
+      setCurrentIndex(0);
+      setResult(null);
+    }
+  }, [id]);
 
-  const items = questionnaire?.items ?? [];
-  const total = items.length;
-  const item  = items[currentIndex];
+  if (!questionnaire) return null;
 
+  const items        = questionnaire.items;
+  const total        = items.length;
+  const item         = items[currentIndex];
   const currentValue = answers[item?.id];
   const canProceed   = item ? isAnswered(item, currentValue) : false;
 
@@ -317,273 +294,173 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
     if (currentIndex < total - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      const score  = questionnaire.score(answers);
-      const saved  = await saveQuestionnaire(questionnaire.id, answers, score);
+      const score = questionnaire.score(answers);
+      const saved = await saveQuestionnaire(questionnaire.id, answers, score);
       setResult(saved);
-      onComplete?.(saved);
     }
   };
 
   const handleBack = () => {
     if (currentIndex > 0) setCurrentIndex((i) => i - 1);
-    else onClose();
+    else router.back();
   };
 
-  const setAnswer = (id, val) => setAnswers((prev) => ({ ...prev, [id]: val }));
-
-  if (!questionnaire) return null;
-
-  const inner = (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      <ScreenBackground variant="home" />
-      <View style={styles.overlay} />
-
-        {/* ── Header ── */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>{questionnaire.shortTitle}</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="close" size={26} color="#1E3A5F" />
-          </TouchableOpacity>
-        </View>
-
-        {questionnaire.beta && (
-          <View style={styles.betaBanner}>
-            <Ionicons name="flask-outline" size={15} color="#6B3FA0" />
-            <Text style={[styles.betaBannerText, { fontFamily: FONTS.bodyMedium }]}>
-              {t('questionnaireModal.betaBanner')}
-            </Text>
-          </View>
-        )}
-
-        {result ? (
-          <ResultScreen
-            questionnaire={questionnaire}
-            score={result.score}
-            resultsUnlocked={resultsUnlocked}
-            onClose={onClose}
-          />
-        ) : (
-          <>
-            <ProgressBar current={currentIndex + 1} total={total} />
-
-            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-
-              {currentIndex === 0 && (
-                <View style={styles.instructionsBox}>
-                  <Text style={styles.instructionsText}>{questionnaire.instructions}</Text>
-                </View>
-              )}
-
-              <Text style={styles.itemNumber}>{t('questionnaireModal.itemOf', { current: item.number, total })}</Text>
-              <Text style={styles.itemText}>{item.text}</Text>
-              {item.hint && (
-                <View style={styles.hintBox}>
-                  <Ionicons name="information-circle-outline" size={16} color={C.primary} />
-                  <Text style={[styles.hintText, { fontFamily: FONTS.bodyMedium }]}>{item.hint}</Text>
-                </View>
-              )}
-
-              <View style={styles.inputArea}>
-                {(item.type === 'scale_0_3' || item.type === 'scale_0_4' || item.type === 'scale_1_10' ||
-                  item.type === 'single_choice' || item.type === 'frequency_3' || item.type === 'frequency_4') && (
-                  <OptionListInput
-                    value={currentValue}
-                    onChange={(v) => setAnswer(item.id, v)}
-                    options={item.options}
-                  />
-                )}
-                {item.type === 'scale_0_10' && (
-                  <Scale010Input value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
-                )}
-                {item.type === 'yes_no' && (
-                  <YesNoInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
-                )}
-                {item.type === 'time' && (
-                  <TimeInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
-                )}
-                {item.type === 'duration_min' && (
-                  <DurationMinInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} min={item.min} max={item.max} unit={item.unit} />
-                )}
-                {item.type === 'number' && (
-                  <NumberInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} min={item.min} max={item.max} unit={item.unit} />
-                )}
-              </View>
-            </ScrollView>
-
-            {/* ── Nav buttons ── */}
-            <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
-              <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                <Ionicons name="chevron-back" size={22} color={C.primary} />
-                <Text style={styles.backBtnText}>{t('questionnaireModal.back')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.nextBtn, !canProceed && styles.nextBtnDisabled]}
-                onPress={handleNext}
-                disabled={!canProceed}
-              >
-                <Text style={styles.nextBtnText}>
-                  {currentIndex < total - 1 ? t('questionnaireModal.next') : t('questionnaireModal.finish')}
-                </Text>
-                <Ionicons name="chevron-forward" size={22} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </>        
-        )}
-      </View>
-  );
+  const setAnswer = (itemId, val) => setAnswers((prev) => ({ ...prev, [itemId]: val }));
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      {Platform.OS === 'web' ? (
-        <View style={styles.webModalOuter}>
-          <View style={styles.webModalInner}>{inner}</View>
+    <View style={[styles.root, { paddingTop: insets.top, minHeight: height }]}>
+      <View style={styles.bgContainer}>
+        <ScreenBackground variant="home" />
+      </View>
+      <View style={styles.overlay} />
+
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{questionnaire.shortTitle}</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
+          <Ionicons name="close" size={26} color="#1E3A5F" />
+        </TouchableOpacity>
+      </View>
+
+      {questionnaire.beta && (
+        <View style={styles.betaBanner}>
+          <Ionicons name="flask-outline" size={15} color="#6B3FA0" />
+          <Text style={[styles.betaBannerText, { fontFamily: FONTS.bodyMedium }]}>
+            {t('questionnaireModal.betaBanner')}
+          </Text>
         </View>
-      ) : inner}
-    </Modal>
+      )}
+
+      {result ? (
+        <ResultScreen
+          questionnaire={questionnaire}
+          score={result.score}
+          resultsUnlocked={resultsUnlocked}
+          onDone={() => router.back()}
+        />
+      ) : (
+        <>
+          <ProgressBar current={currentIndex + 1} total={total} />
+
+          <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+            {currentIndex === 0 && (
+              <View style={styles.instructionsBox}>
+                <Text style={styles.instructionsText}>{questionnaire.instructions}</Text>
+              </View>
+            )}
+            <Text style={styles.itemNumber}>{t('questionnaireModal.itemOf', { current: item.number, total })}</Text>
+            <Text style={styles.itemText}>{item.text}</Text>
+            {item.hint && (
+              <View style={styles.hintBox}>
+                <Ionicons name="information-circle-outline" size={16} color={C.primary} />
+                <Text style={[styles.hintText, { fontFamily: FONTS.bodyMedium }]}>{item.hint}</Text>
+              </View>
+            )}
+            <View style={styles.inputArea}>
+              {(item.type === 'scale_0_3' || item.type === 'scale_0_4' || item.type === 'scale_1_10' ||
+                item.type === 'single_choice' || item.type === 'frequency_3' || item.type === 'frequency_4') && (
+                <OptionListInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} options={item.options} />
+              )}
+              {item.type === 'scale_0_10' && (
+                <Scale010Input value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
+              )}
+              {item.type === 'yes_no' && (
+                <YesNoInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
+              )}
+              {item.type === 'time' && (
+                <TimeInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} />
+              )}
+              {item.type === 'duration_min' && (
+                <DurationMinInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} min={item.min} max={item.max} unit={item.unit} />
+              )}
+              {item.type === 'number' && (
+                <NumberInput value={currentValue} onChange={(v) => setAnswer(item.id, v)} min={item.min} max={item.max} unit={item.unit} />
+              )}
+            </View>
+          </ScrollView>
+
+          <View style={[styles.navRow, { paddingBottom: insets.bottom + 12 }]}>
+            <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+              <Ionicons name="chevron-back" size={22} color={C.primary} />
+              <Text style={styles.backBtnText}>{t('questionnaireModal.back')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.nextBtn, !canProceed && styles.nextBtnDisabled]}
+              onPress={handleNext}
+              disabled={!canProceed}
+            >
+              <Text style={styles.nextBtnText}>
+                {currentIndex < total - 1 ? t('questionnaireModal.next') : t('questionnaireModal.finish')}
+              </Text>
+              <Ionicons name="chevron-forward" size={22} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    </View>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: 'transparent' },
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(240,232,250,0.55)' },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingVertical: 18,
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
-  },
-  headerTitle: { fontSize: SIZES.cardTitle, fontFamily: FONTS.heading, color: '#1E3A5F' },
-  closeBtn:    { padding: 4 },
-
-  betaBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: 'rgba(240,232,250,0.8)', borderBottomWidth: 0,
-    paddingHorizontal: 20, paddingVertical: 10,
-  },
+  root:        { flex: 1, backgroundColor: 'transparent' },
+  bgContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 },
+  overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.60)' },
+  header:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: C.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
+  headerTitle:    { fontSize: SIZES.cardTitle, fontFamily: FONTS.heading, color: '#1E3A5F' },
+  closeBtn:       { padding: 4 },
+  betaBanner:     { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(240,232,250,0.8)', paddingHorizontal: 20, paddingVertical: 10 },
   betaBannerText: { fontSize: SIZES.caption, color: '#6B3FA0', flex: 1, lineHeight: 20 },
-
-  progressRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 16, paddingVertical: 12, gap: 10,
-  },
-  progressIcon: {
-    width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
-    alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)',
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
-  },
-  progressTrack: {
-    flex: 1, height: 28, borderRadius: 14, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(255,255,255,0.72)', overflow: 'hidden',
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 1,
-  },
+  progressRow:   { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  progressIcon:  { width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+  progressTrack: { flex: 1, height: 28, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(255,255,255,0.72)', overflow: 'hidden', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 1 },
   progressFill:  { height: '100%', borderRadius: 14, backgroundColor: C.progressFill },
   progressLabel: { fontSize: 16, fontFamily: FONTS.heading, color: C.primary, minWidth: 40, textAlign: 'right' },
-
   scroll:        { flex: 1 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
-
-  instructionsBox: {
-    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.9)', padding: 16, marginTop: 16, marginBottom: 8,
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2,
-  },
+  instructionsBox:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', padding: 16, marginTop: 16, marginBottom: 8, shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2 },
   instructionsText: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#3B1F6A', lineHeight: 24 },
-
   itemNumber: { fontSize: SIZES.label, fontFamily: FONTS.body, color: C.primaryLight, textTransform: 'uppercase', marginTop: 20, marginBottom: 6 },
   itemText:   { fontSize: 20, fontFamily: FONTS.heading, color: C.primary, lineHeight: 28, marginBottom: 12 },
   hintBox:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: 'rgba(237,224,250,0.7)', borderRadius: 10, padding: 12, marginBottom: 16 },
   hintText:   { flex: 1, fontSize: SIZES.bodySmall, color: C.primary, lineHeight: 22 },
   inputArea:  { alignItems: 'stretch' },
-
-  // Option list (scale_0_3, scale_0_4, scale_1_10, single_choice, frequency_*)
-  scaleCol: { gap: 10 },
-  scaleBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 16, paddingVertical: 13,
-    borderRadius: 12, borderWidth: 1,
-    backgroundColor: 'rgba(255,255,255,0.72)',
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
-  },
+  scaleCol:      { gap: 10 },
+  scaleBtn:      { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   scaleBtnValue: { fontSize: 20, fontFamily: FONTS.heading, minWidth: 26, textAlign: 'center' },
   scaleBtnLabel: { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, flex: 1 },
-
-  // Scale 0–10
   scale010Container: { width: '100%', gap: 10 },
   scale010Row:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
-  scale010Btn: {
-    width: 46, height: 46, borderRadius: 23,
-    borderWidth: 1, borderColor: 'rgba(107,63,160,0.3)',
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.72)',
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3, elevation: 1,
-  },
-  scale010BtnText:  { fontSize: 17, fontFamily: FONTS.heading },
-  scale010Labels:   { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
-  scale010Anchor:   { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8' },
-
-  // Yes / No
+  scale010Btn:       { width: 46, height: 46, borderRadius: 23, borderWidth: 1, borderColor: 'rgba(107,63,160,0.3)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3, elevation: 1 },
+  scale010BtnText:   { fontSize: 17, fontFamily: FONTS.heading },
+  scale010Labels:    { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
+  scale010Anchor:    { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8' },
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
   yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
-  yesNoText: { fontSize: 20, fontFamily: FONTS.body },
-
-  // Time stepper
+  yesNoText:  { fontSize: 20, fontFamily: FONTS.body },
   timeRow:    { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center' },
   stepperCol: { alignItems: 'center', gap: 12 },
   stepBtn:    { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   stepValue:  { fontSize: 40, fontFamily: FONTS.heading, minWidth: 52, textAlign: 'center' },
   timeSep:    { fontSize: 40, fontFamily: FONTS.heading, marginTop: -12 },
-
-  // Number / duration steppers
   numberRow: { flexDirection: 'row', alignItems: 'center', gap: 20, justifyContent: 'center' },
   numBtn:    { width: 52, height: 52, borderRadius: 26, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   numValue:  { fontSize: 48, fontFamily: FONTS.heading, minWidth: 60, textAlign: 'center' },
   numUnit:   { fontSize: 16, fontFamily: FONTS.bodyMedium, marginLeft: 4 },
-
-  // Nav buttons
-  navRow: { flexDirection: 'row', paddingHorizontal: 24, paddingTop: 12, gap: 12 },
-  backBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 14, paddingVertical: 14, gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.72)',
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
-  },
+  navRow:   { flexDirection: 'row', paddingHorizontal: 24, paddingTop: 12, gap: 12 },
+  backBtn:  { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 14, paddingVertical: 14, gap: 4, backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   backBtnText:     { fontSize: SIZES.body, fontFamily: FONTS.body, color: C.primary },
-  nextBtn: {
-    flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4,
-    shadowColor: C.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 4,
-  },
+  nextBtn:         { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary, borderRadius: 14, paddingVertical: 14, gap: 4, shadowColor: C.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 4 },
   nextBtnDisabled: { opacity: 0.35 },
   nextBtnText:     { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
-
-  // Result screen
   resultContainer: { flex: 1, padding: 24, justifyContent: 'center', gap: 20 },
-  resultCard: {
-    backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.9)', padding: 28, alignItems: 'center', gap: 12,
-    shadowColor: '#6B3FA0', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
-  },
+  resultCard:      { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', padding: 28, alignItems: 'center', gap: 12, shadowColor: '#6B3FA0', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   resultTitle:    { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading, color: '#1E3A5F' },
-  scoreBadge: {
-    flexDirection: 'row', alignItems: 'baseline', gap: 4,
-    borderWidth: 1.5, borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10, marginVertical: 4,
-  },
+  scoreBadge:     { flexDirection: 'row', alignItems: 'baseline', gap: 4, borderWidth: 1.5, borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10, marginVertical: 4 },
   scoreNumber:    { fontSize: 52, fontFamily: FONTS.heading },
   scoreMax:       { fontSize: 22, fontFamily: FONTS.bodyMedium },
   interpretLabel: { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading },
   interpretDesc:  { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   referenceText:  { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8', textAlign: 'center', lineHeight: 20, marginTop: 4 },
   pendingDesc:    { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
-  doneBtn: {
-    backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center',
-  },
-  doneBtnText:    { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
-  webOverlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
-  webModalOuter:  { flex: 1, backgroundColor: '#D8CCE8', alignItems: 'center', justifyContent: 'center' },
-  webModalInner:  { width: '100%', maxWidth: 480, flex: 1, maxHeight: '90%', borderRadius: 16, overflow: 'hidden' },
+  doneBtn:     { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
+  doneBtnText: { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
 });

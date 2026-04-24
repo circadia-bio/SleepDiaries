@@ -96,6 +96,7 @@ export default function RootLayout() {
       <Stack.Screen name="final-report"              options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="SleepMetricsScreen"         options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="QuestionnairesScreen"        options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="QuestionnaireScreen"          options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="QuestionnaireCreditsScreen" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="ThresholdReferencesScreen"   options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="MedicationsScreen"           options={{ animation: 'slide_from_right' }} />

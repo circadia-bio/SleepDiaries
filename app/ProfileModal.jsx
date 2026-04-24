@@ -174,7 +174,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
 }
 
 const styles = StyleSheet.create({
-  root:        { flex: 1, backgroundColor: 'transparent' },
+  root:        { flex: 1, backgroundColor: '#EEF5FF' },
   overlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(238,245,255,0.40)' },
   header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
@@ -200,5 +200,5 @@ const styles = StyleSheet.create({
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   divider:       { height: 1, backgroundColor: '#E2EAF4', marginHorizontal: 16 },
-  webOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, height: '100dvh' },
+  webOverlay:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
 });

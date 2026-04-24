@@ -6,11 +6,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import { loadAllQuestionnaires, loadEntries } from '../storage/storage';
 import { QUESTIONNAIRES } from '../data/questionnaires';
-import QuestionnaireModal from './QuestionnaireModal';
 import showAlert from '../utils/alert';
 import t, { locale } from '../i18n';
 
@@ -23,7 +22,6 @@ export default function QuestionnairesScreen() {
   const router = useRouter();
   const [morningCount, setMorningCount] = useState(0);
   const [qResults, setQResults]         = useState({});
-  const [activeQ, setActiveQ]           = useState(null);
 
   const load = useCallback(async () => {
     const [entries, qr] = await Promise.all([loadEntries(), loadAllQuestionnaires()]);
@@ -102,11 +100,11 @@ export default function QuestionnairesScreen() {
                           t('profileQuestionnaires.redoBody', { title: q.shortTitle }),
                           [
                             { text: t('profileQuestionnaires.redoCancel'), style: 'cancel' },
-                            { text: t('profileQuestionnaires.redoConfirm'), style: 'destructive', onPress: () => setActiveQ(q) },
+                            { text: t('profileQuestionnaires.redoConfirm'), style: 'destructive', onPress: () => router.push({ pathname: '/QuestionnaireScreen', params: { id: q.id, resultsUnlocked: String(resultsUnlocked) } }) },
                           ]
                         );
                       } else {
-                        setActiveQ(q);
+                        router.push({ pathname: '/QuestionnaireScreen', params: { id: q.id, resultsUnlocked: String(resultsUnlocked) } });
                       }
                     }}
                   >
@@ -127,19 +125,6 @@ export default function QuestionnairesScreen() {
           </Text>
         )}
       </ScrollView>
-
-      {activeQ && (
-        <QuestionnaireModal
-          visible={!!activeQ}
-          questionnaire={activeQ}
-          resultsUnlocked={resultsUnlocked}
-          onClose={() => setActiveQ(null)}
-          onComplete={async (result) => {
-            setQResults((prev) => ({ ...prev, [result.id]: result }));
-            setActiveQ(null);
-          }}
-        />
-      )}
     </SafeAreaView>
   );
 }
