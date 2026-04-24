@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveQuestionnaire } from '../storage/storage';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
+import ScreenBackground from '../components/ScreenBackground';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const C = {
@@ -334,6 +335,8 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
 
   const inner = (
     <View style={[styles.root, { paddingTop: insets.top }]}>
+      <ScreenBackground variant="home" />
+      <View style={styles.overlay} />
 
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -448,11 +451,12 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: C.bg },
+  root:   { flex: 1, backgroundColor: 'transparent' },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(240,232,250,0.55)' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 18,
-    borderBottomWidth: 1, borderBottomColor: C.primaryLight,
+    shadowColor: C.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
   headerTitle: { fontSize: SIZES.cardTitle, fontFamily: FONTS.heading, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
