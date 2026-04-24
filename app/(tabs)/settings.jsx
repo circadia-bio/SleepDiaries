@@ -3,6 +3,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Platform, Linking } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +16,11 @@ import t, { locale } from '../../i18n';
 const LANGUAGE_NAMES = { 'en': 'English', 'pt-BR': 'Português (Brasil)', 'pt': 'Português (Brasil)' };
 const currentLanguageName = LANGUAGE_NAMES[locale] ?? locale;
 
+const TAB_BAR_HEIGHT = 60;
+
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [notifications, setNotifications] = useState(true);
   const [textToSpeech, setTextToSpeech]   = useState(false);
   const [biggerText, setBiggerText]       = useState(false);
@@ -53,7 +57,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 24 }]}>
         <Text style={[styles.title, { fontFamily: FONTS.heading }]}>{t('settings.title')}</Text>
 
         {Platform.OS !== 'web' && (
@@ -136,7 +140,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   safeArea:      { flex: 1, backgroundColor: '#EEF5FF' },
-  content:       { padding: 24, gap: 8, paddingBottom: 40 },
+  content:       { padding: 24, gap: 8 },
   title:         { fontSize: SIZES.screenTitle, color: '#1E3A5F', marginBottom: 8 },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', marginTop: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.8 },
   card:          { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },

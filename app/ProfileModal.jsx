@@ -82,7 +82,7 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <View style={styles.avatarSection}>
             <View style={styles.avatar}><Ionicons name="person" size={52} color="#4A7BB5" /></View>
 
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   closeBtn:    { padding: 4 },
-  content:     { padding: 20, gap: 12, paddingBottom: 40 },
+  content:     { padding: 20, gap: 12 },
   avatarSection: { alignItems: 'center', gap: 10, paddingVertical: 8 },
   avatar:        { width: 100, height: 100, borderRadius: 50, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8' },
   nameRow:       { flexDirection: 'row', alignItems: 'center' },
