@@ -374,7 +374,7 @@ const ProgressBar = ({ current, total, theme }) => {
       <View style={[styles.progressIcon]}>
         <Ionicons name="person-outline" size={20} color={c.primary} />
       </View>
-      <View style={[styles.progressTrack]}>
+      <View style={[styles.progressTrack, { backgroundColor: c.primary + '15', borderColor: 'rgba(0,0,0,0.08)' }]}>
         <View style={[styles.progressFill, {
           width: `${progress * 100}%`,
           backgroundColor: c.progressFill,
