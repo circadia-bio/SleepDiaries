@@ -108,13 +108,13 @@ export default function InstructionsModal({ visible, onClose }) {
       {Platform.OS === 'web' ? (
         <View style={styles.webOuter}>
           <View style={[styles.root, { width: '100%', maxWidth: 480, height: '90%', borderRadius: 20, overflow: 'hidden' }]}>
-            <Background width={width} height={height} />
+            <Background width={480} height={height * 0.9} />
             <View style={[styles.overlay, { paddingTop: safeTop, paddingBottom: safeBottom }]}>
               <TouchableOpacity style={styles.closeBtn} onPress={handleClose} activeOpacity={0.7}>
                 <Ionicons name="close" size={20} color={CLOSE_COLOR} />
                 <Text style={styles.closeText}>{strings.instructions.close}</Text>
               </TouchableOpacity>
-              <View style={{ height: height * 0.22 }} />
+              <View style={{ height: height * 0.9 * 0.22 }} />
               <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>{slide.title}</Text>
                 <Text style={styles.body}>{slide.body}</Text>
