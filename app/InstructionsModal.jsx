@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import {
   Modal, View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, useWindowDimensions,
+  ScrollView, useWindowDimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
@@ -101,12 +101,47 @@ export default function InstructionsModal({ visible, onClose }) {
     <Modal
       visible={visible}
       animationType="fade"
-      transparent={false}
+      transparent={Platform.OS === 'web'}
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <View style={[styles.root, { width, height }]}>
-        <Background width={width} height={height} />
+      {Platform.OS === 'web' ? (
+        <View style={styles.webOuter}>
+          <View style={[styles.root, { width: '100%', maxWidth: 480, height: '90%', borderRadius: 20, overflow: 'hidden' }]}>
+            <Background width={width} height={height} />
+            <View style={[styles.overlay, { paddingTop: safeTop, paddingBottom: safeBottom }]}>
+              <TouchableOpacity style={styles.closeBtn} onPress={handleClose} activeOpacity={0.7}>
+                <Ionicons name="close" size={20} color={CLOSE_COLOR} />
+                <Text style={styles.closeText}>{strings.instructions.close}</Text>
+              </TouchableOpacity>
+              <View style={{ height: height * 0.22 }} />
+              <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <Text style={styles.title}>{slide.title}</Text>
+                <Text style={styles.body}>{slide.body}</Text>
+              </ScrollView>
+              <Dots total={NUM_SLIDES} current={index} />
+              <View style={styles.navRow}>
+                {isFirst ? (
+                  <TouchableOpacity style={[styles.navBtn, styles.nextBtn]} onPress={handleNext} activeOpacity={0.8}>
+                    <Text style={styles.nextText}>{strings.instructions.getStarted}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <>
+                    <TouchableOpacity style={[styles.navBtn, styles.backBtn]} onPress={handleBack} activeOpacity={0.8}>
+                      <Text style={styles.backText}>{strings.instructions.back}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.navBtn, styles.nextBtn]} onPress={handleNext} activeOpacity={0.8}>
+                      <Text style={styles.nextText}>{isLast ? strings.instructions.close : strings.instructions.next}</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View style={[styles.root, { width, height }]}>
+          <Background width={width} height={height} />
 
         <View style={[styles.overlay, { paddingTop: safeTop, paddingBottom: safeBottom }]}>
 
@@ -153,7 +188,7 @@ export default function InstructionsModal({ visible, onClose }) {
           </View>
 
         </View>
-      </View>
+      )}
     </Modal>
   );
 }
@@ -162,6 +197,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#EFF5F6',
+  },
+  webOuter: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
