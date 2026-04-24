@@ -584,5 +584,13 @@ const styles = StyleSheet.create({
     backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center',
   },
   doneBtnText:    { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },
-  webOverlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
+  webOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    height: '100dvh',
+  },
 });

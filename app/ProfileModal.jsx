@@ -200,5 +200,5 @@ const styles = StyleSheet.create({
   actionIcon:    { marginRight: 12 },
   actionLabel:   { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   divider:       { height: 1, backgroundColor: '#E2EAF4', marginHorizontal: 16 },
-  webOverlay:    { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
+  webOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, height: '100dvh' },
 });
