@@ -155,15 +155,12 @@ describe('MEQ — score()', () => {
 
   it('returns 86 for a fully morning-type response (max options per item)', () => {
     // Published MEQ maximum is 86 (Horne & Östberg, 1976).
-    // NOTE: this test currently fails — the implementation scores 83.
-    // The 3-point gap is due to items 1, 2, and 10 having 5 response options
-    // in the current spec (circadia-bio/sleep-questionnaires) rather than the
-    // 6-option versions in the original paper. The fix belongs in the spec repo;
-    // this test is left failing to flag the discrepancy.
+    // Items 11 and 12 use non-sequential scoring (6/4/2/0 and 0/2/3/5 respectively)
+    // per the original paper.
     const maxA = {
       meq1: 5, meq2: 5, meq3: 4, meq4: 4, meq5: 4,
       meq6: 4, meq7: 4, meq8: 4, meq9: 4, meq10: 5,
-      meq11: 4, meq12: 4, meq13: 4, meq14: 4, meq15: 4,
+      meq11: 6, meq12: 5, meq13: 4, meq14: 4, meq15: 4,
       meq16: 4, meq17: 5, meq18: 5, meq19: 6,
     };
     expect(MEQ.score(maxA)).toBe(86);

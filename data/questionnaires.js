@@ -298,11 +298,11 @@ export const MEQ = {
     },
     {
       id: 'meq11', number: 11, text: 'You want to be at your peak for a 2-hour mentally exhausting test. Which testing time would you choose?', type: 'single_choice',
-      options: [{ value: 4, label: '8:00–10:00 AM' }, { value: 3, label: '11:00 AM–1:00 PM' }, { value: 2, label: '3:00–5:00 PM' }, { value: 1, label: '7:00–9:00 PM' }],
+      options: [{ value: 6, label: '8:00–10:00 AM' }, { value: 4, label: '11:00 AM–1:00 PM' }, { value: 2, label: '3:00–5:00 PM' }, { value: 0, label: '7:00–9:00 PM' }],
     },
     {
       id: 'meq12', number: 12, text: 'If you went to bed at 11:00 PM, at what level of tiredness would you be?', type: 'single_choice',
-      options: [{ value: 1, label: 'Not at all tired' }, { value: 2, label: 'A little tired' }, { value: 3, label: 'Fairly tired' }, { value: 4, label: 'Very tired' }],
+      options: [{ value: 0, label: 'Not at all tired' }, { value: 2, label: 'A little tired' }, { value: 3, label: 'Fairly tired' }, { value: 5, label: 'Very tired' }],
     },
     {
       id: 'meq13', number: 13, text: 'You have gone to bed several hours later than usual, but there is no need to get up at any particular time the next morning. Which is most likely?', type: 'single_choice',
