@@ -161,7 +161,6 @@ export const ISI = {
 
 export const DBAS16 = {
   id:         'dbas16',
-  beta:       true,
   title:      'Dysfunctional Beliefs and Attitudes about Sleep',
   shortTitle: 'DBAS-16',
   credit:     'Morin, C. M., Vallières, A., & Ivers, H. (2007). Sleep, 30(11), 1547–1554. © Charles M. Morin. Available via MAPI Research Trust for research use.',
