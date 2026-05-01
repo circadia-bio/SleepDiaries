@@ -524,7 +524,6 @@ export const STOPBANG = {
 
 export const MCTQ = {
   id:         'mctq',
-  beta:       true,
   title:      'Munich Chronotype Questionnaire',
   shortTitle: 'MCTQ',
   credit:     'Roenneberg, T., et al. (2003). Journal of Biological Rhythms, 18(1), 80–90. © Till Roenneberg, LMU Munich. Free for non-commercial research; contact thewep.org for permission.',
@@ -549,12 +548,8 @@ export const MCTQ = {
     { id: 'mctq_wt_f', number: 'B4', text: 'Free days — What time do you usually wake up?',                                      type: 'time',         defaultValue: { hour: 8, minute: 30 } },
   ],
   score: (answers) => {
-    // All times converted to decimal hours (post-midnight times expressed as >24h)
-    const toH = (t) => {
-      if (!t) return null;
-      let h = t.hour + t.minute / 60;
-      return h; // caller handles wrap
-    };
+    // All times converted to decimal hours
+    const toH = (t) => t ? t.hour + t.minute / 60 : null;
 
     const wd = answers['mctq_wd'] ?? 5;
     const fd = 7 - wd;
@@ -564,10 +559,9 @@ export const MCTQ = {
     const sl_w = (answers['mctq_sl_w'] ?? 15) / 60;
     let so_w = bt_w + sl_w;
     let wt_w = toH(answers['mctq_wt_w'] ?? { hour: 7, minute: 0 });
-    if (wt_w < so_w - 12) wt_w += 24; // handle midnight wrap
-    if (wt_w <= so_w) wt_w += 24;
+    if (wt_w <= so_w) wt_w += 24; // handle midnight wrap
     const sd_w = wt_w - so_w;
-    const msw = so_w + sd_w / 2;
+    const msw = (so_w + sd_w / 2) % 24;
 
     // Free day sleep onset & duration
     let bt_f = toH(answers['mctq_bt_f'] ?? { hour: 0, minute: 0 });
@@ -578,21 +572,28 @@ export const MCTQ = {
     if (wt_f < 12) wt_f += 24;
     if (wt_f <= so_f) wt_f += 24;
     const sd_f = wt_f - so_f;
-    const msf = so_f + sd_f / 2;
+    const msf = (so_f + sd_f / 2) % 24;
 
-    // Sleep debt correction
-    const sd_week = wd > 0 || fd > 0 ? (sd_w * wd + sd_f * fd) / 7 : sd_f;
-    const deficit = sd_week - sd_w;
-    const msf_sc = deficit > 0 ? msf - deficit / 2 : msf;
+    // MSFsc — sleep-corrected mid-sleep on free days
+    // Per Roenneberg et al.: if SD_F <= SD_W, no correction needed.
+    // Otherwise: MSFsc = MSF - (SD_F - SD_week) / 2
+    const sd_week = (sd_w * wd + sd_f * fd) / 7;
+    let msf_sc;
+    if (sd_f <= sd_w) {
+      msf_sc = msf;
+    } else {
+      msf_sc = msf - (sd_f - sd_week) / 2;
+    }
+    // Normalise to 0–24 clock range
+    msf_sc = ((msf_sc % 24) + 24) % 24;
 
-    // Social jetlag
-    const sjl = Math.abs(msf - msw);
+    // SJL — absolute social jetlag using circular (shorter arc) difference
+    // |MSF - MSW| on a 24h clock, taking the shorter of the two arcs
+    let diff = Math.abs(msf - msw);
+    if (diff > 12) diff = 24 - diff;
+    const sjl = diff;
 
-    // Normalise MSFsc to 0–24 clock range
-    let chronoH = msf_sc % 24;
-    if (chronoH < 0) chronoH += 24;
-
-    return { msf_sc: Math.round(chronoH * 100) / 100, sjl: Math.round(sjl * 100) / 100 };
+    return { msf_sc: Math.round(msf_sc * 100) / 100, sjl: Math.round(sjl * 100) / 100 };
   },
   interpret: (score) => {
     // score is { msf_sc, sjl }
