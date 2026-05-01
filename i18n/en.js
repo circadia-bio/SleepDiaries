@@ -243,7 +243,7 @@ export default {
     notYetCompleted:     'Not yet completed',
     resultsAfter14:      'Results available after 14 days',
     completed:           'Completed',
-    betaFootnote:        'These questionnaires are experimental. Scoring algorithms and interpretations are provided for informational purposes only and may not be fully accurate. Always verify results against validated published sources before use in research or clinical practice. Full licensing details are available under Settings → Questionnaire Credits.',
+    betaFootnote:        'Scoring algorithms and interpretations are provided for informational purposes only and may not be fully accurate. Always verify results against validated published sources before use in research or clinical practice. Full licensing details are available under Settings → Questionnaire Credits.',
     redoTitle:           'Replace existing result?',
     redoBody:            'This will permanently overwrite your previous {{title}} result. Are you sure?',
     redoCancel:          'Cancel',
