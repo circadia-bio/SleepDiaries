@@ -329,20 +329,20 @@ describe('PSQI — interpret()', () => {
 describe('RU-SATED — score()', () => {
   it('returns 0 when all items are 0', () => {
     const a = {};
-    for (let n = 1; n <= 7; n++) a[`rus${n}`] = 0;
+    for (let n = 1; n <= 6; n++) a[`rus${n}`] = 0;
     expect(RUSATED.score(a)).toBe(0);
   });
 
-  it('returns 14 when all items are 2', () => {
+  it('returns 24 when all items are 4', () => {
     const a = {};
-    for (let n = 1; n <= 7; n++) a[`rus${n}`] = 2;
-    expect(RUSATED.score(a)).toBe(14);
+    for (let n = 1; n <= 6; n++) a[`rus${n}`] = 4;
+    expect(RUSATED.score(a)).toBe(24);
   });
 
   it('sums item values correctly', () => {
-    // 0+1+2+0+1+2+1 = 7
-    const a = { rus1:0, rus2:1, rus3:2, rus4:0, rus5:1, rus6:2, rus7:1 };
-    expect(RUSATED.score(a)).toBe(7);
+    // 0+1+2+3+4+2 = 12
+    const a = { rus1:0, rus2:1, rus3:2, rus4:3, rus5:4, rus6:2 };
+    expect(RUSATED.score(a)).toBe(12);
   });
 
   it('treats missing items as 0', () => {
@@ -351,12 +351,12 @@ describe('RU-SATED — score()', () => {
 });
 
 describe('RU-SATED — interpret()', () => {
-  it('Poor sleep health at score 0',     () => expect(RUSATED.interpret(0).label).toBe('Poor sleep health'));
-  it('Poor sleep health at score 4',     () => expect(RUSATED.interpret(4).label).toBe('Poor sleep health'));
-  it('Moderate sleep health at score 5', () => expect(RUSATED.interpret(5).label).toBe('Moderate sleep health'));
-  it('Moderate sleep health at score 9', () => expect(RUSATED.interpret(9).label).toBe('Moderate sleep health'));
-  it('Good sleep health at score 10',    () => expect(RUSATED.interpret(10).label).toBe('Good sleep health'));
-  it('Good sleep health at score 14',    () => expect(RUSATED.interpret(14).label).toBe('Good sleep health'));
+  it('Poor sleep health at score 0',      () => expect(RUSATED.interpret(0).label).toBe('Poor sleep health'));
+  it('Poor sleep health at score 8',      () => expect(RUSATED.interpret(8).label).toBe('Poor sleep health'));
+  it('Moderate sleep health at score 9',  () => expect(RUSATED.interpret(9).label).toBe('Moderate sleep health'));
+  it('Moderate sleep health at score 16', () => expect(RUSATED.interpret(16).label).toBe('Moderate sleep health'));
+  it('Good sleep health at score 17',     () => expect(RUSATED.interpret(17).label).toBe('Good sleep health'));
+  it('Good sleep health at score 24',     () => expect(RUSATED.interpret(24).label).toBe('Good sleep health'));
 });
 
 // ─── STOP-BANG ────────────────────────────────────────────────────────────────

@@ -75,7 +75,6 @@ const FREQUENCY_4 = [
 
 export const ESS = {
   id:         'ess',
-  beta:       true,
   title:      'Epworth Sleepiness Scale',
   shortTitle: 'ESS',
   credit:     'Johns, M. W. (1991). Sleep, 14(6), 540–545. © Murray W. Johns. Permission required for commercial use.',
@@ -110,7 +109,6 @@ export const ESS = {
 
 export const ISI = {
   id:         'isi',
-  beta:       true,
   title:      'Insomnia Severity Index',
   shortTitle: 'ISI',
   credit:     'Morin, C. M., et al. (2011). Sleep, 34(5), 601–608. © Charles M. Morin. Available for non-commercial research use.',
@@ -163,7 +161,6 @@ export const ISI = {
 
 export const DBAS16 = {
   id:         'dbas16',
-  beta:       true,
   title:      'Dysfunctional Beliefs and Attitudes about Sleep',
   shortTitle: 'DBAS-16',
   credit:     'Morin, C. M., Vallières, A., & Ivers, H. (2007). Sleep, 30(11), 1547–1554. © Charles M. Morin. Available via MAPI Research Trust for research use.',
@@ -245,7 +242,6 @@ export const KSS = {
 
 export const MEQ = {
   id:         'meq',
-  beta:       true,
   title:      'Morningness–Eveningness Questionnaire',
   shortTitle: 'MEQ',
   credit:     'Horne, J. A., & Östberg, O. (1976). International Journal of Chronobiology, 4(2), 97–110. In the public domain.',
@@ -349,7 +345,7 @@ export const MEQ = {
 
 export const PSQI = {
   id:         'psqi',
-  beta:       true,
+  maxScore:   21,
   title:      'Pittsburgh Sleep Quality Index',
   shortTitle: 'PSQI',
   credit:     'Buysse, D. J., et al. (1989). Psychiatry Research, 28(2), 193–213. © University of Pittsburgh. Permission required; contact the authors for research use.',
@@ -421,13 +417,13 @@ export const PSQI = {
 
     // C3 — Sleep duration (Q4, hours)
     const sd = answers['psqi4'] ?? 7;
-    const c3 = sd > 7 ? 0 : sd >= 6 ? 1 : sd >= 5 ? 2 : 3;
+    const c3 = sd >= 7 ? 0 : sd >= 6 ? 1 : sd >= 5 ? 2 : 3;
 
     // C4 — Habitual sleep efficiency (Q1, Q3, Q4)
     const bt = answers['psqi1'] ? answers['psqi1'].hour * 60 + answers['psqi1'].minute : 23 * 60;
     const wt = answers['psqi3'] ? answers['psqi3'].hour * 60 + answers['psqi3'].minute : 7 * 60;
     let tib = wt - bt; if (tib <= 0) tib += 1440;
-    const hse = tib > 0 ? ((sd * 60) / tib) * 100 : 0;
+    const hse = tib > 0 ? (sd / (tib / 60)) * 100 : 0;
     const c4 = hse >= 85 ? 0 : hse >= 75 ? 1 : hse >= 65 ? 2 : 3;
 
     // C5 — Sleep disturbances (Q5b–Q5i)
@@ -453,30 +449,40 @@ export const PSQI = {
 
 // ─── RU-SATED ─────────────────────────────────────────────────────────────────
 
+const RUSATED_OPTIONS = [
+  { value: 0, label: 'Never' },
+  { value: 1, label: 'Rarely' },
+  { value: 2, label: 'Sometimes' },
+  { value: 3, label: 'Often' },
+  { value: 4, label: 'Always' },
+];
+
 export const RUSATED = {
   id:         'rusated',
-  beta:       true,
-  title:      'RU-SATED Sleep Health Scale',
+  maxScore:   24,
+  title:      'Ru-SATED Sleep Health Scale',
   shortTitle: 'RU-SATED',
-  credit:     'Buysse, D. J. (2014). Sleep, 37(1), 9–17. © University of Pittsburgh. Permission required; contact the authors for research use.',
+  credit:     'Buysse, D. J. (2014). Sleep, 37(1), 9–17. © 2016 University of Pittsburgh. May not be used without permission.',
   instructions:
-    'For each of the following questions, please select the response that best describes your sleep over the past month.',
+    'The following statements refer to your sleep during the past one month. Please indicate the best ' +
+    'response for each statement. “Night” refers to the time you get your longest sleep of the day, which ' +
+    'may not be when it is dark out. “Day” refers to the time of day when you are usually awake. ' +
+    '“Sleep” refers to the longest period of sleep you have in a 24-hour day.',
   reference:
     'Buysse, D. J. (2014). Sleep, 37(1), 9–17.',
   items: [
-    { id: 'rus1', number: 1, text: 'Regularity — How often do you wake up at the same time each day (including weekends and days off)?',    type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus2', number: 2, text: 'Waking satisfaction — How often do you have difficulty waking up in the morning?',                      type: 'frequency_3', options: FREQUENCY_3_REV },
-    { id: 'rus3', number: 3, text: 'Satisfaction — How often are you satisfied with your sleep?',                                           type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus4', number: 4, text: 'Alertness — How often do you have trouble staying awake during the day?',                               type: 'frequency_3', options: FREQUENCY_3_REV },
-    { id: 'rus5', number: 5, text: 'Timing — How often do you fall asleep between 10 PM and midnight?',                                     type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus6', number: 6, text: 'Efficiency — How often do you sleep for at least 85% of the time that you are in bed?',                 type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus7', number: 7, text: 'Duration — How often do you sleep 7 hours or more each night?',                                         type: 'frequency_3', options: FREQUENCY_3 },
+    { id: 'rus1', number: 1, text: 'I go to sleep and wake up at about the same time every day.',                                                      type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus2', number: 2, text: 'I sleep 7–9 hours per night.',                                                                                      type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus3', number: 3, text: 'The middle of my sleep period is between 2:00 AM and 4:00 AM.',                                                       type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus4', number: 4, text: 'I am awake for less than 30 minutes between the time I go to bed and the time I get out of bed.',                     type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus5', number: 5, text: 'I stay awake all day without dozing.',                                                                                type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus6', number: 6, text: 'I am satisfied with my sleep.',                                                                                       type: 'single_choice', options: RUSATED_OPTIONS },
   ],
   score: (answers) =>
-    [1,2,3,4,5,6,7].reduce((s, n) => s + (answers[`rus${n}`] ?? 0), 0),
+    [1,2,3,4,5,6].reduce((s, n) => s + (answers[`rus${n}`] ?? 0), 0),
   interpret: (score) => {
-    if (score >= 10) return { label: 'Good sleep health',     color: '#2E7D32', description: 'Your score suggests good multidimensional sleep health.' };
-    if (score >= 5)  return { label: 'Moderate sleep health', color: '#F59E0B', description: 'Your score suggests moderate sleep health. There may be room for improvement.' };
+    if (score >= 17) return { label: 'Good sleep health',     color: '#2E7D32', description: 'Your score suggests good multidimensional sleep health.' };
+    if (score >= 9)  return { label: 'Moderate sleep health', color: '#F59E0B', description: 'Your score suggests moderate sleep health. There may be room for improvement.' };
     return               { label: 'Poor sleep health',      color: '#DC2626', description: 'Your score suggests poor sleep health across multiple dimensions. Consider speaking with a clinician.' };
   },
 };
@@ -485,7 +491,6 @@ export const RUSATED = {
 
 export const STOPBANG = {
   id:         'stopbang',
-  beta:       true,
   title:      'STOP-BANG Questionnaire',
   shortTitle: 'STOP-BANG',
   credit:     'Chung, F., et al. (2016). Chest, 149(3), 631–638. © University Health Network, Toronto. Freely available for clinical and non-commercial research use (stopbang.ca).',
@@ -518,7 +523,6 @@ export const STOPBANG = {
 
 export const MCTQ = {
   id:         'mctq',
-  beta:       true,
   title:      'Munich Chronotype Questionnaire',
   shortTitle: 'MCTQ',
   credit:     'Roenneberg, T., et al. (2003). Journal of Biological Rhythms, 18(1), 80–90. © Till Roenneberg, LMU Munich. Free for non-commercial research; contact thewep.org for permission.',
@@ -543,12 +547,8 @@ export const MCTQ = {
     { id: 'mctq_wt_f', number: 'B4', text: 'Free days — What time do you usually wake up?',                                      type: 'time',         defaultValue: { hour: 8, minute: 30 } },
   ],
   score: (answers) => {
-    // All times converted to decimal hours (post-midnight times expressed as >24h)
-    const toH = (t) => {
-      if (!t) return null;
-      let h = t.hour + t.minute / 60;
-      return h; // caller handles wrap
-    };
+    // All times converted to decimal hours
+    const toH = (t) => t ? t.hour + t.minute / 60 : null;
 
     const wd = answers['mctq_wd'] ?? 5;
     const fd = 7 - wd;
@@ -558,10 +558,9 @@ export const MCTQ = {
     const sl_w = (answers['mctq_sl_w'] ?? 15) / 60;
     let so_w = bt_w + sl_w;
     let wt_w = toH(answers['mctq_wt_w'] ?? { hour: 7, minute: 0 });
-    if (wt_w < so_w - 12) wt_w += 24; // handle midnight wrap
-    if (wt_w <= so_w) wt_w += 24;
+    if (wt_w <= so_w) wt_w += 24; // handle midnight wrap
     const sd_w = wt_w - so_w;
-    const msw = so_w + sd_w / 2;
+    const msw = (so_w + sd_w / 2) % 24;
 
     // Free day sleep onset & duration
     let bt_f = toH(answers['mctq_bt_f'] ?? { hour: 0, minute: 0 });
@@ -572,21 +571,28 @@ export const MCTQ = {
     if (wt_f < 12) wt_f += 24;
     if (wt_f <= so_f) wt_f += 24;
     const sd_f = wt_f - so_f;
-    const msf = so_f + sd_f / 2;
+    const msf = (so_f + sd_f / 2) % 24;
 
-    // Sleep debt correction
-    const sd_week = wd > 0 || fd > 0 ? (sd_w * wd + sd_f * fd) / 7 : sd_f;
-    const deficit = sd_week - sd_w;
-    const msf_sc = deficit > 0 ? msf - deficit / 2 : msf;
+    // MSFsc — sleep-corrected mid-sleep on free days
+    // Per Roenneberg et al.: if SD_F <= SD_W, no correction needed.
+    // Otherwise: MSFsc = MSF - (SD_F - SD_week) / 2
+    const sd_week = (sd_w * wd + sd_f * fd) / 7;
+    let msf_sc;
+    if (sd_f <= sd_w) {
+      msf_sc = msf;
+    } else {
+      msf_sc = msf - (sd_f - sd_week) / 2;
+    }
+    // Normalise to 0–24 clock range
+    msf_sc = ((msf_sc % 24) + 24) % 24;
 
-    // Social jetlag
-    const sjl = Math.abs(msf - msw);
+    // SJL — absolute social jetlag using circular (shorter arc) difference
+    // |MSF - MSW| on a 24h clock, taking the shorter of the two arcs
+    let diff = Math.abs(msf - msw);
+    if (diff > 12) diff = 24 - diff;
+    const sjl = diff;
 
-    // Normalise MSFsc to 0–24 clock range
-    let chronoH = msf_sc % 24;
-    if (chronoH < 0) chronoH += 24;
-
-    return { msf_sc: Math.round(chronoH * 100) / 100, sjl: Math.round(sjl * 100) / 100 };
+    return { msf_sc: Math.round(msf_sc * 100) / 100, sjl: Math.round(sjl * 100) / 100 };
   },
   interpret: (score) => {
     // score is { msf_sc, sjl }

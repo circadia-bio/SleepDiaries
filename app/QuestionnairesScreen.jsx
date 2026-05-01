@@ -50,6 +50,22 @@ export default function QuestionnairesScreen() {
           {QUESTIONNAIRES.map((q, i, arr) => {
             const result = qResults[q.id];
             const interpretation = (result && resultsUnlocked) ? q.interpret(result.score) : null;
+
+            // Format score for display — handle object scores (e.g. MCTQ)
+            let scoreDisplay = '';
+            if (result && resultsUnlocked) {
+              if (typeof result.score === 'object' && result.score !== null) {
+                if (result.score.msf_sc !== undefined) {
+                  const h = Math.floor(result.score.msf_sc);
+                  const m = Math.round((result.score.msf_sc % 1) * 60);
+                  scoreDisplay = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} MSFsc`;
+                } else {
+                  scoreDisplay = JSON.stringify(result.score);
+                }
+              } else {
+                scoreDisplay = String(result.score);
+              }
+            }
             return (
               <View key={q.id}>
                 <View style={styles.qRow}>
@@ -66,7 +82,7 @@ export default function QuestionnairesScreen() {
                       <View style={styles.qResultRow}>
                         <View style={[styles.qBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
                           <Text style={[styles.qBadgeText, { color: interpretation.color, fontFamily: FONTS.body }]}>
-                            {result.score} — {interpretation.label}
+                            {scoreDisplay} — {interpretation.label}
                           </Text>
                         </View>
                         <Text style={[styles.qDate, { fontFamily: FONTS.bodyMedium }]}>

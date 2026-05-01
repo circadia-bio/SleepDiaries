@@ -303,7 +303,7 @@ export default {
     notYetCompleted:     'Ainda não concluído',
     resultsAfter14:      'Resultados disponíveis após 14 dias',
     completed:           'Concluído em',
-    betaFootnote:        'Estes questionários são experimentais. Os algoritmos de pontuação e interpretações são fornecidos apenas para fins informativos e podem não ser totalmente precisos. Sempre verifique os resultados em relação às fontes publicadas validadas antes de usar em pesquisa ou prática clínica. Detalhes completos de licenciamento estão disponíveis em Configurações → Créditos dos Questionários.',
+    betaFootnote:        'Os algoritmos de pontuação e interpretações são fornecidos apenas para fins informativos e podem não ser totalmente precisos. Sempre verifique os resultados em relação às fontes publicadas validadas antes de usar em pesquisa ou prática clínica. Detalhes completos de licenciamento estão disponíveis em Configurações → Créditos dos Questionários.',
     redoTitle:           'Substituir resultado existente?',
     redoBody:            'Isso vai substituir permanentemente o seu resultado anterior do {{title}}. Tem certeza?',
     redoCancel:          'Cancelar',

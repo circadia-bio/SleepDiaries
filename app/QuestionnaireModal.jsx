@@ -19,10 +19,10 @@
  *
  * Theme: purple/violet to distinguish from morning (amber) and evening (blue).
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Modal, View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Platform, TextInput,
+  StyleSheet, Platform, TextInput, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -126,24 +126,50 @@ const YesNoInput = ({ value, onChange }) => (
   </View>
 );
 
-/** HH:MM time stepper */
+/** HH:MM time stepper with long-press repeat */
 const TimeInput = ({ value, onChange }) => {
   const { hour, minute } = value ?? { hour: 23, minute: 0 };
-  const adjust = (field, delta) => {
-    if (field === 'hour')   onChange({ hour: (hour   + delta + 24) % 24, minute });
-    if (field === 'minute') onChange({ hour, minute: (minute + delta + 60) % 60 });
-  };
+  const intervalRef = useRef(null);
+  const valueRef    = useRef(value ?? { hour: 23, minute: 0 });
+  useEffect(() => { valueRef.current = value ?? { hour: 23, minute: 0 }; }, [value]);
+
+  const adjust = useCallback((field, delta) => {
+    const p = valueRef.current;
+    if (field === 'hour')   onChange({ ...p, hour:   (p.hour   + delta + 24) % 24 });
+    if (field === 'minute') onChange({ ...p, minute: (p.minute + delta + 60) % 60 });
+  }, [onChange]);
+
+  const startLongPress = useCallback((field, delta) => {
+    adjust(field, delta);
+    intervalRef.current = setInterval(() => adjust(field, delta), 150);
+  }, [adjust]);
+
+  const stopLongPress = useCallback(() => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+  }, []);
+
+  useEffect(() => () => stopLongPress(), []);
+
   const Stepper = ({ field, display }) => (
     <View style={styles.stepperCol}>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: C.primaryLight }]} onPress={() => adjust(field, 1)}>
+      <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+        onPress={() => adjust(field, 1)}
+        onLongPress={() => startLongPress(field, 1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="caret-up" size={20} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
       <Text style={[styles.stepValue, { color: C.primary }]}>{display}</Text>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: C.primaryLight }]} onPress={() => adjust(field, -1)}>
+      <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+        onPress={() => adjust(field, -1)}
+        onLongPress={() => startLongPress(field, -1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="caret-down" size={20} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
+
   return (
     <View style={styles.timeRow}>
       <Stepper field="hour"   display={pad(hour)} />
@@ -153,35 +179,91 @@ const TimeInput = ({ value, onChange }) => {
   );
 };
 
-/** Integer minutes stepper */
+/** Integer minutes stepper with long-press repeat */
 const DurationMinInput = ({ value, onChange, min = 0, max = 180, unit = 'min' }) => {
   const v = value ?? 0;
+  const intervalRef = useRef(null);
+  const valueRef    = useRef(v);
+  useEffect(() => { valueRef.current = value ?? 0; }, [value]);
+
+  const adjust = useCallback((delta) => {
+    const next = Math.min(Math.max(valueRef.current + delta, min), max);
+    onChange(next);
+  }, [onChange, min, max]);
+
+  const startLongPress = useCallback((delta) => {
+    adjust(delta);
+    intervalRef.current = setInterval(() => adjust(delta), 150);
+  }, [adjust]);
+
+  const stopLongPress = useCallback(() => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+  }, []);
+
+  useEffect(() => () => stopLongPress(), []);
+
   return (
     <View style={styles.numberRow}>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: C.primary }]} onPress={() => onChange(clamp(v - 1, min, max))}>
+      <Pressable style={[styles.numBtn, { borderColor: C.primary }]}
+        onPress={() => adjust(-1)}
+        onLongPress={() => startLongPress(-1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="remove" size={24} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
       <Text style={[styles.numValue, { color: C.primary }]}>{v}</Text>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: C.primary }]} onPress={() => onChange(clamp(v + 1, min, max))}>
+      <Pressable style={[styles.numBtn, { borderColor: C.primary }]}
+        onPress={() => adjust(1)}
+        onLongPress={() => startLongPress(1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="add" size={24} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
       <Text style={[styles.numUnit, { color: C.primary }]}>{unit}</Text>
     </View>
   );
 };
 
-/** Generic integer stepper */
+/** Generic integer stepper with long-press repeat */
 const NumberInput = ({ value, onChange, min = 0, max = 99, unit = '' }) => {
   const v = value ?? min;
+  const intervalRef = useRef(null);
+  const valueRef    = useRef(v);
+  useEffect(() => { valueRef.current = value ?? min; }, [value]);
+
+  const adjust = useCallback((delta) => {
+    const next = Math.min(Math.max(valueRef.current + delta, min), max);
+    onChange(next);
+  }, [onChange, min, max]);
+
+  const startLongPress = useCallback((delta) => {
+    adjust(delta);
+    intervalRef.current = setInterval(() => adjust(delta), 150);
+  }, [adjust]);
+
+  const stopLongPress = useCallback(() => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+  }, []);
+
+  useEffect(() => () => stopLongPress(), []);
+
   return (
     <View style={styles.numberRow}>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: C.primary }]} onPress={() => onChange(clamp(v - 1, min, max))}>
+      <Pressable style={[styles.numBtn, { borderColor: C.primary }]}
+        onPress={() => adjust(-1)}
+        onLongPress={() => startLongPress(-1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="remove" size={24} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
       <Text style={[styles.numValue, { color: C.primary }]}>{v}</Text>
-      <TouchableOpacity style={[styles.numBtn, { borderColor: C.primary }]} onPress={() => onChange(clamp(v + 1, min, max))}>
+      <Pressable style={[styles.numBtn, { borderColor: C.primary }]}
+        onPress={() => adjust(1)}
+        onLongPress={() => startLongPress(1)}
+        onPressOut={stopLongPress}
+        delayLongPress={300}>
         <Ionicons name="add" size={24} color={C.primary} />
-      </TouchableOpacity>
+      </Pressable>
       {!!unit && <Text style={[styles.numUnit, { color: C.primary }]}>{unit}</Text>}
     </View>
   );
@@ -233,7 +315,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
     }
   } else {
     scoreDisplay = String(score);
-    const maxScore = questionnaire.items.reduce((mx, item) => {
+    const maxScore = questionnaire.maxScore ?? questionnaire.items.reduce((mx, item) => {
       if (!item.options) return mx;
       const itemMax = Math.max(...item.options.map((o) => o.value));
       return mx + itemMax;
