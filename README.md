@@ -58,12 +58,6 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 
 ---
 
-## 📱 Screens
-
-![](screens.png)
-
----
-
 ## 🗂️ Project Structure
 
 ```
