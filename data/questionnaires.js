@@ -243,7 +243,6 @@ export const KSS = {
 
 export const MEQ = {
   id:         'meq',
-  beta:       true,
   title:      'Morningness–Eveningness Questionnaire',
   shortTitle: 'MEQ',
   credit:     'Horne, J. A., & Östberg, O. (1976). International Journal of Chronobiology, 4(2), 97–110. In the public domain.',
