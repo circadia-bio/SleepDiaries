@@ -492,7 +492,6 @@ export const RUSATED = {
 
 export const STOPBANG = {
   id:         'stopbang',
-  beta:       true,
   title:      'STOP-BANG Questionnaire',
   shortTitle: 'STOP-BANG',
   credit:     'Chung, F., et al. (2016). Chest, 149(3), 631–638. © University Health Network, Toronto. Freely available for clinical and non-commercial research use (stopbang.ca).',
