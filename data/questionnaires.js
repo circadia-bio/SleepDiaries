@@ -450,30 +450,40 @@ export const PSQI = {
 
 // ─── RU-SATED ─────────────────────────────────────────────────────────────────
 
+const RUSATED_OPTIONS = [
+  { value: 0, label: 'Never' },
+  { value: 1, label: 'Rarely' },
+  { value: 2, label: 'Sometimes' },
+  { value: 3, label: 'Often' },
+  { value: 4, label: 'Always' },
+];
+
 export const RUSATED = {
   id:         'rusated',
-  beta:       true,
-  title:      'RU-SATED Sleep Health Scale',
+  maxScore:   24,
+  title:      'Ru-SATED Sleep Health Scale',
   shortTitle: 'RU-SATED',
-  credit:     'Buysse, D. J. (2014). Sleep, 37(1), 9–17. © University of Pittsburgh. Permission required; contact the authors for research use.',
+  credit:     'Buysse, D. J. (2014). Sleep, 37(1), 9–17. © 2016 University of Pittsburgh. May not be used without permission.',
   instructions:
-    'For each of the following questions, please select the response that best describes your sleep over the past month.',
+    'The following statements refer to your sleep during the past one month. Please indicate the best ' +
+    'response for each statement. “Night” refers to the time you get your longest sleep of the day, which ' +
+    'may not be when it is dark out. “Day” refers to the time of day when you are usually awake. ' +
+    '“Sleep” refers to the longest period of sleep you have in a 24-hour day.',
   reference:
     'Buysse, D. J. (2014). Sleep, 37(1), 9–17.',
   items: [
-    { id: 'rus1', number: 1, text: 'Regularity — How often do you wake up at the same time each day (including weekends and days off)?',    type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus2', number: 2, text: 'Waking satisfaction — How often do you have difficulty waking up in the morning?',                      type: 'frequency_3', options: FREQUENCY_3_REV },
-    { id: 'rus3', number: 3, text: 'Satisfaction — How often are you satisfied with your sleep?',                                           type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus4', number: 4, text: 'Alertness — How often do you have trouble staying awake during the day?',                               type: 'frequency_3', options: FREQUENCY_3_REV },
-    { id: 'rus5', number: 5, text: 'Timing — How often do you fall asleep between 10 PM and midnight?',                                     type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus6', number: 6, text: 'Efficiency — How often do you sleep for at least 85% of the time that you are in bed?',                 type: 'frequency_3', options: FREQUENCY_3 },
-    { id: 'rus7', number: 7, text: 'Duration — How often do you sleep 7 hours or more each night?',                                         type: 'frequency_3', options: FREQUENCY_3 },
+    { id: 'rus1', number: 1, text: 'I go to sleep and wake up at about the same time every day.',                                                      type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus2', number: 2, text: 'I sleep 7–9 hours per night.',                                                                                      type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus3', number: 3, text: 'The middle of my sleep period is between 2:00 AM and 4:00 AM.',                                                       type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus4', number: 4, text: 'I am awake for less than 30 minutes between the time I go to bed and the time I get out of bed.',                     type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus5', number: 5, text: 'I stay awake all day without dozing.',                                                                                type: 'single_choice', options: RUSATED_OPTIONS },
+    { id: 'rus6', number: 6, text: 'I am satisfied with my sleep.',                                                                                       type: 'single_choice', options: RUSATED_OPTIONS },
   ],
   score: (answers) =>
-    [1,2,3,4,5,6,7].reduce((s, n) => s + (answers[`rus${n}`] ?? 0), 0),
+    [1,2,3,4,5,6].reduce((s, n) => s + (answers[`rus${n}`] ?? 0), 0),
   interpret: (score) => {
-    if (score >= 10) return { label: 'Good sleep health',     color: '#2E7D32', description: 'Your score suggests good multidimensional sleep health.' };
-    if (score >= 5)  return { label: 'Moderate sleep health', color: '#F59E0B', description: 'Your score suggests moderate sleep health. There may be room for improvement.' };
+    if (score >= 17) return { label: 'Good sleep health',     color: '#2E7D32', description: 'Your score suggests good multidimensional sleep health.' };
+    if (score >= 9)  return { label: 'Moderate sleep health', color: '#F59E0B', description: 'Your score suggests moderate sleep health. There may be room for improvement.' };
     return               { label: 'Poor sleep health',      color: '#DC2626', description: 'Your score suggests poor sleep health across multiple dimensions. Consider speaking with a clinician.' };
   },
 };
