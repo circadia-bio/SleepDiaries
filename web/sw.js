@@ -3,7 +3,7 @@
  * Strategy: cache-first for assets, network-first for navigation.
  * This allows the app to work offline after first load.
  */
-const CACHE = 'sleep-diaries-v1';
+const CACHE = 'sleep-diaries-v2';
 
 const PRECACHE = [
   '/',

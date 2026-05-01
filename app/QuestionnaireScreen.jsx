@@ -11,7 +11,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { saveQuestionnaire } from '../storage/storage';
+import { saveQuestionnaire, loadEntries } from '../storage/storage';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
@@ -207,7 +207,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onDone }) => {
     }
   } else {
     scoreDisplay = String(score);
-    const maxScore = questionnaire.items.reduce((mx, item) => {
+    const maxScore = questionnaire.maxScore ?? questionnaire.items.reduce((mx, item) => {
       if (!item.options) return mx;
       return mx + Math.max(...item.options.map((o) => o.value));
     }, null);
@@ -262,8 +262,7 @@ const isAnswered = (item, value) => {
 // ─── Main screen ──────────────────────────────────────────────────────────────
 export default function QuestionnaireScreen() {
   const router = useRouter();
-  const { id, resultsUnlocked: ruParam } = useLocalSearchParams();
-  const resultsUnlocked = ruParam === 'true';
+  const { id } = useLocalSearchParams();
 
   const questionnaire = QUESTIONNAIRES.find((q) => q.id === id);
   const insets = useSafeAreaInsets();
@@ -272,6 +271,14 @@ export default function QuestionnaireScreen() {
   const [answers, setAnswers]           = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [result, setResult]             = useState(null);
+  const [resultsUnlocked, setResultsUnlocked] = useState(false);
+
+  useEffect(() => {
+    loadEntries().then((entries) => {
+      const count = entries.filter((e) => e.type === 'morning').length;
+      setResultsUnlocked(count >= 14);
+    });
+  }, []);
 
   useEffect(() => {
     if (questionnaire) {
@@ -294,9 +301,13 @@ export default function QuestionnaireScreen() {
     if (currentIndex < total - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      const score = questionnaire.score(answers);
-      const saved = await saveQuestionnaire(questionnaire.id, answers, score);
-      setResult(saved);
+      try {
+        const score = questionnaire.score(answers);
+        const saved = await saveQuestionnaire(questionnaire.id, answers, score);
+        setResult(saved);
+      } catch (e) {
+        console.error('[QuestionnaireScreen] score/save failed:', e);
+      }
     }
   };
 
