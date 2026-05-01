@@ -5,9 +5,9 @@
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
 [![Tests](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml/badge.svg)](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-1.1.0--beta.2-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19683378.svg)](https://doi.org/10.5281/zenodo.19683378)
-[![Beta](https://img.shields.io/badge/status-beta-orange)](#)
+[![Stable](https://img.shields.io/badge/status-stable-brightgreen)](#)
 [![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
@@ -53,7 +53,7 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
 - 🌍 **Localisation** — full Portuguese (Brazilian) translation 🇧🇷, locale detected automatically from device settings
-- 📋 **Research questionnaires** *(beta)* — validated one-time instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) accessible from the Profile, with results unlocking after 14 diary days
+- 📋 **Research questionnaires** — validated one-time instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) accessible from the Profile, with results unlocking after 14 diary days
 - 💊 **My Medications** — save regular treatments to your profile; they auto-populate the morning and evening medication questions
 
 ---
@@ -221,24 +221,24 @@ The tab bar, questionnaire nav buttons, instructions slideshow, and bottom short
 
 ---
 
-## 📋 Research Questionnaires *(Beta)*
+## 📋 Research Questionnaires
 
 Sleep Diaries includes a set of validated one-time research questionnaires accessible from the Profile screen. These complement the daily diary by capturing baseline clinical and chronobiological characteristics of participants.
 
-> ⚠️ **Beta notice:** Questionnaire scoring algorithms and result interpretations are implemented in good faith from the published literature but should be considered experimental. Always verify results against the original published sources before use in research or clinical practice.
+> **Note on permissions:** Several instruments are protected by copyright. It is the responsibility of the researcher or institution deploying this app to obtain the necessary permissions before using any instrument in a study. See the `credit` field in `data/questionnaires.js` or **Settings → Questionnaire credits** in the app for per-instrument details.
 
 ### Available instruments
 
-| Instrument | Full name | Items | Measures |
-|------------|-----------|-------|---------|
-| ESS | Epworth Sleepiness Scale | 8 | Daytime sleepiness |
-| ISI | Insomnia Severity Index | 7 | Insomnia severity |
-| DBAS-16 | Dysfunctional Beliefs and Attitudes about Sleep | 16 | Sleep-related cognitions |
-| MEQ | Morningness–Eveningness Questionnaire | 19 | Chronotype |
-| PSQI | Pittsburgh Sleep Quality Index | 17 | Sleep quality (7 components) |
-| RU-SATED | RU-SATED Sleep Health Scale | 7 | Multidimensional sleep health |
-| STOP-BANG | STOP-BANG Questionnaire | 8 | OSA risk screening |
-| MCTQ | Munich Chronotype Questionnaire | 7 | Chronotype (MSFsc + social jetlag) |
+| Instrument | Full name | Items | Scale | Measures |
+|------------|-----------|-------|-------|----------|
+| ESS | Epworth Sleepiness Scale | 8 | 0–3 per item (max 24) | Daytime sleepiness |
+| ISI | Insomnia Severity Index | 7 | 0–4 per item (max 28) | Insomnia severity |
+| DBAS-16 | Dysfunctional Beliefs and Attitudes about Sleep | 16 | 0–10 mean (max 10) | Sleep-related cognitions |
+| MEQ | Morningness–Eveningness Questionnaire | 19 | Weighted sum (max 86) | Chronotype |
+| PSQI | Pittsburgh Sleep Quality Index | 17 | 7-component global (max 21) | Sleep quality |
+| RU-SATED | Ru-SATED Sleep Health Scale | 6 | 0–4 per item (max 24) | Multidimensional sleep health |
+| STOP-BANG | STOP-BANG Questionnaire | 8 | Yes/No count (max 8) | OSA risk screening |
+| MCTQ | Munich Chronotype Questionnaire | 7 | MSFsc (clock time) + SJL (hours) | Chronotype + social jetlag |
 
 ### How it works
 
@@ -593,7 +593,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ## 📄 Citation
 
-**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.0.0-beta.1) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.1.0) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
 
 ---
 
@@ -704,7 +704,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Medication presets — auto-populate diary medication questions from saved treatments
 - [x] Share card — share a branded sleep report image from the final report screen
 - [x] Full UI modernisation — glassy card system, gradient backgrounds, blur effects, refined typography and icons throughout
-- [ ] Questionnaire result validation and removal of beta flag per instrument
+- [x] Questionnaire result validation and removal of beta flag — all eight instruments now stable
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
