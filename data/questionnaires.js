@@ -75,7 +75,6 @@ const FREQUENCY_4 = [
 
 export const ESS = {
   id:         'ess',
-  beta:       true,
   title:      'Epworth Sleepiness Scale',
   shortTitle: 'ESS',
   credit:     'Johns, M. W. (1991). Sleep, 14(6), 540–545. © Murray W. Johns. Permission required for commercial use.',
