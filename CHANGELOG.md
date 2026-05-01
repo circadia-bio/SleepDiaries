@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-05-01
+
+### Added
+
+- **Unit test suite — questionnaire scoring**: comprehensive tests for all eight one-time questionnaire instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) covering score computation, boundary conditions, and interpretation labels
+- **Unit test suite — JSON export consistency**: structural validation of `exportToJSON` output, field-format checks (clock, duration, medication), round-trip fidelity, and import edge cases
+
+### Fixed
+
+- **MEQ items 11 and 12**: corrected option values to match the original Horne & Östberg (1976) paper — item 11 now scores 6/4/2/0 and item 12 scores 0/2/3/5, raising the maximum achievable score to 86
+- **PSQI scoring**: corrected sleep duration boundary (`>7` → `≥7`), sleep efficiency formula, and disturbance thresholds to match the official Buysse et al. (1989) scoring algorithm; maximum score now correctly displayed as `/21`
+- **PSQI result display**: maximum score was incorrectly calculated by summing raw item option values (giving `/39`); now uses the published maximum of 21 via `maxScore` property
+- **RU-SATED**: fully rewritten to match official Ru-SATED v4.0 — 6 items (not 7), 0–4 response scale (Never/Rarely/Sometimes/Often/Always), maximum score 24, corrected item wording; interpretation thresholds updated accordingly
+- **MCTQ MSFsc formula**: corrected to compare SD_F vs SD_W (not SD_week) per Roenneberg et al.; social jetlag now uses circular (shorter arc) arithmetic to handle midnight-straddling schedules, fixing erroneous values such as 24.0 h
+- **Questionnaire results not showing**: `resultsUnlocked` was passed as a stale route param from `QuestionnairesScreen` (evaluated before `morningCount` loaded from storage); `QuestionnaireScreen` now loads entry count independently, resolving the issue where results only appeared after visiting the Final Report screen
+- **Service worker cache**: bumped cache version from `v1` to `v2` to force a full cache bust on existing PWA installations, ensuring updated JS bundles are served
+
+### Improved
+
+- **One-time questionnaire steppers**: time, duration, and number steppers in `QuestionnaireModal` now support long-press repeat (150 ms interval), matching the behaviour of the daily diary steppers
+- **Beta flags removed**: ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, and MCTQ are now considered stable; beta flags and banners removed from all eight instruments
+- **Questionnaire footnote**: removed the opening "These questionnaires are experimental" sentence; retained the methodological caveat and licensing reference
+- **MCTQ**: removed beta flag following scoring correction
+
+---
 ## [1.1.0-beta.2] — 2026-04-24
 
 ### Improved
