@@ -346,7 +346,7 @@ export const MEQ = {
 
 export const PSQI = {
   id:         'psqi',
-  beta:       true,
+  maxScore:   21,
   title:      'Pittsburgh Sleep Quality Index',
   shortTitle: 'PSQI',
   credit:     'Buysse, D. J., et al. (1989). Psychiatry Research, 28(2), 193–213. © University of Pittsburgh. Permission required; contact the authors for research use.',
@@ -418,13 +418,13 @@ export const PSQI = {
 
     // C3 — Sleep duration (Q4, hours)
     const sd = answers['psqi4'] ?? 7;
-    const c3 = sd > 7 ? 0 : sd >= 6 ? 1 : sd >= 5 ? 2 : 3;
+    const c3 = sd >= 7 ? 0 : sd >= 6 ? 1 : sd >= 5 ? 2 : 3;
 
     // C4 — Habitual sleep efficiency (Q1, Q3, Q4)
     const bt = answers['psqi1'] ? answers['psqi1'].hour * 60 + answers['psqi1'].minute : 23 * 60;
     const wt = answers['psqi3'] ? answers['psqi3'].hour * 60 + answers['psqi3'].minute : 7 * 60;
     let tib = wt - bt; if (tib <= 0) tib += 1440;
-    const hse = tib > 0 ? ((sd * 60) / tib) * 100 : 0;
+    const hse = tib > 0 ? (sd / (tib / 60)) * 100 : 0;
     const c4 = hse >= 85 ? 0 : hse >= 75 ? 1 : hse >= 65 ? 2 : 3;
 
     // C5 — Sleep disturbances (Q5b–Q5i)

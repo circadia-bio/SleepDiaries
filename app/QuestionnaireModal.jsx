@@ -233,7 +233,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
     }
   } else {
     scoreDisplay = String(score);
-    const maxScore = questionnaire.items.reduce((mx, item) => {
+    const maxScore = questionnaire.maxScore ?? questionnaire.items.reduce((mx, item) => {
       if (!item.options) return mx;
       const itemMax = Math.max(...item.options.map((o) => o.value));
       return mx + itemMax;
