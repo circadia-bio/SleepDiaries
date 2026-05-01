@@ -399,10 +399,14 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
     if (currentIndex < total - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      const score  = questionnaire.score(answers);
-      const saved  = await saveQuestionnaire(questionnaire.id, answers, score);
-      setResult(saved);
-      onComplete?.(saved);
+      try {
+        const score  = questionnaire.score(answers);
+        const saved  = await saveQuestionnaire(questionnaire.id, answers, score);
+        setResult(saved);
+        onComplete?.(saved);
+      } catch (e) {
+        console.error('[QuestionnaireModal] score/save failed:', e);
+      }
     }
   };
 
