@@ -109,7 +109,6 @@ export const ESS = {
 
 export const ISI = {
   id:         'isi',
-  beta:       true,
   title:      'Insomnia Severity Index',
   shortTitle: 'ISI',
   credit:     'Morin, C. M., et al. (2011). Sleep, 34(5), 601–608. © Charles M. Morin. Available for non-commercial research use.',
