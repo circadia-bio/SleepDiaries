@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.1] — 2026-05-04
+
+### Fixed
+
+- **Minute stepper — one-time questionnaires**: time inputs in `QuestionnaireScreen` and `QuestionnaireModal` now tap ±5 min and hold ±1 min, matching the daily diary behaviour
+- **Onboarding nav buttons**: Back button uses glassmorphic style consistent with the rest of the app; Next/Get Started button gains shadow and semi-transparent amber fill
+
+---
+
 ## [1.1.0] — 2026-05-01
 
 ### Added
