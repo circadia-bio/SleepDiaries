@@ -272,9 +272,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backBtn: {
-    backgroundColor: CREAM,
-    borderWidth: 2,
-    borderColor: AMBER_BORDER,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   backText: {
     fontFamily: FONTS.body,
@@ -282,7 +287,14 @@ const styles = StyleSheet.create({
     color: AMBER_TEXT,
   },
   nextBtn: {
-    backgroundColor: AMBER,
+    backgroundColor: 'rgba(255,176,96,0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,200,140,0.9)',
+    shadowColor: '#E07A20',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   nextText: {
     fontFamily: FONTS.body,

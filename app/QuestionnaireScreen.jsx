@@ -4,9 +4,9 @@
  * Replaces QuestionnaireModal for the QuestionnairesScreen flow.
  * Receives `id` and `resultsUnlocked` as route params.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet, useWindowDimensions,
+  View, Text, TouchableOpacity, ScrollView, StyleSheet, useWindowDimensions, Pressable,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -107,26 +107,68 @@ const YesNoInput = ({ value, onChange }) => (
 
 const TimeInput = ({ value, onChange }) => {
   const { hour, minute } = value ?? { hour: 23, minute: 0 };
-  const adjust = (field, delta) => {
-    if (field === 'hour')   onChange({ hour: (hour + delta + 24) % 24, minute });
-    if (field === 'minute') onChange({ hour, minute: (minute + delta + 60) % 60 });
-  };
-  const Stepper = ({ field, display }) => (
-    <View style={styles.stepperCol}>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: C.primaryLight }]} onPress={() => adjust(field, 1)}>
-        <Ionicons name="caret-up" size={20} color={C.primary} />
-      </TouchableOpacity>
-      <Text style={[styles.stepValue, { color: C.primary }]}>{display}</Text>
-      <TouchableOpacity style={[styles.stepBtn, { backgroundColor: C.primaryLight }]} onPress={() => adjust(field, -1)}>
-        <Ionicons name="caret-down" size={20} color={C.primary} />
-      </TouchableOpacity>
-    </View>
-  );
+  const intervalRef = useRef(null);
+  const valueRef    = useRef(value ?? { hour: 23, minute: 0 });
+  useEffect(() => { valueRef.current = value ?? { hour: 23, minute: 0 }; }, [value]);
+
+  const adjust = useCallback((field, delta) => {
+    const p = valueRef.current;
+    if (field === 'hour')   onChange({ ...p, hour:   (p.hour   + delta + 24) % 24 });
+    if (field === 'minute') onChange({ ...p, minute: (p.minute + delta + 60) % 60 });
+  }, [onChange]);
+
+  const startLongPress = useCallback((field, delta) => {
+    adjust(field, delta);
+    intervalRef.current = setInterval(() => adjust(field, delta), 150);
+  }, [adjust]);
+
+  const stopLongPress = useCallback(() => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+  }, []);
+
+  useEffect(() => () => stopLongPress(), []);
+
   return (
-    <View style={styles.timeRow}>
-      <Stepper field="hour"   display={pad(hour)} />
-      <Text style={[styles.timeSep, { color: C.primary }]}>:</Text>
-      <Stepper field="minute" display={pad(minute)} />
+    <View style={styles.stepperWrapper}>
+      <View style={styles.timeRow}>
+        <View style={styles.stepperCol}>
+          <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+            onPress={() => adjust('hour', 1)}
+            onLongPress={() => startLongPress('hour', 1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-up" size={20} color={C.primary} />
+          </Pressable>
+          <Text style={[styles.stepValue, { color: C.primary }]}>{pad(hour)}</Text>
+          <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+            onPress={() => adjust('hour', -1)}
+            onLongPress={() => startLongPress('hour', -1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-down" size={20} color={C.primary} />
+          </Pressable>
+        </View>
+        <Text style={[styles.timeSep, { color: C.primary }]}>:</Text>
+        {/* Minute stepper — tap ±5, hold ±1 */}
+        <View style={styles.stepperCol}>
+          <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+            onPress={() => adjust('minute', 5)}
+            onLongPress={() => startLongPress('minute', 1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-up" size={20} color={C.primary} />
+          </Pressable>
+          <Text style={[styles.stepValue, { color: C.primary }]}>{pad(minute)}</Text>
+          <Pressable style={[styles.stepBtn, { backgroundColor: C.primaryLight }]}
+            onPress={() => adjust('minute', -5)}
+            onLongPress={() => startLongPress('minute', -1)}
+            onPressOut={stopLongPress}
+            delayLongPress={300}>
+            <Ionicons name="caret-down" size={20} color={C.primary} />
+          </Pressable>
+        </View>
+      </View>
+      <Text style={[styles.stepHint, { color: C.primary }]}>hold for ±1 min</Text>
     </View>
   );
 };
@@ -447,6 +489,8 @@ const styles = StyleSheet.create({
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
   yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.18, shadowRadius: 8, elevation: 5 },
   yesNoText:  { fontSize: 20, fontFamily: FONTS.body },
+  stepperWrapper: { alignItems: 'center', gap: 10 },
+  stepHint:   { fontSize: 12, fontFamily: FONTS.bodyMedium, opacity: 0.5 },
   timeRow:    { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center' },
   stepperCol: { alignItems: 'center', gap: 12 },
   stepBtn:    { width: 52, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
