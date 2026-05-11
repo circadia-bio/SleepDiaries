@@ -27,6 +27,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry, loadMedicationPresets } from '../storage/storage';
+import { useEntries } from '../storage/EntriesContext';
 import t from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
 import IMAGES from '../assets/images';
@@ -395,6 +396,7 @@ export default function QuestionnaireScreen() {
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
 
+  const { refresh } = useEntries();
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone]                 = useState(false);
@@ -445,6 +447,7 @@ export default function QuestionnaireScreen() {
       setSaving(true);
       try {
         await saveEntry(entryType, answers);
+        await refresh();
         setDone(true);
       } catch (e) {
         setSaving(false);

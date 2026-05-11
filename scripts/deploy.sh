@@ -136,6 +136,9 @@ cp assets/favicon.png docs/favicon.png
 # Copy PWA files
 cp web/manifest.json docs/manifest.json
 cp web/sw.js docs/sw.js
+VERSION=$(node -p "require('./package.json').version")
+sed -i '' "s/__VERSION__/$VERSION/" docs/sw.js
+echo "Service worker versioned: sleep-diaries-$VERSION"
 
 # Copy PWA icons
 mkdir -p docs/icons
