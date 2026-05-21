@@ -397,6 +397,7 @@ export default function QuestionnaireScreen() {
   const theme = entryType === 'morning' ? 'morning' : 'evening';
 
   const { refresh } = useEntries();
+  const scrollRef = useRef(null);
   const [answers, setAnswers]           = useState(() => buildInitialAnswers(allQuestions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone]                 = useState(false);
@@ -432,6 +433,10 @@ export default function QuestionnaireScreen() {
     if (question.type === 'rating') return val !== null && val !== undefined;
     return true;
   };
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [currentIndex]);
 
   useEffect(() => {
     if (!done) return;
@@ -496,7 +501,7 @@ export default function QuestionnaireScreen() {
           <ProgressBar current={currentIndex + 1} total={total} theme={theme} />
         </View>
 
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scrollRef} style={styles.scrollView} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <Text style={[styles.questionText, { color: c.primary }, question.hint && { marginBottom: 8 }]}>
             {question.number}. {question.text}
           </Text>

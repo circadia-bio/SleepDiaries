@@ -50,6 +50,19 @@ const questionnaireKey = (id) => `questionnaire_${id}`;
  * or if parsing throws (e.g. corrupted data). Logs a warning in development so
  * issues are visible without crashing the app.
  */
+/**
+ * Returns today's date as a 'YYYY-MM-DD' string in the device's local timezone.
+ * Using toISOString() would return UTC, which causes entries saved after 9 pm
+ * in UTC-3 (Brazil) to be dated the following day, breaking the morning→evening gate.
+ */
+const getLocalDateStr = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const safeParseJSON = (raw, fallback, context = '') => {
   if (!raw) return fallback;
   try {
@@ -113,7 +126,7 @@ export const saveEntry = async (entryType, answers) => {
   try {
     const entries = await loadEntries();
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
+    const dateStr = getLocalDateStr();
     const id = `${dateStr}-${entryType}`;
     const filtered = entries.filter((e) => e.id !== id);
     const newEntry = {
@@ -133,13 +146,13 @@ export const saveEntry = async (entryType, answers) => {
 
 export const isTodayComplete = async (entryType) => {
   const entries = await loadEntries();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateStr();
   return entries.some((e) => e.date === today && e.type === entryType);
 };
 
 export const loadTodayStatus = async () => {
   const entries = await loadEntries();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateStr();
   const todayEntries = entries.filter((e) => e.date === today);
   return {
     morningCompleted: todayEntries.some((e) => e.type === 'morning'),
