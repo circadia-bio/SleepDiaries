@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.2] — 2026-05-21
+
+### Fixed
+
+- **Evening diary blocked after morning entry**: context state was not refreshed before navigating back to the home screen; on slower Android devices the home screen could render with stale `todayStatus`, incorrectly locking the evening card
+- **Evening diary unavailable after ~21:00 in Brazil**: date strings were computed from UTC (`toISOString()`), causing entries made after 21:00 local time (UTC-3) to be assigned to the following day; replaced with a `getLocalDateStr()` helper that uses device local time throughout `saveEntry`, `isTodayComplete`, and `loadTodayStatus`
+- **Android question text not updating between steps**: `ScrollView` in `QuestionnaireScreen` was not resetting scroll position on question change, leaving previous question text visible above the fold; added a `scrollTo({ y: 0 })` effect keyed to `currentIndex`
+- **Service worker cache not busting on deploy**: cache version string was hardcoded and never incremented; `deploy.sh` now injects the app version from `package.json` at build time; `sed` command made cross-platform compatible (macOS and Linux/Netlify)
+
+---
+
 ## [1.1.1] — 2026-05-04
 
 ### Fixed
