@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.3] — 2026-05-23
+
+### Added
+
+- **Entry date prompt**: participants completing entries between midnight and 14:00 are now asked which day the entry belongs to (today or yesterday) before starting the questionnaire. This correctly attributes data for night owls, delayed sleep phase, and anyone who goes to bed after midnight — without relying on arbitrary fixed cutoffs. The evening card gate is now date-pair-aware, checking whether the morning entry for the *same candidate date* exists rather than always checking today’s date.
+
+---
+
 ## [1.1.2] — 2026-05-21
 
 ### Fixed

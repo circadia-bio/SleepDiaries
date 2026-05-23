@@ -5,7 +5,7 @@
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
 [![Tests](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml/badge.svg)](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-1.1.2-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![Version](https://img.shields.io/badge/version-1.1.3-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19683378.svg)](https://doi.org/10.5281/zenodo.19683378)
 [![Stable](https://img.shields.io/badge/status-stable-brightgreen)](#)
 [![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
@@ -699,6 +699,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Share card — share a branded sleep report image from the final report screen
 - [x] Full UI modernisation — glassy card system, gradient backgrounds, blur effects, refined typography and icons throughout
 - [x] Questionnaire result validation and removal of beta flag — all eight instruments now stable
+- [x] Entry date prompt — participants filling in entries between midnight and 14:00 are asked which night the entry belongs to, correctly attributing data for night owls and delayed sleep schedules
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
