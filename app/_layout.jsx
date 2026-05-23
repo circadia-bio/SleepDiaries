@@ -90,7 +90,8 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="questionnaire"  options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="questionnaire"      options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="EntryDatePrompt"    options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="past-entries"   options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="export"         options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="final-report"              options={{ animation: 'slide_from_right' }} />

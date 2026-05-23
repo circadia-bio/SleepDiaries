@@ -392,7 +392,7 @@ export default function QuestionnaireScreen() {
   const router    = useRouter();
   const rawInsets = useSafeAreaInsets();
   const insets    = Platform.OS === 'web' ? { ...rawInsets, top: 44 } : rawInsets;
-  const { entryType = 'morning' } = useLocalSearchParams();
+  const { entryType = 'morning', dateStr } = useLocalSearchParams();
   const allQuestions = entryType === 'morning' ? MORNING_QUESTIONS : EVENING_QUESTIONS;
   const theme = entryType === 'morning' ? 'morning' : 'evening';
 
@@ -451,7 +451,7 @@ export default function QuestionnaireScreen() {
     } else {
       setSaving(true);
       try {
-        await saveEntry(entryType, answers);
+        await saveEntry(entryType, answers, dateStr || undefined);
         await refresh();
         setDone(true);
       } catch (e) {

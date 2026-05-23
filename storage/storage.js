@@ -122,11 +122,14 @@ export const loadEntries = async () => {
   }
 };
 
-export const saveEntry = async (entryType, answers) => {
+export const saveEntry = async (entryType, answers, dateStr) => {
   try {
     const entries = await loadEntries();
     const now = new Date();
-    const dateStr = getLocalDateStr();
+    // dateStr can be supplied explicitly (e.g. from the EntryDatePrompt screen
+    // when a participant fills in an entry after midnight for the previous night).
+    // Falls back to the current local date when not provided.
+    if (!dateStr) dateStr = getLocalDateStr();
     const id = `${dateStr}-${entryType}`;
     const filtered = entries.filter((e) => e.id !== id);
     const newEntry = {

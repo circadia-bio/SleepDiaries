@@ -342,4 +342,16 @@ export default {
     namePlaceholder: 'Nome do medicamento',
     add:             'Adicionar Medicamento',
   },
+
+  // ── Prompt de data do registro ──────────────────────────────────────────────
+  datePrompt: {
+    titleMorning:     'A qual manhã se refere este registro?',
+    titleEvening:     'A qual noite se refere este registro?',
+    subtitle:         'Selecione o dia a que este registro pertence.',
+    todayMorning:     'Esta manhã',
+    todayEvening:     'Esta noite',
+    yesterdayMorning: 'Manhã de ontem',
+    yesterdayEvening: 'Ontem à noite',
+    continue:         'Continuar',
+  },
 };

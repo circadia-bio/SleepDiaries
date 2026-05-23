@@ -322,6 +322,18 @@ export default {
     ],
   },
 
+  // ── Entry date prompt ───────────────────────────────────────────────────
+  datePrompt: {
+    titleMorning:     'Which morning is this for?',
+    titleEvening:     'Which night is this for?',
+    subtitle:         'Select the day this entry belongs to.',
+    todayMorning:     'This morning',
+    todayEvening:     'Tonight',
+    yesterdayMorning: 'Yesterday morning',
+    yesterdayEvening: 'Last night',
+    continue:         'Continue',
+  },
+
   // ── Common ───────────────────────────────────────────────────────────────────────────
   common: {
     ok: 'OK',

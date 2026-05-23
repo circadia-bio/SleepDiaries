@@ -16,6 +16,7 @@ import { useEntries } from '../../storage/EntriesContext';
 import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
+import { getEntryDateOptions, isMorningDoneForDate } from '../../utils/dateEntry';
 import t from '../../i18n';
 import IMAGES from '../../assets/images';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
@@ -55,6 +56,31 @@ export default function HomeScreen() {
   const morningCount     = entries.filter((e) => e.type === 'morning').length;
   const reportUnlocked   = morningCount >= MIN_ENTRIES_FOR_REPORT;
 
+  // Date-aware gate: evening is unlocked only when the morning entry for the
+  // *same candidate date* exists. During the prompt window (midnight–14:00)
+  // that candidate date may be yesterday, so we check both possibilities.
+  const now = new Date();
+  const hour = now.getHours();
+  const inPromptWindow = hour < 14;
+  const todayStr = (() => {
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  })();
+  const yesterdayStr = (() => {
+    const d = new Date(`${todayStr}T12:00:00`);
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const dy = String(d.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${dy}`;
+  })();
+  // Evening is unlocked if morning is done for today OR (in prompt window) for yesterday.
+  const eveningMorningDone =
+    isMorningDoneForDate(todayStr, entries) ||
+    (inPromptWindow && isMorningDoneForDate(yesterdayStr, entries));
+
   useFocusEffect(useCallback(() => {
     const load = async () => {
       const [, seen] = await Promise.all([refresh(), hasSeenInstructions()]);
@@ -91,10 +117,24 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <Text style={[styles.sectionLabel, { fontFamily: FONTS.body }]}>{t('home.newEntry')}</Text>
             <View style={styles.cardsContainer}>
-              <EntryCard type="morning" completed={morningCompleted} morningDone={morningCompleted}
-                onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })} />
-              <EntryCard type="evening" completed={eveningCompleted} morningDone={morningCompleted}
-                onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })} />
+              <EntryCard type="morning" completed={morningCompleted} morningDone={true}
+                onPress={() => {
+                  const opts = getEntryDateOptions('morning', entries);
+                  if (opts) {
+                    router.push({ pathname: '/EntryDatePrompt', params: { entryType: 'morning', today: opts.today, yesterday: opts.yesterday } });
+                  } else {
+                    router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } });
+                  }
+                }} />
+              <EntryCard type="evening" completed={eveningCompleted} morningDone={eveningMorningDone}
+                onPress={() => {
+                  const opts = getEntryDateOptions('evening', entries);
+                  if (opts) {
+                    router.push({ pathname: '/EntryDatePrompt', params: { entryType: 'evening', today: opts.today, yesterday: opts.yesterday } });
+                  } else {
+                    router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } });
+                  }
+                }} />
             </View>
           </View>
 
