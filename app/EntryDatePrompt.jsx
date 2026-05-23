@@ -38,8 +38,6 @@ export default function EntryDatePromptScreen() {
 
   const isMorning = entryType === 'morning';
   const primary   = isMorning ? '#E07A20' : '#2A6CB5';
-  const borderSel = isMorning ? '#E07A20' : '#4A7BB5';
-  const bgSel     = isMorning ? '#FFF0D6' : '#D6E8FF';
   const textSel   = isMorning ? '#7A3800' : '#0C3A70';
   const subSel    = isMorning ? '#A05010' : '#185FA5';
 
@@ -58,25 +56,31 @@ export default function EntryDatePromptScreen() {
       <TouchableOpacity
         style={[
           styles.option,
-          {
-            borderColor:     isSelected ? borderSel : 'rgba(255,255,255,0.7)',
-            backgroundColor: isSelected ? bgSel     : 'rgba(255,255,255,0.72)',
-          },
+          isSelected && { backgroundColor: 'rgba(255,255,255,0.92)' },
         ]}
         onPress={() => setSelected(dateStr)}
         activeOpacity={0.8}
       >
         <View style={styles.optionText}>
-          <Text style={[styles.optionLabel, { color: isSelected ? textSel : '#1E3A5F' }, { fontFamily: FONTS.heading }]}>
+          <Text style={[
+            styles.optionLabel,
+            { fontFamily: FONTS.heading },
+            { color: isSelected ? textSel : '#1E3A5F' },
+          ]}>
             {label}
           </Text>
-          <Text style={[styles.optionSub, { color: isSelected ? subSel : '#94A3B8' }, { fontFamily: FONTS.body }]}>
+          <Text style={[
+            styles.optionSub,
+            { fontFamily: FONTS.body },
+            { color: isSelected ? subSel : '#94A3B8' },
+          ]}>
             {sublabel}
           </Text>
         </View>
-        {isSelected && (
-          <Ionicons name="checkmark-circle" size={24} color={borderSel} />
-        )}
+        {isSelected
+          ? <Ionicons name="checkmark-circle" size={24} color={primary} />
+          : <Ionicons name="ellipse-outline"  size={24} color="rgba(148,163,184,0.6)" />
+        }
       </TouchableOpacity>
     );
   };
@@ -125,11 +129,11 @@ export default function EntryDatePromptScreen() {
 
         {/* Continue */}
         <TouchableOpacity
-          style={[styles.continueBtn, { backgroundColor: primary }]}
+          style={styles.continueBtn}
           onPress={handleContinue}
           activeOpacity={0.85}
         >
-          <Text style={[styles.continueBtnText, { fontFamily: FONTS.heading }]}>
+          <Text style={[styles.continueBtnText, { color: primary, fontFamily: FONTS.heading }]}>
             {t('datePrompt.continue')}
           </Text>
         </TouchableOpacity>
@@ -142,26 +146,34 @@ export default function EntryDatePromptScreen() {
 const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 24, gap: 24 },
-  backBtn:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' },
-  backText:  { fontSize: SIZES.body },
-  header:    { alignItems: 'center', gap: 10, paddingTop: 8 },
-  title:     { fontSize: 26, textAlign: 'center', lineHeight: 32 },
-  subtitle:  { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 22 },
-  options:   { gap: 12 },
+
+  backBtn:  { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' },
+  backText: { fontSize: SIZES.body },
+
+  header:   { alignItems: 'center', gap: 10, paddingTop: 8 },
+  title:    { fontSize: 26, textAlign: 'center', lineHeight: 32 },
+  subtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 22 },
+
+  options: { gap: 12 },
   option: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 16, borderRadius: 16, borderWidth: 2,
+    padding: 18, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
     shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08, shadowRadius: 6, elevation: 2,
   },
-  optionText:      { gap: 2 },
-  optionLabel:     { fontSize: SIZES.cardTitle },
-  optionSub:       { fontSize: SIZES.bodySmall },
+  optionText:  { gap: 3 },
+  optionLabel: { fontSize: SIZES.cardTitle },
+  optionSub:   { fontSize: SIZES.bodySmall },
+
   continueBtn: {
-    borderRadius: 30, paddingVertical: 18, alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+    backgroundColor: 'rgba(255,255,255,0.80)',
+    borderRadius: 30, paddingVertical: 19, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.7)',
+    shadowColor: '#3A7AAA', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15, shadowRadius: 6, elevation: 4,
     marginTop: 'auto',
   },
-  continueBtnText: { color: '#fff', fontSize: SIZES.cardTitle, letterSpacing: 0.3 },
+  continueBtnText: { fontSize: SIZES.cardTitle, letterSpacing: 0.3 },
 });
