@@ -20,6 +20,8 @@ An open-source, research-grade sleep diary app built with React Native and Expo.
 
 🌐 **Web app:** https://sleepdiaries.circadia-lab.uk
 
+> 🧬 **Adapting this for your own study?** Use [**SleepDiaries Protocol**](https://github.com/circadia-bio/SleepDiaries-Protocol) instead — a template repository that seeds a clean copy of a specific release with lab-specific config already stripped out.
+
 ---
 
 ## 📖 What is Sleep Diaries?
@@ -656,6 +658,7 @@ Contributions are welcome. If you are adapting this for a research study and wan
 
 ## 🤝 Related Tools
 
+- 🧬 [**SleepDiaries Protocol**](https://github.com/circadia-bio/SleepDiaries-Protocol) — template repo for adapting SleepDiaries to your own study, pinned to a specific release
 - 🌀 [**nonparametric-actigraphy-clustering**](https://github.com/circadia-bio/nonparametric-actigraphy-clustering) — unsupervised clustering of actigraphy rest-activity profiles using nonparametric methods
 - ⚡ [**ACTT_validation_study**](https://github.com/circadia-bio/ACTT_validation_study) — validation study for actigraphy-based sleep staging cut-points
 - 🔬 [**circadia-bio**](https://github.com/circadia-bio) — the Circadia Lab GitHub organisation
