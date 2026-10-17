@@ -482,33 +482,6 @@ Each question is a plain JavaScript object with a `type` field that controls how
 
 ---
 
-## 🎨 Customising Themes
-
-The morning/evening colour themes are defined at the top of `app/questionnaire.jsx`:
-
-```js
-const THEME = {
-  morning: {
-    primary:      '#E07A20',   // Amber — buttons, text, progress bar
-    primaryLight: '#F5C96A',   // Light amber — stepper backgrounds
-    progressBg:   '#F5DEB3',
-    background:   '#FDFAF5',
-    cardBg:       '#FFF8EE',
-  },
-  evening: {
-    primary:      '#2A6CB5',   // Blue
-    primaryLight: '#7EB0E0',
-    progressBg:   '#C8DFF5',
-    background:   '#F5F9FF',
-    cardBg:       '#EEF5FF',
-  },
-};
-```
-
-The one-time research questionnaire modal uses a **purple theme** (`#6B3FA0`) to visually distinguish it from the daily diary flows.
-
----
-
 ## 🗺️ Navigation Architecture
 
 The app uses [expo-router](https://expo.github.io/router/) with file-based routing:
@@ -633,7 +606,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ## 📄 Citation
 
-**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.1.0) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.1.3) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
 
 ---
 
@@ -644,6 +617,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 | Principal Investigators | Lucas França, Mario Leocadio-Miguel |
 | Development | Lucas França |
 | Design | Bri Baehl, Jacob Howard, Frederic Kussow, Yuliana Luna Colón |
+| Swedish translation | Jonatan Nyberg |
 
 ---
 
@@ -754,6 +728,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Sleep pattern actogram in the final report
 - [x] Entry cards and completion screen rendered in code — no per-language artwork
 - [x] Release branch workflow — production deploys from `release` through a tag-pinned pull request
+- [ ] Theme customisation guide — document how to change the morning/evening colours (currently set in `app/questionnaire.jsx`, `components/EntryCardContent.jsx` and `components/EntryCompleteSplash.jsx`) and ideally centralise them in `theme/`
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
