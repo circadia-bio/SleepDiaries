@@ -21,7 +21,7 @@ import ActogramChart from '../components/ActogramChart';
 import IMAGES from '../assets/images';
 
 
-const formatDecimal = (n) => isSwedish ? n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : n.toFixed(1);
+const formatDecimal = (n) => n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
 const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`; };
 
@@ -262,6 +262,18 @@ const AlcoholBar = ({ value }) => {
 const StarRow = ({ value, max = 5, color = '#E07A20' }) => (
   <View style={styles.starRow}>
     {Array.from({ length: max }).map((_, i) => <Ionicons key={i} name={i < Math.round(value) ? 'star' : 'star-outline'} size={20} color={color} />)}
+  </View>
+);
+
+const SummaryStat = ({ icon, value, label, color }) => (
+  <View
+    style={[styles.summaryStatTile, { backgroundColor: color + '14' }]}
+    accessible={true}
+    accessibilityLabel={`${value} ${label}`}
+  >
+    <Ionicons name={icon} size={22} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
+    <Text style={[styles.summaryStatValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+    <Text style={[styles.summaryStatLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
   </View>
 );
 
@@ -536,6 +548,13 @@ export default function FinalReportScreen() {
     const dates = morning.map((e) => e.date).sort();
     return `${dates[0]} → ${dates[dates.length - 1]}`;
   }, [morning]);
+  // Localised, human-readable period for the summary card (dateRange above stays ISO for sharing).
+  const periodLabel = useMemo(() => {
+    if (morning.length === 0) return '';
+    const dates = morning.map((e) => e.date).sort();
+    const fmt = (d) => new Date(`${d}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    return dates[0] === dates[dates.length - 1] ? fmt(dates[0]) : `${fmt(dates[0])} \u2013 ${fmt(dates[dates.length - 1])}`;
+  }, [morning]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
@@ -575,8 +594,6 @@ export default function FinalReportScreen() {
     }
   };
 
-  const entriesLabel = metrics ? (metrics.n === 1 ? t('report.morningEntries_one', { count: metrics.n }) : t('report.morningEntries_other', { count: metrics.n })) : '';
-
   return (
     <View style={[styles.root, { minHeight: height }]}>
       <View style={styles.bgContainer}>
@@ -607,34 +624,25 @@ export default function FinalReportScreen() {
           )}
 
           <View style={styles.summaryCard}>
-            <View style={styles.summaryLeft}>
+            <View style={styles.summaryTop}>
               <View style={styles.summaryAvatar}>
-                <Ionicons name="person" size={36} color="#4A7BB5" />
+                <Ionicons name="person" size={30} color="#4A7BB5" />
               </View>
-              <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]}>{userName}</Text>
-              {researchCode ? <Text style={[styles.summaryCode, { fontFamily: FONTS.bodyMedium }]}>{researchCode}</Text> : null}
+              <View style={styles.summaryIdentity}>
+                <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]} numberOfLines={1}>{userName}</Text>
+                {researchCode ? <Text style={[styles.summaryCode, { fontFamily: FONTS.bodyMedium }]}>{researchCode}</Text> : null}
+              </View>
             </View>
-            <View style={styles.summaryInfo}>
-              <View style={styles.summaryStat}>
-                <Ionicons name="calendar-outline" size={15} color="#94A3B8" />
-                <View>
-                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort()[0]}</Text>
-                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort().slice(-1)[0]}</Text>
-                </View>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="sunny-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{entriesLabel}</Text>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="moon-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{allEntries.filter(e => e.type === 'evening').length} {t('report.eveningEntries')}</Text>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="clipboard-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length}</Text>
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length === 1 ? t('report.questionnaireOne') : t('report.questionnaireOther')}</Text>
-              </View>
+
+            <View style={styles.summaryPeriod}>
+              <Ionicons name="calendar-outline" size={18} color="#5B7089" />
+              <Text style={[styles.summaryPeriodText, { fontFamily: FONTS.bodyMedium }]}>{periodLabel}</Text>
+            </View>
+
+            <View style={styles.summaryStatsRow}>
+              <SummaryStat icon="sunny-outline"     value={metrics.n}                                          label={t('profile.statMorningShort')}    color="#E07A20" />
+              <SummaryStat icon="moon-outline"      value={allEntries.filter((e) => e.type === 'evening').length} label={t('profile.statEveningShort')}    color="#2A6CB5" />
+              <SummaryStat icon="clipboard-outline" value={qResults.length}                                     label={t('profile.statQuestionnaires')} color="#4A7BB5" />
             </View>
           </View>
 
@@ -710,16 +718,18 @@ const styles = StyleSheet.create({
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
   emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
   scrollContent: { padding: 16, gap: 20, paddingBottom: 40 },
-  summaryCard:    { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
-  summaryLeft:    { alignItems: 'center', gap: 6 },
-  summaryAvatar:   { width: 72, height: 72, borderRadius: 36, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
-  summaryInfo:     { flex: 1, gap: 4, justifyContent: 'center', paddingRight: 8 },
-  summaryName:     { fontSize: SIZES.body, color: '#1A3A5C' },
-  summaryCode:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
-  summaryDivider:  { height: 1, backgroundColor: 'rgba(74,123,181,0.15)', width: '100%' },
-  summaryStats:    { gap: 8, width: '100%' },
-  summaryStat:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  summaryStatText: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  summaryCard:    { gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  summaryTop:      { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  summaryAvatar:   { width: 60, height: 60, borderRadius: 30, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
+  summaryIdentity: { flex: 1, gap: 2 },
+  summaryName:     { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
+  summaryCode:     { fontSize: SIZES.caption, color: '#94A3B8' },
+  summaryPeriod:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(74,123,181,0.15)' },
+  summaryPeriodText: { fontSize: SIZES.bodySmall, color: '#5B7089', flexShrink: 1 },
+  summaryStatsRow: { flexDirection: 'row', gap: 8 },
+  summaryStatTile: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 12 },
+  summaryStatValue: { fontSize: SIZES.screenTitle },
+  summaryStatLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
   metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },

@@ -243,20 +243,22 @@ export default function ActogramChart({ entries }) {
       </View>
 
       <View style={styles.row}>
-        <Svg width={AXIS_WIDTH} height={totalHeight}>
-          {gridTimes.map((m) => (
-            <SvgText
-              key={m}
-              x={0}
-              y={yFor(m) + TOP_PAD + 4}
-              fontFamily={FONTS.bodyMedium}
-              fontSize={12}
-              fill={AXIS_TEXT}
-            >
-              {formatClock(m)}
-            </SvgText>
-          ))}
-        </Svg>
+        <View style={styles.axis}>
+          <Svg width={AXIS_WIDTH} height={totalHeight}>
+            {gridTimes.map((m) => (
+              <SvgText
+                key={m}
+                x={0}
+                y={yFor(m) + TOP_PAD + 4}
+                fontFamily={FONTS.bodyMedium}
+                fontSize={12}
+                fill={AXIS_TEXT}
+              >
+                {formatClock(m)}
+              </SvgText>
+            ))}
+          </Svg>
+        </View>
 
         <ScrollView
           ref={scrollRef}
@@ -409,6 +411,9 @@ export default function ActogramChart({ entries }) {
 
 const styles = StyleSheet.create({
   row:         { flexDirection: 'row' },
+  // Fixed-width Y axis. flexShrink: 0 stops browsers squeezing it (and clipping
+  // the time labels) when the scrolling plot beside it is wider than the screen.
+  axis:        { width: AXIS_WIDTH, flexShrink: 0 },
   header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 8 },
   headerLabel: { fontSize: SIZES.caption, color: '#1E3A5F' },
   statLabel:   { fontSize: SIZES.caption, color: '#94A3B8', paddingHorizontal: 4 },

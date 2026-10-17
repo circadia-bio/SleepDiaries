@@ -362,8 +362,16 @@ export default {
   },
   // UI text previously embedded in images or screen code.
   appText: {
-    "morningCard": "Morning entry",
-    "eveningCard": "Evening entry",
+    "morningCard": "Morning Entry",
+    "eveningCard": "Evening Entry",
+    "entryPendingMorning": "New Action Item: Complete Morning Entry",
+    "entryPendingEvening": "New Action Item: Complete Evening Entry",
+    "entryDoneMorning": "Morning Entry Completed",
+    "entryDoneEvening": "Evening Entry Completed",
+    "entryLocked": "Complete a Morning Entry first before an Evening Entry.",
+    "entrySavedMorning": "Morning Entry Complete!",
+    "entrySavedEvening": "Evening Entry Complete!",
+    "homepage": "Homepage",
     "startEntry": "Start",
     "editEntry": "Completed · Tap to edit",
     "lockedEntry": "Complete your morning entry first",
