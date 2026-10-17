@@ -10,7 +10,7 @@ import { useEntries } from '../../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import { computeStats } from '../../utils/stats';
 import { FONTS, SIZES } from '../../theme/typography';
-import t, { isSwedish } from '../../i18n';
+import t from '../../i18n';
 import EntryCardContent from '../../components/EntryCardContent';
 import ScreenBackground from '../../components/ScreenBackground';
 
@@ -77,7 +77,7 @@ export default function EntryTab() {
         <TouchableOpacity
           onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
           activeOpacity={0.9}
-          style={isSwedish ? styles.textCardWrapper : styles.cardWrapper}
+          style={styles.cardWrapper}
           accessibilityRole="button"
           accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
         >
@@ -87,7 +87,7 @@ export default function EntryTab() {
           onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
           activeOpacity={eveningLocked ? 1 : 0.9}
           disabled={eveningLocked}
-          style={isSwedish ? styles.textCardWrapper : styles.cardWrapper}
+          style={styles.cardWrapper}
           accessibilityRole="button"
           accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
           accessibilityState={{ disabled: eveningLocked }}
@@ -102,9 +102,7 @@ export default function EntryTab() {
 const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120, justifyContent: 'flex-end' },
-  textCardWrapper: { width: '100%', minHeight: 112, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
-  cardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
-  cardImage:   { width: '100%', height: '100%' },
+  cardWrapper: { width: '100%', minHeight: 118, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18,

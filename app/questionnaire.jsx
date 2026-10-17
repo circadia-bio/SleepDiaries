@@ -19,7 +19,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, Pressable, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Image, Alert,
+  Platform, Alert,
 } from 'react-native';
 import ScreenBackground from '../components/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,9 +28,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry, loadMedicationPresets } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
-import t, { isSwedish } from '../i18n';
+import t from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
-import IMAGES from '../assets/images';
+import EntryCompleteSplash from '../components/EntryCompleteSplash';
 
 const THEME = {
   morning: {
@@ -471,29 +471,15 @@ export default function QuestionnaireScreen() {
   };
 
   if (done) {
-    const isMorning = entryType === 'morning';
     return (
       <TouchableOpacity
         style={styles.splashContainer}
         activeOpacity={1}
         onPress={() => router.replace('/(tabs)/home')}
+        accessibilityRole="button"
+        accessibilityLabel={t('appText.homepage')}
       >
-        {isSwedish ? (
-          <>
-            <ScreenBackground variant={isMorning ? 'home' : 'questionnaire'} />
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
-              <Ionicons name="checkmark-circle-outline" size={64} color="#1D5689" />
-              <Text style={{ fontSize: 28, textAlign: 'center', color: '#1E3A5F' }}>{t('appText.entrySaved')}</Text>
-              <Text style={{ fontSize: 18, textAlign: 'center', color: '#1E3A5F' }}>{t('appText.returnHome')}</Text>
-            </View>
-          </>
-        ) : (
-          <Image
-            source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
-            style={styles.splashImage}
-            resizeMode="cover"
-          />
-        )}
+        <EntryCompleteSplash type={entryType === 'morning' ? 'morning' : 'evening'} />
       </TouchableOpacity>
     );
   }
@@ -646,6 +632,5 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  splashContainer: { flex: 1, backgroundColor: '#C8DFF5' },
-  splashImage:     { width: '100%', height: '100%' },
+  splashContainer: { flex: 1, backgroundColor: '#FFFDF7' },
 });

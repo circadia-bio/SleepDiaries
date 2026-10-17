@@ -27,18 +27,12 @@ const isStandalone =
 
 // Preloaded image assets. Excludes assets now rendered in code:
 //   - taskbar images (tab bar uses Ionicons)
+//   - entry cards and entry-complete splash (EntryCardContent.jsx, EntryCompleteSplash.jsx)
 //   - past-entries, final-report, final-report-locked (BottomCards.jsx)
 //   - back-day, back-night, next-day, next-night (NavButtons.jsx)
 //   - instructions-1..6 (InstructionsModal.jsx is now fully coded)
 //   - homepage-bg, login-bg, questionnaire-bg (ScreenBackground.jsx, react-native-svg — no preload needed)
 const IMAGE_ASSETS = [
-  require('../assets/images/morning_pending.png'),
-  require('../assets/images/morning_completed.png'),
-  require('../assets/images/evening_pending.png'),
-  require('../assets/images/evening_completed.png'),
-  require('../assets/images/evening_locked.png'),
-  require('../assets/images/splash-end-morning.png'),
-  require('../assets/images/splash-end-night.png'),
   require('../assets/images/logo.png'),
   require('../assets/splash-icon.png'),
 ];

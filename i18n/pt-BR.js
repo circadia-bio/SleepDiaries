@@ -362,8 +362,16 @@ export default {
   },
   // UI text previously embedded in images or screen code.
   appText: {
-    "morningCard": "Morning entry",
-    "eveningCard": "Evening entry",
+    "morningCard": "Registro Matinal",
+    "eveningCard": "Registro Noturno",
+    "entryPendingMorning": "Nova tarefa: completar registro matinal",
+    "entryPendingEvening": "Nova tarefa: completar registro noturno",
+    "entryDoneMorning": "Registro Matinal Concluído",
+    "entryDoneEvening": "Registro Noturno Concluído",
+    "entryLocked": "Conclua um registro matinal antes de fazer o registro noturno.",
+    "entrySavedMorning": "Registro Matinal Concluído!",
+    "entrySavedEvening": "Registro Noturno Concluído!",
+    "homepage": "Página inicial",
     "startEntry": "Start",
     "editEntry": "Completed · Tap to edit",
     "lockedEntry": "Complete your morning entry first",
