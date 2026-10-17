@@ -21,7 +21,7 @@ import ActogramChart from '../components/ActogramChart';
 import IMAGES from '../assets/images';
 
 
-const formatDecimal = (n) => isSwedish ? n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : n.toFixed(1);
+const formatDecimal = (n) => n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
 const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`; };
 
