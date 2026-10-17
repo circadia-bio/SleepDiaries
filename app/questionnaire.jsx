@@ -28,7 +28,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MORNING_QUESTIONS, EVENING_QUESTIONS } from '../data/useQuestions';
 import { saveEntry, loadMedicationPresets } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
-import t from '../i18n';
+import t, { isSwedish } from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
 import IMAGES from '../assets/images';
 
@@ -154,7 +154,7 @@ const TimeInput = ({ value, onChange, theme }) => {
           </Pressable>
         </View>
       </View>
-      <Text style={[styles.stepHint, { color: c.primary }]}>hold for ±1 min</Text>
+      <Text style={[styles.stepHint, { color: c.primary }]}>{t('appText.holdMinute')}</Text>
     </View>
   );
 };
@@ -478,11 +478,22 @@ export default function QuestionnaireScreen() {
         activeOpacity={1}
         onPress={() => router.replace('/(tabs)/home')}
       >
-        <Image
-          source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
-          style={styles.splashImage}
-          resizeMode="cover"
-        />
+        {isSwedish ? (
+          <>
+            <ScreenBackground variant={isMorning ? 'home' : 'questionnaire'} />
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
+              <Ionicons name="checkmark-circle-outline" size={64} color="#1D5689" />
+              <Text style={{ fontSize: 28, textAlign: 'center', color: '#1E3A5F' }}>{t('appText.entrySaved')}</Text>
+              <Text style={{ fontSize: 18, textAlign: 'center', color: '#1E3A5F' }}>{t('appText.returnHome')}</Text>
+            </View>
+          </>
+        ) : (
+          <Image
+            source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
+            style={styles.splashImage}
+            resizeMode="cover"
+          />
+        )}
       </TouchableOpacity>
     );
   }

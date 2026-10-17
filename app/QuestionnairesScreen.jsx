@@ -11,7 +11,7 @@ import { FONTS, SIZES } from '../theme/typography';
 import { loadAllQuestionnaires, loadEntries } from '../storage/storage';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import showAlert from '../utils/alert';
-import t, { locale } from '../i18n';
+import t, { locale, isSwedish } from '../i18n';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -46,6 +46,7 @@ export default function QuestionnairesScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {isSwedish && <Text style={[styles.betaFootnote, { fontFamily: FONTS.bodyMedium }]}>{t('appText.instrumentLanguage')}</Text>}
         <View style={styles.card}>
           {QUESTIONNAIRES.map((q, i, arr) => {
             const result = qResults[q.id];

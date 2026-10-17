@@ -20,7 +20,7 @@ const formatAnswer = (question, value) => {
   if (value === null || value === undefined) return '—';
   switch (question.type) {
     case 'time':      return `${pad(value.hour)}:${pad(value.minute)}`;
-    case 'duration': { const p = []; if (value.hours > 0) p.push(`${value.hours}h`); if (value.minutes > 0) p.push(`${value.minutes}m`); return p.length ? p.join(' ') : '0m'; }
+    case 'duration': { const p = []; if (value.hours > 0) p.push(`${value.hours} ${t('questionnaire.hrs')}`); if (value.minutes > 0) p.push(`${value.minutes} ${t('questionnaire.min')}`); return p.length ? p.join(' ') : `0 ${t('questionnaire.min')}`; }
     case 'yes_no':    return value === 'yes' ? t('pastEntries.answerYes') : t('pastEntries.answerNo');
     case 'number':    return `${value}${question.unit ? ' ' + question.unit : ''}`;
     case 'rating':  { const o = question.options?.find((x) => x.value === value); return o ? `${value}/5 — ${o.label}` : `${value}/5`; }

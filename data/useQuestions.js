@@ -10,7 +10,7 @@
  *   const { MORNING_QUESTIONS, EVENING_QUESTIONS } = useQuestions();
  */
 
-import { locale } from '../i18n';
+import { locale, isSwedish } from '../i18n';
 import {
   MORNING_QUESTIONS as MORNING_EN,
   EVENING_QUESTIONS as EVENING_EN,
@@ -19,6 +19,8 @@ import {
   MORNING_QUESTIONS_PT_BR,
   EVENING_QUESTIONS_PT_BR,
 } from './questions.pt-BR';
+
+import { MORNING_QUESTIONS_SV, EVENING_QUESTIONS_SV } from './questions.sv';
 
 const isPtBR = locale === 'pt-BR' || locale === 'pt';
 
@@ -41,11 +43,11 @@ function mergeTranslations(baseQuestions, overrides) {
 
 const MORNING_QUESTIONS = isPtBR
   ? mergeTranslations(MORNING_EN, MORNING_QUESTIONS_PT_BR)
-  : MORNING_EN;
+  : isSwedish ? mergeTranslations(MORNING_EN, MORNING_QUESTIONS_SV) : MORNING_EN;
 
 const EVENING_QUESTIONS = isPtBR
   ? mergeTranslations(EVENING_EN, EVENING_QUESTIONS_PT_BR)
-  : EVENING_EN;
+  : isSwedish ? mergeTranslations(EVENING_EN, EVENING_QUESTIONS_SV) : EVENING_EN;
 
 export function useQuestions() {
   return { MORNING_QUESTIONS, EVENING_QUESTIONS };

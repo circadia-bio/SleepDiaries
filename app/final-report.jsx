@@ -13,15 +13,16 @@ import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { computeMetrics } from '../utils/metrics';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
-import t, { locale } from '../i18n';
+import t, { locale, isSwedish } from '../i18n';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import ScreenBackground from '../components/ScreenBackground';
 import IMAGES from '../assets/images';
 
 
+const formatDecimal = (n) => isSwedish ? n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : n.toFixed(1);
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
-const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h}h ${pad(m)}m` : `${m}m`; };
+const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`; };
 
 const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel, bar }) => (
   <View
@@ -146,7 +147,7 @@ const QuestionnaireReportCard = ({ result, questionnaire, locale }) => {
         </View>
       </View>
       {!isMCTQ && <ScaleBar questionnaire={questionnaire} score={result.score} />}
-      <Text style={[styles.qReportDate, { fontFamily: FONTS.bodyMedium }]}>Completed {completedDate}</Text>
+      <Text style={[styles.qReportDate, { fontFamily: FONTS.bodyMedium }]}>{t('appText.completedOn', { date: completedDate })}</Text>
     </View>
   );
 };
@@ -321,7 +322,7 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   // Title
   ctx.fillStyle = '#1E3A5F';
   ctx.font = 'bold 28px system-ui, sans-serif';
-  ctx.fillText('My Sleep Report', W / 2, y + 28);
+  ctx.fillText(t('appText.mySleepReport'), W / 2, y + 28);
   y += 38;
 
   // Subtitle
@@ -341,20 +342,20 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     if (mins === null || isNaN(mins)) return '\u2014';
     const h = Math.floor(Math.abs(mins) / 60);
     const m = Math.round(Math.abs(mins) % 60);
-    return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+    return h > 0 ? `${h} ${t('questionnaire.hrs')} ${String(m).padStart(2, '0')} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`;
   };
   const eff     = metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '\u2014';
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
   const effColor  = effGood ? '#2E7D32' : '#F59E0B';
   const stats   = [
-    { label: 'Sleep Duration',   value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration),         emoji: '\u23F1\uFE0F' },
-    { label: 'Sleep Efficiency', value: eff,                               accent: effColor,                                        emoji: '\uD83D\uDCCA' },
-    { label: 'Onset Latency',    value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency),       emoji: '\u23F3' },
+    { label: t('profile.glossary.sleepDuration.title'),   value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration),         emoji: '\u23F1\uFE0F' },
+    { label: t('profile.glossary.sleepEfficiency.title'), value: eff,                               accent: effColor,                                        emoji: '\uD83D\uDCCA' },
+    { label: t('profile.glossary.sleepOnsetLatency.title'),    value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency),       emoji: '\u23F3' },
     { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO),                      emoji: '\uD83C\uDF19' },
-    { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
-    { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
-    { label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
-    { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
+    { label: t('profile.glossary.nightWakings.title'),    value: metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
+    { label: t('profile.glossary.earlyWaking.title'),     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
+    { label: t('report.drinksNight'),          value: metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
+    { label: t('report.morningRestedness'),       value: metrics.avgRestedness !== null ? `${formatDecimal(metrics.avgRestedness)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
   ];
   const cols    = 2;
   const cellW   = (cW - cellGap * (cols - 1)) / cols;
@@ -375,7 +376,7 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     ctx.fillText(s.value, cx + cellW / 2, cy + 62);
     ctx.fillStyle = '#94A3B8';
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillText(s.label, cx + cellW / 2, cy + 80);
+    ctx.fillText(s.label, cx + cellW / 2, cy + 80, cellW - 12);
   });
   y += gridH + 20;
 
@@ -414,9 +415,9 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
   const file = new File([blob], 'sleep-report.png', { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
-    await navigator.share({ files: [file], title: 'My Sleep Report' });
+    await navigator.share({ files: [file], title: t('appText.mySleepReport') });
   } else if (navigator.share) {
-    await navigator.share({ title: 'My Sleep Report', text: `${userName} \u00B7 ${dateRange} \u2014 sleepdiaries.circadia-lab.uk` });
+    await navigator.share({ title: t('appText.mySleepReport'), text: `${userName} \u00B7 ${dateRange} \u2014 sleepdiaries.circadia-lab.uk` });
   } else {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -448,20 +449,20 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
     if (mins === null || isNaN(mins)) return '—';
     const h = Math.floor(Math.abs(mins) / 60);
     const m = Math.round(Math.abs(mins) % 60);
-    return h > 0 ? `${h}h ${pad2(m)}m` : `${m}m`;
+    return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad2(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`;
   };
   const eff = metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—';
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
 
   const stats = [
-    { emoji: '⏱️', label: 'Sleep Duration',  value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration) },
-    { emoji: '📊', label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#2E7D32' : '#F59E0B' },
-    { emoji: '⏳', label: 'Onset Latency',   value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency) },
+    { emoji: '⏱️', label: t('profile.glossary.sleepDuration.title'),  value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration) },
+    { emoji: '📊', label: t('profile.glossary.sleepEfficiency.title'), value: eff,                               accent: effGood ? '#2E7D32' : '#F59E0B' },
+    { emoji: '⏳', label: t('profile.glossary.sleepOnsetLatency.title'),   value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency) },
     { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO) },
-    { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#4A7BB5' },
-    { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
-    { emoji: '🍷', label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
-    { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#E07A20' },
+    { emoji: '🔔', label: t('profile.glossary.nightWakings.title'),   value: metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)}x` : '—', accent: '#4A7BB5' },
+    { emoji: '☀️', label: t('profile.glossary.earlyWaking.title'),    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
+    { emoji: '🍷', label: t('report.drinksNight'),          value: metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
+    { emoji: '🌅', label: t('report.morningRestedness'),       value: metrics.avgRestedness !== null ? `${formatDecimal(metrics.avgRestedness)}/5` : '—',     accent: '#E07A20' },
   ];
 
   return (
@@ -481,7 +482,7 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
             <Text style={{ fontSize: 16, lineHeight: 20 }}>🌙</Text>
             <Text style={[shareStyles.logoText, { fontFamily: FONTS.body }]}>SLEEP DIARIES</Text>
           </View>
-          <Text style={[shareStyles.title, { fontFamily: FONTS.heading }]}>My Sleep Report</Text>
+          <Text style={[shareStyles.title, { fontFamily: FONTS.heading }]}>{t('appText.mySleepReport')}</Text>
           <Text style={[shareStyles.subtitle, { fontFamily: FONTS.bodyMedium }]}>{userName}  ·  {dateRange}</Text>
         </View>
 
@@ -560,15 +561,15 @@ export default function FinalReportScreen() {
       setSharing(false);
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
-        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Share Sleep Report' });
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t('appText.shareReport') });
       } else {
-        await Share.share({ message: `My Sleep Report — ${userName} · ${dateRange}` });
+        await Share.share({ message: t('appText.reportMessage', { name: userName, period: dateRange }) });
       }
     } catch (e) {
       setSharing(false);
       if (e?.message !== 'User did not share') {
         console.warn('[handleShare]', e);
-        if (Platform.OS === 'web') alert('Share failed: ' + e.message);
+        if (Platform.OS === 'web') alert(t('appText.shareFailed') + ': ' + e.message);
       }
     }
   };
@@ -645,22 +646,23 @@ export default function FinalReportScreen() {
           </Section>
 
           <Section title={t('report.sleepQuality')}>
-            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
-            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
+            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? formatDecimal(metrics.avgQuality) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
+            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? formatDecimal(metrics.avgRestedness) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
           </Section>
 
           <Section title={t('report.nightDisruptions')}>
-            <MetricCard icon="alert-circle-outline" label={t('report.avgNightWakings')} value={metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)} ${t('report.times')}` : '—'} subtext={t('report.avgNightWakingsSub')} color="#4A7BB5" />
+            <MetricCard icon="alert-circle-outline" label={t('report.avgNightWakings')} value={metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)} ${t('report.times')}` : '—'} subtext={t('report.avgNightWakingsSub')} color="#4A7BB5" />
             <MetricCard icon="alarm-outline"        label={t('report.earlyWaking')}     value={metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}${t('report.ofNights')}` : '—'}          subtext={t('report.earlyWakingSub')}     color="#4A7BB5" />
           </Section>
 
           <Section title={t('report.lifestyle')}>
-            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color={alcoholColor(metrics.avgAlcohol)} bar={<AlcoholBar value={metrics.avgAlcohol} />} />
+            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color={alcoholColor(metrics.avgAlcohol)} bar={<AlcoholBar value={metrics.avgAlcohol} />} />
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.alcoholNote')}</Text>
           </Section>
 
           {qResults.length > 0 && (
             <Section title={t('report.sectionQuestionnaires')}>
+              {isSwedish && <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('appText.instrumentLanguage')}</Text>}
               {qResults.map((result) => {
                 const questionnaire = QUESTIONNAIRES.find((q) => q.id === result.id);
                 if (!questionnaire) return null;

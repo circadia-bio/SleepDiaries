@@ -2,7 +2,7 @@
  * app/(tabs)/entry.jsx — Entry tab
  */
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
@@ -10,8 +10,8 @@ import { useEntries } from '../../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import { computeStats } from '../../utils/stats';
 import { FONTS, SIZES } from '../../theme/typography';
-import t from '../../i18n';
-import IMAGES from '../../assets/images';
+import t, { isSwedish } from '../../i18n';
+import EntryCardContent from '../../components/EntryCardContent';
 import ScreenBackground from '../../components/ScreenBackground';
 
 
@@ -38,8 +38,6 @@ export default function EntryTab() {
   const eveningCompleted = todayStatus.eveningCompleted;
   const stats            = useMemo(() => computeStats(entries), [entries]);
   const eveningLocked    = !morningCompleted;
-  const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
-  const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
   const s = stats ?? {};
 
   return (
@@ -79,22 +77,22 @@ export default function EntryTab() {
         <TouchableOpacity
           onPress={() => router.push({ pathname: '/questionnaire', params: { entryType: 'morning' } })}
           activeOpacity={0.9}
-          style={styles.cardWrapper}
+          style={isSwedish ? styles.textCardWrapper : styles.cardWrapper}
           accessibilityRole="button"
           accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
         >
-          <Image source={morningImage} style={styles.cardImage} resizeMode="cover" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <EntryCardContent type="morning" completed={morningCompleted} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
           activeOpacity={eveningLocked ? 1 : 0.9}
           disabled={eveningLocked}
-          style={styles.cardWrapper}
+          style={isSwedish ? styles.textCardWrapper : styles.cardWrapper}
           accessibilityRole="button"
           accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
           accessibilityState={{ disabled: eveningLocked }}
         >
-          <Image source={eveningImage} style={styles.cardImage} resizeMode="cover" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <EntryCardContent type="evening" completed={eveningCompleted} locked={eveningLocked} />
         </TouchableOpacity>
       </View>
     </View>
@@ -104,6 +102,7 @@ export default function EntryTab() {
 const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120, justifyContent: 'flex-end' },
+  textCardWrapper: { width: '100%', minHeight: 112, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
   cardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
   cardImage:   { width: '100%', height: '100%' },
   streakBanner: {

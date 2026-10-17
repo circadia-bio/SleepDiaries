@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, StatusBar, Image, useWindowDimensions,
+  StyleSheet, StatusBar, useWindowDimensions,
 } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,27 +17,24 @@ import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import { getEntryDateOptions, isMorningDoneForDate } from '../../utils/dateEntry';
-import t from '../../i18n';
-import IMAGES from '../../assets/images';
+import t, { isSwedish } from '../../i18n';
+import EntryCardContent from '../../components/EntryCardContent';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
   const isLocked  = !isMorning && !morningDone;
-  let image;
-  if (isMorning) {
-    image = completed ? IMAGES.morningCompleted : IMAGES.morningPending;
-  } else {
-    image = isLocked ? IMAGES.eveningLocked : completed ? IMAGES.eveningCompleted : IMAGES.eveningPending;
-  }
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={isLocked ? 1 : 0.9}
       disabled={isLocked}
-      style={styles.entryCardWrapper}
+      style={isSwedish ? styles.textCardWrapper : styles.entryCardWrapper}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isLocked }}
+      accessibilityLabel={t(`entry.a11y.${isMorning ? (completed ? 'morningCompleted' : 'morningStart') : isLocked ? 'eveningLocked' : completed ? 'eveningCompleted' : 'eveningStart'}`)}
     >
-      <Image source={image} style={styles.entryCardImage} resizeMode="cover" />
+      <EntryCardContent type={type} completed={completed} locked={isLocked} />
     </TouchableOpacity>
   );
 };
@@ -190,6 +187,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8,
   },
   cardsContainer: { gap: 8 },
+  textCardWrapper: { width: '100%', minHeight: 112, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
   entryCardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
   entryCardImage:   { width: '100%', height: '100%' },
   instructionsCard: {
