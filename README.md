@@ -45,6 +45,7 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics with colour-coded reference bands
 - 🔭 **Sleep pattern actogram** — weekly chart of bedtime to out-of-bed time with night-waking markers and a sleep-midpoint trend line, so drifting schedules and missed days are visible at a glance
+- 🎯 **Age-aware reference ranges** — optional age group (under 18, 18–64, 65+) chosen at onboarding or in the Profile adjusts the green/amber/red bands for sleep duration, latency and WASO; stored on the device only
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
 - 🖼️ **Share card** — share a branded sleep report image to social media from the final report screen, with the original home screen background; works on iOS, Android, and mobile web (PWA)
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
@@ -90,6 +91,7 @@ SleepDiaries/
 │       └── settings.jsx        # Settings (includes questionnaire credits)
 ├── components/
 │   ├── ActogramChart.jsx       # Weekly sleep pattern chart for the final report (react-native-svg)
+│   ├── AgeBandPicker.jsx       # Optional age group selector (onboarding + Profile)
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
 │   ├── EntryCardContent.jsx    # Morning / evening entry cards (all languages, no PNGs)
 │   ├── EntryCompleteSplash.jsx # "Entry complete" screen shown after saving
@@ -115,6 +117,7 @@ SleepDiaries/
 │   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
 │   ├── dateEntry.js            # Entry-date logic for post-midnight entries and the evening gate
 │   ├── metrics.js              # Final-report metrics (duration, efficiency, SOL, WASO, ...)
+│   ├── referenceRanges.js      # ⭐ Age-banded reference ranges and colour logic for the final report
 │   └── stats.js                # Shared stat helpers (computeStats)
 ├── theme/
 │   ├── typography.js           # Font constants (Livvic, Afacad)
@@ -509,6 +512,7 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 // Stored keys:
 // 'user_name'            → participant name string
 // 'research_code'        → optional research study identifier
+// 'age_band'             → optional age group ('under18' | 'adult' | 'older'); device-only, not exported
 // 'entries'              → JSON array of diary entry objects
 // 'seen_instructions'    → 'true' once the instructions modal has been dismissed
 // 'questionnaire_{id}'   → one object per completed one-time questionnaire
@@ -566,6 +570,22 @@ The final report (unlocked after 14 morning entries) automatically computes:
 
 The report also opens with a **sleep pattern actogram** (`components/ActogramChart.jsx`): one bar per night from bedtime to out-of-bed time, shaded by time asleep and time awake in bed, with red markers for the number of night wakings and a dashed line tracing the midpoint of sleep. It shows seven days at a time (swipe or use the arrows), and a day with no entry leaves a visible gap instead of closing up. The waking markers show *how many* times a participant woke, not when, because the diary records a count and a total duration rather than timestamps.
 
+### Age-specific reference ranges
+
+The colour bands on the final report depend on an optional **age group** (under 18, 18–64, or 65 and over). Participants can set it during onboarding or change it later in the Profile; tapping the selected option again clears it. It is stored only on the device, is not part of CSV/JSON exports, and defaults to the 18–64 ranges when left blank.
+
+| Metric | Under 18 | 18–64 | 65 or over |
+|--------|----------|-------|-----------|
+| Sleep duration — green | 8–10 h | 7–9 h | 7–8 h |
+| Sleep duration — amber | 7–8 h, 10–11 h | 6–7 h, 9–10 h | 5–7 h, 8–9 h |
+| Sleep onset latency | green ≤15 min, amber ≤30 | green ≤15 min, amber ≤30 | green ≤30 min, amber ≤60 |
+| Wake after sleep onset | green ≤20 min, amber ≤30 | green ≤20 min, amber ≤30 | green ≤30 min, amber ≤45 |
+| Sleep efficiency | green ≥85%, amber 75–85% in every age group | | |
+
+Anything outside the amber band is shown red. The duration ranges come from the National Sleep Foundation recommendations (Hirshkowitz et al., 2015); the latency and WASO limits follow the NSF sleep-quality consensus (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19). The green latency band (≤15 min) is this app's own stricter guide, and the 65+ WASO ceiling and latency green cut-off follow the adult band's proportions rather than a published table. The under-18 band is based on the teenage range (about 13–17); younger children need more sleep, so add a band if the app is ever used with them.
+
+All of the numbers, the colour logic and the scale-bar geometry live in `utils/referenceRanges.js`, so changing a threshold is a one-file edit. The same ranges drive the metric cards, the share card and **Settings → Sleep metric thresholds**.
+
 ### Research code
 
 The onboarding screen includes an optional **research code** field. This allows researchers to assign a unique identifier to each participant at enrolment. The code is:
@@ -582,6 +602,7 @@ Participants leave the field blank if they are using the app independently.
 The **Profile** button on the home screen slides up a modal showing:
 
 - Editable participant name and research code
+- Optional age group, which selects the reference ranges used in the final report
 - Summary stats: morning entries, evening entries, current streak, member since date
 - **Questionnaires** — one-time research instruments with status badges and Start/Redo buttons
 - Sleep metrics glossary with plain-language explanations of each metric
@@ -728,6 +749,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Sleep pattern actogram in the final report
 - [x] Entry cards and completion screen rendered in code — no per-language artwork
 - [x] Release branch workflow — production deploys from `release` through a tag-pinned pull request
+- [x] Age-specific reference ranges — optional age group in onboarding and Profile
 - [ ] Theme customisation guide — document how to change the morning/evening colours (currently set in `app/questionnaire.jsx`, `components/EntryCardContent.jsx` and `components/EntryCompleteSplash.jsx`) and ideally centralise them in `theme/`
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration

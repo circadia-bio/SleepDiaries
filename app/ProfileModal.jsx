@@ -5,7 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
+import { loadName, saveName, loadResearchCode, saveResearchCode, loadAgeBand, saveAgeBand, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
+import AgeBandPicker from '../components/AgeBandPicker';
 import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
@@ -41,6 +42,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [code, setCode]               = useState('');
   const [editingCode, setEditingCode] = useState(false);
   const [draftCode, setDraftCode]     = useState('');
+  const [ageBand, setAgeBand]         = useState(null);
+  const [editingAge, setEditingAge]   = useState(false);
   const [morningCount, setMorningCount] = useState(0);
   const [eveningCount, setEveningCount] = useState(0);
   const [streak, setStreak]             = useState(0);
@@ -50,8 +53,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const router = useRouter();
 
   const load = useCallback(async () => {
-    const [n, c, entries, qResults, meds] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets()]);
-    setName(n ?? ''); setCode(c ?? '');
+    const [n, c, entries, qResults, meds, band] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets(), loadAgeBand()]);
+    setName(n ?? ''); setCode(c ?? ''); setAgeBand(band);
     const morningCount = entries.filter((e) => e.type === 'morning').length;
     setMorningCount(morningCount);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
@@ -69,6 +72,9 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   };
   const handleSaveCode = async () => {
     await saveResearchCode(draftCode.trim()); setCode(draftCode.trim()); setEditingCode(false);
+  };
+  const handleSaveAgeBand = async (band) => {
+    await saveAgeBand(band); setAgeBand(band); setEditingAge(false);
   };
 
   const inner = (
@@ -109,6 +115,24 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               <TouchableOpacity style={styles.codeRow} onPress={() => { setDraftCode(code); setEditingCode(true); }}>
                 <Ionicons name="code-slash-outline" size={16} color="#94A3B8" />
                 <Text style={[styles.codeText, { fontFamily: FONTS.bodyMedium }]}>{code || t('profile.addResearchCode')}</Text>
+                <Ionicons name="pencil-outline" size={15} color="#94A3B8" style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            )}
+
+            {editingAge ? (
+              <View style={styles.ageEdit}>
+                <AgeBandPicker value={ageBand} onChange={handleSaveAgeBand} />
+                <Text style={[styles.ageHint, { fontFamily: FONTS.bodyMedium }]}>{t('ageBand.hint')}</Text>
+                <TouchableOpacity onPress={() => setEditingAge(false)} style={styles.ageDoneBtn} accessibilityRole="button">
+                  <Text style={[styles.ageDoneText, { fontFamily: FONTS.body }]}>{t('common.ok')}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.codeRow} onPress={() => setEditingAge(true)}>
+                <Ionicons name="people-outline" size={16} color="#94A3B8" />
+                <Text style={[styles.codeText, { fontFamily: FONTS.bodyMedium }]}>
+                  {ageBand ? t('ageBand.current', { band: t(`ageBand.${ageBand}`) }) : t('ageBand.add')}
+                </Text>
                 <Ionicons name="pencil-outline" size={15} color="#94A3B8" style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             )}
@@ -186,6 +210,10 @@ const styles = StyleSheet.create({
   nameText:      { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
   codeRow:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
   codeText:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  ageEdit:       { width: '100%', gap: 8 },
+  ageHint:       { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  ageDoneBtn:    { alignSelf: 'center', paddingHorizontal: 24, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)' },
+  ageDoneText:   { fontSize: SIZES.bodySmall, color: '#4A7BB5' },
   editRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%' },
   editInput:     { flex: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 12, padding: 12, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
