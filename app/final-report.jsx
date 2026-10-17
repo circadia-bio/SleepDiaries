@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadAllQuestionnaires, loadResearchCode } from '../storage/storage';
+import { loadAllQuestionnaires, loadResearchCode, loadAgeBand } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { computeMetrics } from '../utils/metrics';
@@ -18,6 +18,15 @@ import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import ScreenBackground from '../components/ScreenBackground';
 import ActogramChart from '../components/ActogramChart';
+import {
+  getReferenceRanges,
+  durationColor as durationColorFor,
+  latencyColor as latencyColorFor,
+  wasoColor as wasoColorFor,
+  durationBar,
+  latencyBar,
+  wasoBar,
+} from '../utils/referenceRanges';
 import IMAGES from '../assets/images';
 
 
@@ -173,21 +182,9 @@ const BandBar = ({ segments, marker, ticks, endLabels }) => (
   </View>
 );
 
-const DurationBar = ({ value }) => {
+const DurationBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 600;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 60, color: '#DC2626' },
-      { width: 10, color: '#F59E0B' },
-      { width: 20, color: '#2E7D32' },
-      { width: 10, color: '#F59E0B' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 60, label: '6h' }, { pct: 70, label: '7h' }, { pct: 90, label: '9h' }]}
-    endLabels={['0h', '']}
-  />;
+  return <BandBar {...durationBar(value, ranges)} />;
 };
 
 const EfficiencyBar = ({ value }) => {
@@ -205,42 +202,19 @@ const EfficiencyBar = ({ value }) => {
   />;
 };
 
-const LatencyBar = ({ value }) => {
+const LatencyBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 60;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 25, color: '#2E7D32' },
-      { width: 25, color: '#F59E0B' },
-      { width: 50, color: '#DC2626' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 25, label: '15m' }, { pct: 50, label: '30m' }]}
-    endLabels={['0m', '']}
-  />;
+  return <BandBar {...latencyBar(value, ranges)} />;
 };
 
-const WasoBar = ({ value }) => {
+const WasoBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 60;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 33, color: '#2E7D32' },
-      { width: 17, color: '#F59E0B' },
-      { width: 50, color: '#DC2626' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 33, label: '20m' }, { pct: 50, label: '30m' }]}
-    endLabels={['0m', '']}
-  />;
+  return <BandBar {...wasoBar(value, ranges)} />;
 };
 
-const durationColor  = (m) => m === null ? '#4A7BB5' : m >= 420 && m <= 540 ? '#2E7D32' : m >= 360 && m <= 600 ? '#F59E0B' : '#DC2626';
+// Duration, latency and WASO colours depend on the participant's age band, so
+// they live in utils/referenceRanges.js and take the ranges as an argument.
 const alcoholColor   = (n) => n === null ? '#4A7BB5' : n < 1 ? '#2E7D32' : n <= 2 ? '#F59E0B' : '#DC2626';
-const latencyColor   = (m) => m === null ? '#4A7BB5' : m <= 15 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
-const wasoColor      = (m) => m === null ? '#4A7BB5' : m <= 20 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
 
 const AlcoholBar = ({ value }) => {
   // NHS guideline: ≤14 units/week = 2 units/night avg; max display 5
@@ -287,7 +261,10 @@ const Section = ({ title, children }) => (
 // ─── Web canvas share ────────────────────────────────────────────────────────
 // Loads the original HomeBg SVG as an <img> onto the canvas, then draws
 // the stats panel on top — pixel-perfect with the native render.
-async function handleShareWeb({ metrics, userName, dateRange }) {
+async function handleShareWeb({ metrics, userName, dateRange, ranges }) {
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const dpr    = Math.min(window.devicePixelRatio || 1, 2);
   const W      = 390;
   const H      = 844;
@@ -456,7 +433,10 @@ function roundRect(ctx, x, y, w, h, r) {
 
 // ─── Share card ──────────────────────────────────────────────────────────────
 // Rendered off-screen, captured as a PNG, then shared via native share sheet.
-const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, height }, ref) => {
+const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, height, ranges }, ref) => {
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const pad2 = (n) => String(Math.round(n)).padStart(2, '0');
   const fmt = (mins) => {
     if (mins === null || isNaN(mins)) return '—';
@@ -532,6 +512,12 @@ export default function FinalReportScreen() {
   const [loading,  setLoading]  = useState(true);
   const [qResults, setQResults] = useState([]);
   const [researchCode, setResearchCode] = useState('');
+  const [ageBand, setAgeBand] = useState(null);
+  // Reference ranges follow the participant's (optional) age group; adult by default.
+  const ranges = useMemo(() => getReferenceRanges(ageBand), [ageBand]);
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const [sharing, setSharing] = useState(false);
   const shareCardRef = useRef(null);
 
@@ -559,9 +545,10 @@ export default function FinalReportScreen() {
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [, allQResults, code] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode()]);
+      const [, allQResults, code, band] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode(), loadAgeBand()]);
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setResearchCode(code ?? '');
+      setAgeBand(band);
       setLoading(false);
     };
     load();
@@ -571,7 +558,7 @@ export default function FinalReportScreen() {
     if (!metrics) return;
     try {
       if (Platform.OS === 'web') {
-        await handleShareWeb({ metrics, userName, dateRange });
+        await handleShareWeb({ metrics, userName, dateRange, ranges });
         return;
       }
       // Mount the share card, wait for it to render, then capture
@@ -619,7 +606,7 @@ export default function FinalReportScreen() {
           {/* Share card — only mounted during capture to avoid background bleed */}
           {sharing && (
             <View style={shareStyles.offscreen} aria-hidden>
-              <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} />
+              <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} ranges={ranges} />
             </View>
           )}
 
@@ -660,10 +647,11 @@ export default function FinalReportScreen() {
           </Section>
 
           <Section title={t('report.sleepTiming')}>
-            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color={durationColor(metrics.avgSleepDuration)}  bar={<DurationBar value={metrics.avgSleepDuration} />} />
+            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color={durationColor(metrics.avgSleepDuration)}  bar={<DurationBar value={metrics.avgSleepDuration} ranges={ranges} />} />
             <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} bar={<EfficiencyBar value={metrics.avgSleepEfficiency} />} />
-            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color={latencyColor(metrics.avgSleepOnsetLatency)}  bar={<LatencyBar value={metrics.avgSleepOnsetLatency} />} />
-            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color={wasoColor(metrics.avgWASO)}               bar={<WasoBar value={metrics.avgWASO} />} />
+            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color={latencyColor(metrics.avgSleepOnsetLatency)}  bar={<LatencyBar value={metrics.avgSleepOnsetLatency} ranges={ranges} />} />
+            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color={wasoColor(metrics.avgWASO)}               bar={<WasoBar value={metrics.avgWASO} ranges={ranges} />} />
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.ageBandNote', { band: t(`ageBand.${ranges.band}`) })}</Text>
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.thresholdNote')}</Text>
           </Section>
 

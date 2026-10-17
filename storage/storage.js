@@ -7,6 +7,7 @@
  * Stored keys:
  *   user_name               — participant's name string
  *   research_code           — optional research code string
+ *   age_band                — optional age group ('under18' | 'adult' | 'older'); device-only, never exported
  *   entries                 — JSON array of diary entry objects
  *   seen_instructions       — 'true' once the instructions modal has been dismissed
  *   questionnaire_{id}      — one object per completed one-time questionnaire
@@ -32,11 +33,13 @@
  */
 import t from '../i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isValidAgeBand } from '../utils/referenceRanges';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const KEYS = {
   USER_NAME:            'user_name',
   RESEARCH_CODE:        'research_code',
+  AGE_BAND:             'age_band',
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
   MEDICATION_PRESETS:   'medication_presets',
@@ -112,6 +115,36 @@ export const loadResearchCode = async () => {
   }
 };
 
+// ─── Age band ──────────────────────────────────────────────────────────────────────────────────
+/**
+ * Optional age group used only to choose the reference ranges in the final
+ * report. Stored on the device; deliberately not part of the CSV/JSON export.
+ * Passing null/undefined/an unknown value clears it (back to the adult default).
+ */
+export const saveAgeBand = async (band) => {
+  try {
+    if (isValidAgeBand(band)) {
+      await AsyncStorage.setItem(KEYS.AGE_BAND, band);
+    } else {
+      await AsyncStorage.removeItem(KEYS.AGE_BAND);
+    }
+  } catch (e) {
+    console.warn('[storage] saveAgeBand failed:', e.message);
+    throw e;
+  }
+};
+
+/** Returns 'under18' | 'adult' | 'older', or null when the participant hasn't chosen one. */
+export const loadAgeBand = async () => {
+  try {
+    const value = await AsyncStorage.getItem(KEYS.AGE_BAND);
+    return isValidAgeBand(value) ? value : null;
+  } catch (e) {
+    console.warn('[storage] loadAgeBand failed:', e.message);
+    return null;
+  }
+};
+
 // ─── Entries ──────────────────────────────────────────────────────────────────
 export const loadEntries = async () => {
   try {
@@ -169,7 +202,7 @@ export const clearAll = async () => {
     // Also remove any stored questionnaire results
     const allKeys = await AsyncStorage.getAllKeys();
     const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
   } catch (e) {
     console.warn('[storage] clearAll failed:', e.message);
     throw e;
