@@ -1,0 +1,74 @@
+name: Open release PR
+
+# Opens (or updates) a pull request from `main` into `release`.
+# Merging that PR is what promotes a new version to production.
+# Run it from the Actions tab once the version bump has landed on main.
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "Optional extra notes to include in the PR body"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check for changes to release
+        id: diff
+        run: |
+          git fetch origin release
+          AHEAD=$(git rev-list --count origin/release..origin/main)
+          echo "ahead=$AHEAD" >> "$GITHUB_OUTPUT"
+          echo "main is $AHEAD commit(s) ahead of release"
+
+      - name: Open or update PR
+        if: steps.diff.outputs.ahead != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          TITLE="🚀 release: v${VERSION}"
+          {
+            echo "Promotes \`main\` to production (\`release\`)."
+            echo
+            echo "**Version:** v${VERSION}"
+            echo
+            echo "### Before merging"
+            echo "- [ ] Version bumped in \`app.json\`, \`package.json\`, \`CITATION.cff\`, \`CHANGELOG.md\`, \`README.md\`"
+            echo "- [ ] Tests passing on \`main\`"
+            echo "- [ ] Checked the \`main\` branch deploy preview on Netlify"
+            if [ -n "$NOTES" ]; then
+              echo
+              echo "### Notes"
+              echo "$NOTES"
+            fi
+          } > body.md
+
+          EXISTING=$(gh pr list --base release --head main --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --title "$TITLE" --body-file body.md
+            echo "Updated PR #$EXISTING"
+          else
+            gh pr create --base release --head main --title "$TITLE" --body-file body.md
+          fi
+
+      - name: Nothing to release
+        if: steps.diff.outputs.ahead == '0'
+        run: echo "release is already up to date with main. No PR opened."
