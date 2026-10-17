@@ -17,7 +17,7 @@ import InstructionsModal from '../InstructionsModal';
 import ProfileModal from '../ProfileModal';
 import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import { getEntryDateOptions, isMorningDoneForDate } from '../../utils/dateEntry';
-import t, { isSwedish } from '../../i18n';
+import t from '../../i18n';
 import EntryCardContent from '../../components/EntryCardContent';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
 
@@ -29,7 +29,7 @@ const EntryCard = ({ type, completed, morningDone, onPress }) => {
       onPress={onPress}
       activeOpacity={isLocked ? 1 : 0.9}
       disabled={isLocked}
-      style={isSwedish ? styles.textCardWrapper : styles.entryCardWrapper}
+      style={styles.entryCardWrapper}
       accessibilityRole="button"
       accessibilityState={{ disabled: isLocked }}
       accessibilityLabel={t(`entry.a11y.${isMorning ? (completed ? 'morningCompleted' : 'morningStart') : isLocked ? 'eveningLocked' : completed ? 'eveningCompleted' : 'eveningStart'}`)}
@@ -187,9 +187,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8,
   },
   cardsContainer: { gap: 8 },
-  textCardWrapper: { width: '100%', minHeight: 112, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
-  entryCardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
-  entryCardImage:   { width: '100%', height: '100%' },
+  entryCardWrapper: { width: '100%', minHeight: 118, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
   instructionsCard: {
     borderRadius: 18,
     paddingHorizontal: 16, paddingVertical: 16,
