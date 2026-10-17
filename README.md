@@ -181,6 +181,25 @@ The app detects the device locale at startup using `expo-localization` and selec
 |----------|-------------|--------|
 | 🇬🇧 English | `en` | ✅ Complete |
 | 🇧🇷 Portuguese (Brazil) | `pt-BR` | ✅ Complete |
+| Swedish | `sv`, `sv-SE`, `sv-FI` | UI and daily diary; research instruments remain in English |
+
+Swedish is selected automatically for Swedish device/browser locales, including
+Sweden and Finland. Restart the app after changing the device/browser language.
+Swedish entry cards and the completion screen use real text instead of PNG text.
+Notification text, sharing controls, report labels and dates also use the locale.
+If reminders were already enabled before changing language, switch reminders off
+and back on in Settings to reschedule their text in the new language.
+
+The Swedish daily diary and instructions are an **unvalidated app translation**,
+not an authorized or clinically validated Swedish Consensus Sleep Diary version.
+Research instrument titles, instructions, questions, response options, scale
+anchors, credits and interpretations remain in their original English. A Swedish
+notice makes this explicit in the questionnaire list, both questionnaire views,
+and the final report. Scoring, stored answer values and CSV/JSON keys are unchanged.
+
+The Swedish alcohol help retains the source diary's 355/150/45 ml serving sizes.
+It clarifies that these servings are not equivalent to UK alcohol units; no
+numeric thresholds or calculation logic have been changed.
 
 All other locales fall back to English.
 
@@ -206,8 +225,9 @@ Question text, rating labels, units, and placeholders are defined separately in 
 1. Create `i18n/<locale>.js` following the structure of `en.js`
 2. Create `data/questions.<locale>.js` for the question text
 3. Add the locale to the `TRANSLATIONS` map in `i18n/index.js`
-4. Add the locale to the `LANGUAGE_NAMES` map in `app/(tabs)/settings.jsx`
-5. Export any locale-specific image assets to `assets/images/<locale>/`
+4. Register the question overrides in `data/useQuestions.js`
+5. Add the locale to the `LANGUAGE_NAMES` map in `app/(tabs)/settings.jsx`
+6. Export any locale-specific image assets to `assets/images/<locale>/`
 
 ### Locale-specific image assets
 

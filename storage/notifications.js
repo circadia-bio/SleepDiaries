@@ -11,6 +11,7 @@
  * The enabled/disabled preference is persisted in AsyncStorage separately
  * from the rest of the app data so it survives entry history being cleared.
  */
+import t from '../i18n';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -37,7 +38,7 @@ export const requestNotificationPermission = async () => {
   if (isWeb) return false;
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('sleep-diaries', {
-      name: 'Sleep Diaries Reminders',
+      name: t('appText.notificationChannel'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
     });
@@ -55,12 +56,12 @@ export const scheduleReminders = async () => {
   if (!granted) return false;
   await Notifications.scheduleNotificationAsync({
     identifier: 'morning-reminder',
-    content: { title: '🌅 Good morning!', body: "Don't forget to complete your morning sleep diary entry.", sound: true },
+    content: { title: t('appText.morningNotificationTitle'), body: t('appText.morningNotificationBody'), sound: true },
     trigger: { type: 'daily', hour: MORNING_HOUR, minute: 0 },
   });
   await Notifications.scheduleNotificationAsync({
     identifier: 'evening-reminder',
-    content: { title: '🌙 Good evening!', body: 'Time to complete your evening sleep diary entry.', sound: true },
+    content: { title: t('appText.eveningNotificationTitle'), body: t('appText.eveningNotificationBody'), sound: true },
     trigger: { type: 'daily', hour: EVENING_HOUR, minute: 0 },
   });
   return true;
@@ -88,7 +89,7 @@ export const loadNotificationsEnabled = async () => {
 export const sendTestNotification = async () => {
   if (isWeb) return;
   await Notifications.scheduleNotificationAsync({
-    content: { title: '🌙 Sleep Diaries', body: 'Notifications are working correctly!' },
+    content: { title: '🌙 Sleep Diaries', body: t('appText.testNotificationBody') },
     trigger: { type: 'timeInterval', seconds: 5, repeats: false },
   });
 };

@@ -21,12 +21,12 @@ import { Ionicons } from '@expo/vector-icons';
 import ScreenBackground from '../components/ScreenBackground';
 import { useInsets } from '../theme/useInsets';
 import { FONTS, SIZES } from '../theme/typography';
-import t from '../i18n';
+import t, { locale } from '../i18n';
 
 /** Format 'YYYY-MM-DD' as a localised day string, e.g. 'Fri 23 May'. */
 const formatDate = (dateStr) => {
   const d = new Date(`${dateStr}T12:00:00`);
-  return d.toLocaleDateString(undefined, {
+  return d.toLocaleDateString(locale, {
     weekday: 'short', day: 'numeric', month: 'short',
   });
 };

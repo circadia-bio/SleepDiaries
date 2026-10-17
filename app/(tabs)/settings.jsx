@@ -13,7 +13,7 @@ import showAlert from '../../utils/alert';
 import { loadNotificationsEnabled, saveNotificationsEnabled, sendTestNotification, requestNotificationPermission } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
 
-const LANGUAGE_NAMES = { 'en': 'English', 'pt-BR': 'Português (Brasil)', 'pt': 'Português (Brasil)' };
+const LANGUAGE_NAMES = { 'sv': 'Svenska', 'sv-SE': 'Svenska (Sverige)', 'sv-FI': 'Svenska (Finland)', 'en': 'English', 'pt-BR': 'Português (Brasil)', 'pt': 'Português (Brasil)' };
 const currentLanguageName = LANGUAGE_NAMES[locale] ?? locale;
 
 const TAB_BAR_HEIGHT = 60;
@@ -104,7 +104,7 @@ export default function SettingsScreen() {
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={[styles.aboutText, { fontFamily: FONTS.body }]}>© Circadia Lab</Text>
           <Text style={[styles.aboutVersion, { fontFamily: FONTS.bodyMedium }]}>v{Constants.expoConfig?.version}</Text>
-          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>MIT Licence</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>{t('appText.mitLicense')}</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Lucas França · Mario Leocadio-Miguel</Text>
           <Text style={[styles.aboutLabel, { fontFamily: FONTS.body }]}>{t('settings.aboutDesign')}</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Bri Baehl · Jacob Howard</Text>
@@ -112,7 +112,7 @@ export default function SettingsScreen() {
           <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
             <Text style={[styles.aboutLinkText, { fontFamily: FONTS.body }]}>circadia-lab.uk</Text>
           </TouchableOpacity>
-          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>Made with ❤️</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>{t('appText.madeWithLove')}</Text>
         </View>
         <View style={styles.card}>
           <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"

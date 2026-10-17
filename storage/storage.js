@@ -30,6 +30,7 @@
  *
  * Also exports CSV and JSON export helpers used by the export screen.
  */
+import t from '../i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
@@ -364,15 +365,15 @@ export const exportToCSV = async (userName) => {
  * Returns an array of valid diary entries, or throws if the file is unrecognised.
  */
 const validateImport = (parsed) => {
-  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file format.');
+  if (!parsed || typeof parsed !== 'object') throw new Error(t('appText.invalidImportFormat'));
   const entries = Array.isArray(parsed) ? parsed : parsed.entries;
-  if (!Array.isArray(entries)) throw new Error('No entries array found in file.');
+  if (!Array.isArray(entries)) throw new Error(t('appText.missingImportEntries'));
   const valid = entries.filter(
     (e) => e && e.id && e.type && e.date && e.answers
   );
   // Only throw if entries were supplied but every one failed validation.
   // An empty entries array is allowed (e.g. questionnaire-only import).
-  if (entries.length > 0 && valid.length === 0) throw new Error('No valid entries found in file.');
+  if (entries.length > 0 && valid.length === 0) throw new Error(t('appText.invalidImportEntries'));
   return valid;
 };
 
