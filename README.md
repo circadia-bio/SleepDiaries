@@ -181,7 +181,7 @@ The app detects the device locale at startup using `expo-localization` and selec
 |----------|-------------|--------|
 | 🇬🇧 English | `en` | ✅ Complete |
 | 🇧🇷 Portuguese (Brazil) | `pt-BR` | ✅ Complete |
-| Swedish | `sv`, `sv-SE`, `sv-FI` | UI and daily diary; research instruments remain in English |
+| 🇸🇪 Swedish | `sv`, `sv-SE`, `sv-FI` | UI and daily diary; research instruments remain in English |
 
 Swedish is selected automatically for Swedish device/browser locales, including
 Sweden and Finland. Restart the app after changing the device/browser language.
