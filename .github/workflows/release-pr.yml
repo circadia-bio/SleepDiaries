@@ -1,59 +1,88 @@
 name: Open release PR
 
-# Opens (or updates) a pull request from `main` into `release`.
-# Merging that PR is what promotes a new version to production.
-# Run it from the Actions tab once the version bump has landed on main.
+# Opens (or updates) a pull request into `release` from a pinned snapshot of a
+# version tag, NOT from the moving tip of `main`. Anything merged to `main`
+# after the tag was cut cannot leak into the release.
+#
+# Usage:
+#   1. On main, after the version bump:  git tag v1.2.0 && git push origin v1.2.0
+#   2. Actions → Open release PR → Run workflow → tag: v1.2.0
+#   3. Merge the PR into `release` to go to production.
 
 on:
   workflow_dispatch:
     inputs:
+      tag:
+        description: "Version tag to release (e.g. v1.2.0). Must be on main."
+        required: true
       notes:
         description: "Optional extra notes to include in the PR body"
         required: false
         default: ""
 
 permissions:
-  contents: read
-  pull-requests: write
+  contents: write        # push the release-candidate branch
+  pull-requests: write   # open / update the PR
 
 jobs:
   release-pr:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag }}
+      NOTES: ${{ inputs.notes }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
-      - name: Read version
+      - name: Validate tag
         id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          # Tag must be reachable from main (no releasing stray branches)
+          git fetch origin main release
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::Tag $TAG is not on main."
+            exit 1
+          fi
+
+          # package.json at the tag must match the tag name
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$TAG" ]; then
+            echo "::error::Tag is $TAG but package.json at that commit says v$VERSION. Did you tag before bumping?"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check for changes to release
         id: diff
         run: |
-          git fetch origin release
-          AHEAD=$(git rev-list --count origin/release..origin/main)
+          AHEAD=$(git rev-list --count origin/release..HEAD)
           echo "ahead=$AHEAD" >> "$GITHUB_OUTPUT"
-          echo "main is $AHEAD commit(s) ahead of release"
+          echo "$TAG is $AHEAD commit(s) ahead of release"
+
+      - name: Pin release candidate branch
+        if: steps.diff.outputs.ahead != '0'
+        run: |
+          git push --force origin "HEAD:refs/heads/release-candidate/$TAG"
 
       - name: Open or update PR
         if: steps.diff.outputs.ahead != '0'
         env:
-          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          NOTES: ${{ inputs.notes }}
         run: |
           TITLE="🚀 release: v${VERSION}"
+          SHA=$(git rev-parse --short HEAD)
           {
-            echo "Promotes \`main\` to production (\`release\`)."
+            echo "Promotes \`$TAG\` (\`$SHA\`) to production (\`release\`)."
             echo
-            echo "**Version:** v${VERSION}"
+            echo "This PR is pinned to the tag, so later commits on \`main\` are **not** included."
             echo
             echo "### Before merging"
-            echo "- [ ] Version bumped in \`app.json\`, \`package.json\`, \`CITATION.cff\`, \`CHANGELOG.md\`, \`README.md\`"
-            echo "- [ ] Tests passing on \`main\`"
+            echo "- [ ] Tests passing on the tagged commit"
             echo "- [ ] Checked the \`main\` branch deploy preview on Netlify"
+            echo "- [ ] \`CHANGELOG.md\` entry matches the release"
             if [ -n "$NOTES" ]; then
               echo
               echo "### Notes"
@@ -61,14 +90,15 @@ jobs:
             fi
           } > body.md
 
-          EXISTING=$(gh pr list --base release --head main --state open --json number --jq '.[0].number // empty')
+          HEAD_BRANCH="release-candidate/$TAG"
+          EXISTING=$(gh pr list --base release --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$EXISTING" ]; then
             gh pr edit "$EXISTING" --title "$TITLE" --body-file body.md
             echo "Updated PR #$EXISTING"
           else
-            gh pr create --base release --head main --title "$TITLE" --body-file body.md
+            gh pr create --base release --head "$HEAD_BRANCH" --title "$TITLE" --body-file body.md
           fi
 
       - name: Nothing to release
         if: steps.diff.outputs.ahead == '0'
-        run: echo "release is already up to date with main. No PR opened."
+        run: echo "release already contains $TAG. No PR opened."
