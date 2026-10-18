@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] — 2026-10-19
+
+### Added
+
+- **Swedish localisation**: UI, daily diary questions and instructions are available in Swedish (translation by Jonatan Nyberg). The one-time research questionnaires stay in English, with a note explaining that no validated Swedish version is included
+- **Sleep pattern actogram**: the final report opens with a weekly chart showing each night from bedtime to out-of-bed time, night-waking markers and a dashed sleep-midpoint trend line; days with no entry stay visible as gaps
+- **Age-specific reference ranges**: an optional age group (under 18, 18–64, 65 or over) can be set during onboarding or edited in the Profile. It adjusts the green/amber/red bands for sleep duration, sleep onset latency and WASO, and **Settings → Sleep metric thresholds** now lists the ranges for the chosen group. The age group is stored on the device only and is not included in exports. All ranges live in `utils/referenceRanges.js`
+- **Release workflow**: production now deploys from a `release` branch. The *Open release PR* GitHub Action opens a pull request from a snapshot of a version tag, and `deploy.sh` refuses production builds from any other branch
+- **Tests**: Swedish locale completeness and a reference-range suite that pins the adult band to the previous thresholds
+
+### Changed
+
+- **Entry cards and completion screen are drawn in code** for every language, replacing the locale-specific PNG artwork. Text now scales with Bigger Text, and a new language only needs strings. Title and pill colours were darkened slightly to improve contrast
+- **Final report summary card** redesigned: participant identity, a localised date range and three count tiles that use the full width
+- **Latency and WASO references** now cite the National Sleep Foundation sleep-quality consensus (Ohayon et al., 2017, *Sleep Health*) and explain how the app’s colour bands relate to it
+- **Decimal separators** in the final report follow the device language in every locale (e.g. “7,5” in Portuguese and Swedish)
+- **Portuguese (Brazil)**: reminder notifications, report sharing, import error messages and the completion screen are now translated
+
+### Fixed
+
+- **Actogram Y-axis labels clipped in browsers**: the time axis could be squeezed by the scrolling chart beside it; it now has a fixed width
+- **Home tab entry cards**: square bottom corners and extra spacing caused by a stale fixed-aspect wrapper
+- **Portuguese typo** in the questionnaire completion button
+
+### Removed
+
+- Unused PNG artwork: entry cards (including `pt-BR/`), end-of-entry screens, taskbar and back/next button images
+
+---
+
 ## [1.1.3] — 2026-05-23
 
 ### Added

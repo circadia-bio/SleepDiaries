@@ -5,7 +5,7 @@
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
 [![Tests](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml/badge.svg)](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-1.1.3-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19683378.svg)](https://doi.org/10.5281/zenodo.19683378)
 [![Stable](https://img.shields.io/badge/status-stable-brightgreen)](#)
 [![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
@@ -627,7 +627,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ## 📄 Citation
 
-**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.1.3) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.2.0) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
 
 ---
 
