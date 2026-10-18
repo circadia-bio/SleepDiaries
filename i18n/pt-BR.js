@@ -59,7 +59,7 @@ export default {
     glossary: {
       sleepDuration: {
         title: 'Duração do Sono',
-        body:  'O tempo total que você ficou dormindo. A maioria dos adultos precisa de 7 a 9 horas por noite.',
+        body:  'O tempo total que você ficou dormindo. A maioria dos adultos precisa de 7 a 9 horas por noite; adolescentes precisam de cerca de 8 a 10 horas e adultos acima de 65 anos, de cerca de 7 a 8 horas.',
       },
       sleepEfficiency: {
         title: 'Eficiência do Sono',
@@ -67,7 +67,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Latência do Início do Sono',
-        body:  'Quanto tempo você levou para adormecer depois de deitar. Adormecer em até 30 minutos é o habitual.',
+        body:  'Quanto tempo você levou para adormecer depois de deitar. Adormecer em até 30 minutos é considerado saudável (até 60 minutos para adultos acima de 65 anos); a parte mais rápida desse intervalo aparece em verde no seu relatório.',
       },
       waso: {
         title: 'Vigília Após o Início do Sono (WASO)',
@@ -364,6 +364,15 @@ export default {
     yesterdayEvening: 'Ontem à noite',
     continue:         'Continuar',
   },
+  dataSafety: {
+    installTitle:  'Mantenha seus registros seguros',
+    installBody:   'Adicione o Sleep Diaries à tela inicial. Os navegadores podem apagar os dados salvos de sites que não estão instalados.',
+    installAction: 'Como instalar',
+    backupTitle:   'Faça um backup dos seus registros',
+    backupBody:    'Seus registros ficam guardados apenas neste dispositivo. Exporte uma cópia para não perdê-los se trocar de celular ou limpar os dados.',
+    backupAction:  'Exportar agora',
+    dismiss:       'Agora não',
+  },
   ageBand: {
     label:    'Faixa etária',
     hint:     'Opcional. Usada apenas para escolher os valores de referência do seu relatório de sono. Fica guardada neste dispositivo.',
@@ -385,11 +394,6 @@ export default {
     "entrySavedMorning": "Registro Matinal Concluído!",
     "entrySavedEvening": "Registro Noturno Concluído!",
     "homepage": "Página inicial",
-    "startEntry": "Iniciar",
-    "editEntry": "Concluído · Toque para editar",
-    "lockedEntry": "Conclua primeiro o seu registro matinal",
-    "entrySaved": "Registro salvo",
-    "returnHome": "Toque para voltar à página inicial",
     "holdMinute": "segure para ±1 min",
     "mitLicense": "Licença MIT",
     "madeWithLove": "Feito com ❤️",

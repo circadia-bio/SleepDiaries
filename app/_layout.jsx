@@ -16,14 +16,9 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import { loadName } from '../storage/storage';
 import { EntriesProvider } from '../storage/EntriesContext';
+import { isStandalonePwa, requestPersistentStorage } from '../utils/dataSafety';
 
-const isStandalone =
-  Platform.OS === 'web' &&
-  typeof window !== 'undefined' &&
-  (
-    window.navigator.standalone === true ||
-    window.matchMedia('(display-mode: standalone)').matches
-  );
+const isStandalone = isStandalonePwa();
 
 // Preloaded image assets. Excludes assets now rendered in code:
 //   - taskbar images (tab bar uses Ionicons)
@@ -59,6 +54,9 @@ export default function RootLayout() {
     };
     prepare();
   }, []);
+
+  // Web: ask the browser not to evict our storage (no-op on native).
+  useEffect(() => { requestPersistentStorage(); }, []);
 
   useEffect(() => {
     if (!isStandalone) return;

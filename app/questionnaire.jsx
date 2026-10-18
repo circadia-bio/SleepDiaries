@@ -31,29 +31,7 @@ import { useEntries } from '../storage/EntriesContext';
 import t from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
 import EntryCompleteSplash from '../components/EntryCompleteSplash';
-
-const THEME = {
-  morning: {
-    primary:      '#E07A20',
-    primaryLight: '#F5C96A',
-    progressBg:   '#F5DEB3',
-    background:   'transparent',
-    cardBg:       '#FFF8EE',
-    progressFill: '#E07A20',
-    progressTrackBg: '#FFFFFF',
-    progressTrackBorder: '#F5C96A',
-  },
-  evening: {
-    primary:      '#2A6CB5',
-    primaryLight: '#7EB0E0',
-    progressBg:   '#C8DFF5',
-    background:   'transparent',
-    cardBg:       '#EEF5FF',
-    progressFill: '#4A9FE0',
-    progressTrackBg: '#FFFFFF',
-    progressTrackBorder: '#A8D0F0',
-  },
-};
+import { THEME } from '../theme/colors';
 
 const pad = (n) => String(n).padStart(2, '0');
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);

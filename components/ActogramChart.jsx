@@ -53,7 +53,7 @@ const WAKING_ROW_OFFSET = 9;   // distance above the bar's top edge
 const MIDPOINT_COLOR = '#1E3A5F';  // navy dashed trend line — sleep midpoint
 const GRID_COLOR    = '#E2EAF4';
 const EMPTY_COLOR    = '#D8E2EC';  // placeholder line for a day with no entry
-const AXIS_TEXT     = '#94A3B8';
+const AXIS_TEXT     = '#64748B';
 const HEADER_TEXT   = '#1E3A5F';
 
 const DAYS_PER_VIEW  = 7;
@@ -416,6 +416,6 @@ const styles = StyleSheet.create({
   axis:        { width: AXIS_WIDTH, flexShrink: 0 },
   header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 8 },
   headerLabel: { fontSize: SIZES.caption, color: '#1E3A5F' },
-  statLabel:   { fontSize: SIZES.caption, color: '#94A3B8', paddingHorizontal: 4 },
+  statLabel:   { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4 },
   statValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F', paddingHorizontal: 4, marginBottom: 8 },
 });

@@ -20,6 +20,7 @@ import { getEntryDateOptions, isMorningDoneForDate } from '../../utils/dateEntry
 import t from '../../i18n';
 import EntryCardContent from '../../components/EntryCardContent';
 import { PastEntriesCard, FinalReportCard } from '../../components/BottomCards';
+import DataSafetyBanner from '../../components/DataSafetyBanner';
 
 const EntryCard = ({ type, completed, morningDone, onPress }) => {
   const isMorning = type === 'morning';
@@ -135,6 +136,12 @@ export default function HomeScreen() {
             </View>
           </View>
 
+          <DataSafetyBanner
+            entryCount={entries.length}
+            onBackup={() => router.push('/export')}
+            onInstall={() => setShowInstructions(true)}
+          />
+
           <TouchableOpacity style={styles.instructionsCard} activeOpacity={0.8} onPress={() => setShowInstructions(true)}>
             <View style={styles.instructionsIconWrap}>
               <Ionicons name="book-outline" size={48} color="#4A7BB5" />
@@ -143,7 +150,7 @@ export default function HomeScreen() {
               <Text style={[styles.instructionsTitle, { fontFamily: FONTS.heading }]}>{t('home.instructionsTitle')}</Text>
               <Text style={[styles.instructionsBody, { fontFamily: FONTS.body }]}>{t('home.instructionsBody')}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            <Ionicons name="chevron-forward" size={18} color="#64748B" />
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
@@ -199,8 +206,8 @@ const styles = StyleSheet.create({
   instructionsIconWrap: { width: 72, height: 72, borderRadius: 18, backgroundColor: '#4A7BB520', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   instructionsText: { flex: 1 },
   instructionsTitle: { fontSize: SIZES.cardTitle, color: '#1A3A5C', marginBottom: 4 },
-  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 20 },
+  instructionsBody:  { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 20 },
   bottomRow:      { flexDirection: 'row', gap: 12 },
   bottomCard:     { flex: 1 },
-  bottomCardHint: { fontSize: SIZES.caption, color: '#94A3B8', marginTop: 4, textAlign: 'center' },
+  bottomCardHint: { fontSize: SIZES.caption, color: '#64748B', marginTop: 4, textAlign: 'center' },
 });

@@ -61,8 +61,8 @@ const EntryCard = React.memo(({ entry }) => {
           </Text>
         </View>
         <View style={styles.cardHeaderRight}>
-          <Text style={[styles.cardTime, { color: '#94A3B8', fontFamily: FONTS.bodyMedium }]}>{formatTime(entry.completedAt)}</Text>
-          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color="#94A3B8" />
+          <Text style={[styles.cardTime, { color: '#64748B', fontFamily: FONTS.bodyMedium }]}>{formatTime(entry.completedAt)}</Text>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color="#64748B" />
         </View>
       </TouchableOpacity>
       {expanded && (
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   listContent: { padding: 16, gap: 10 },
   centred: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12 },
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
-  emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
+  emptySubtitle: { fontSize: SIZES.body, color: '#64748B', textAlign: 'center', lineHeight: 26 },
   dateLabel:     { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 16, marginBottom: 4 },
   card:            { borderRadius: 16, overflow: 'hidden', marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   cardHeader:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
@@ -156,6 +156,6 @@ const styles = StyleSheet.create({
   cardTime:        { fontSize: SIZES.bodySmall },
   cardBody:        { paddingHorizontal: 16, paddingVertical: 14, gap: 14 },
   answerRow:       { gap: 4 },
-  answerQuestion:  { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 22 },
+  answerQuestion:  { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 22 },
   answerValue:     { fontSize: SIZES.body, lineHeight: 26 },
 });

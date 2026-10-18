@@ -18,7 +18,7 @@ const TABS = [
 ];
 
 const ACTIVE_COLOR   = '#E07A20';
-const INACTIVE_COLOR = '#94A3B8';
+const INACTIVE_COLOR = '#64748B';
 
 function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();

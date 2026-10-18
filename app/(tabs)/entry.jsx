@@ -67,7 +67,7 @@ export default function EntryTab() {
 
         {s && s.morningCount < MIN_ENTRIES_FOR_REPORT && (
           <View style={styles.statsUnlockHint}>
-            <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
+            <Ionicons name="lock-closed-outline" size={18} color="#64748B" />
             <Text style={[styles.statsUnlockText, { fontFamily: FONTS.bodyMedium }]}>
               {t('entry.statsUnlock', { count: MIN_ENTRIES_FOR_REPORT - s.morningCount })}
             </Text>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   streakIconWrap: { width: 64, height: 64, borderRadius: 16, backgroundColor: '#E07A2020', alignItems: 'center', justifyContent: 'center' },
   streakValue: { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
-  streakLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8', marginTop: 2 },
+  streakLabel: { fontSize: SIZES.bodySmall, color: '#64748B', marginTop: 2 },
   statRow: { flexDirection: 'row', gap: 8 },
   statBox: {
     flex: 1, aspectRatio: 1,
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
   statValue: { fontSize: SIZES.body },
-  statLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  statLabel: { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
   statsUnlockHint: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12,
@@ -130,5 +130,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 12,
     shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
   },
-  statsUnlockText: { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
+  statsUnlockText: { fontSize: SIZES.bodySmall, color: '#64748B', flex: 1 },
 });

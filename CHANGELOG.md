@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Age-specific reference ranges**: an optional age group (under 18, 18–64, 65 or over) can be set during onboarding or edited in the Profile. It adjusts the green/amber/red bands for sleep duration, sleep onset latency and WASO, and **Settings → Sleep metric thresholds** now lists the ranges for the chosen group. The age group is stored on the device only and is not included in exports. All ranges live in `utils/referenceRanges.js`
 - **Release workflow**: production now deploys from a `release` branch. The *Open release PR* GitHub Action opens a pull request from a snapshot of a version tag, and `deploy.sh` refuses production builds from any other branch
 - **Tests**: Swedish locale completeness and a reference-range suite that pins the adult band to the previous thresholds
+- **Data-safety reminders**: entries live only on the device, so the Home tab now offers a dismissible reminder to install the PWA (touch browsers, after the first entry) and to export a backup (after 7 entries with no export for 14 days). On the web the browser is also asked to keep storage persistent
+- **Translation-key tests and a web build check in CI**: a test fails if code uses a translation key that does not exist or if Swedish or Portuguese lack an English key, and the build now also bundles the web app so a broken import or missing asset fails before Netlify
 
 ### Changed
 
@@ -23,6 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Latency and WASO references** now cite the National Sleep Foundation sleep-quality consensus (Ohayon et al., 2017, *Sleep Health*) and explain how the app’s colour bands relate to it
 - **Decimal separators** in the final report follow the device language in every locale (e.g. “7,5” in Portuguese and Swedish)
 - **Portuguese (Brazil)**: reminder notifications, report sharing, import error messages and the completion screen are now translated
+- **Readable grey text**: hints, captions and reference texts use a darker grey (`#64748B`, about 4.8:1 on white instead of 2.6:1), and input placeholders were darkened to match
+- **Central colour theme**: the morning/evening looks, report status colours and muted-text grey now live in `theme/colors.js`
+- **Sleep-metric glossary** now matches the age-specific ranges (teenagers 8–10 h, adults 7–9 h, 65+ 7–8 h; latency up to 30 min, 60 min for 65+)
 
 ### Fixed
 
@@ -33,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Removed
 
 - Unused PNG artwork: entry cards (including `pt-BR/`), end-of-entry screens, taskbar and back/next button images
+- Unused entry-card strings (`startEntry`, `editEntry`, `lockedEntry`, `entrySaved`, `returnHome`) and stray files from the repository root
 
 ---
 

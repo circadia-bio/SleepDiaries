@@ -39,13 +39,15 @@
  *               NSF report also uses 85%). Not age-adjusted.
  */
 
+import { COLORS } from '../theme/colors';
+
 export const AGE_BANDS = ['under18', 'adult', 'older'];
 export const DEFAULT_AGE_BAND = 'adult';
 
-const GREEN = '#2E7D32';
-const AMBER = '#F59E0B';
-const RED = '#DC2626';
-const NEUTRAL = '#4A7BB5';
+const GREEN = COLORS.status.good;
+const AMBER = COLORS.status.warn;
+const RED = COLORS.status.bad;
+const NEUTRAL = COLORS.status.neutral;
 
 const EFFICIENCY = { greenMin: 85, amberMin: 75 };
 

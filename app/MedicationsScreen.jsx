@@ -22,7 +22,7 @@ const BORDER   = '#B0CCEE';
 const BG       = '#EEF5FF';
 const CARD     = '#fff';
 const TEXT     = '#1E3A5F';
-const MUTED    = '#94A3B8';
+const MUTED    = '#64748B';
 
 const MedTimeInput = ({ value = '', onChange }) => {
   const parse = (v) => {

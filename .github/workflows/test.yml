@@ -20,3 +20,19 @@ jobs:
       - run: npm ci --legacy-peer-deps
 
       - run: npm test
+
+  # Bundles the web app the same way deploy.sh does, so a broken import or a
+  # missing asset fails here instead of on Netlify. Output goes to a temp dir.
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm ci --legacy-peer-deps
+
+      - run: npx expo export -p web --output-dir "$RUNNER_TEMP/web-export"

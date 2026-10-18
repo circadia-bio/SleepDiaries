@@ -224,7 +224,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onDone }) => {
     return (
       <View style={styles.resultContainer}>
         <View style={styles.resultCard}>
-          <Ionicons name="time-outline" size={48} color="#94A3B8" />
+          <Ionicons name="time-outline" size={48} color="#64748B" />
           <Text style={styles.resultTitle}>{t('questionnaireModal.allDone')}</Text>
           <Text style={styles.pendingDesc}>
             {t('questionnaireModal.pendingDesc', { shortTitle: questionnaire.shortTitle })}
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   scale010Btn:       { width: 46, height: 46, borderRadius: 23, borderWidth: 1, borderColor: 'rgba(107,63,160,0.3)', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3, elevation: 1 },
   scale010BtnText:   { fontSize: 17, fontFamily: FONTS.heading },
   scale010Labels:    { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
-  scale010Anchor:    { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8' },
+  scale010Anchor:    { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#64748B' },
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
   yesNoBtn: { width: 130, height: 56, borderRadius: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.72)', shadowColor: C.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.18, shadowRadius: 8, elevation: 5 },
   yesNoText:  { fontSize: 20, fontFamily: FONTS.body },
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
   scoreMax:       { fontSize: 22, fontFamily: FONTS.bodyMedium },
   interpretLabel: { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading },
   interpretDesc:  { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
-  referenceText:  { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8', textAlign: 'center', lineHeight: 20, marginTop: 4 },
+  referenceText:  { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 20, marginTop: 4 },
   pendingDesc:    { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   doneBtn:     { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
   doneBtnText: { fontSize: SIZES.body, fontFamily: FONTS.body, color: '#fff' },

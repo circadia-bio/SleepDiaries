@@ -93,8 +93,8 @@ export default function QuestionnairesScreen() {
                     ) : result && !resultsUnlocked ? (
                       <View style={styles.qResultRow}>
                         <View style={[styles.qBadge, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
-                          <Ionicons name="time-outline" size={13} color="#94A3B8" />
-                          <Text style={[styles.qBadgeText, { color: '#94A3B8', fontFamily: FONTS.body }]}>
+                          <Ionicons name="time-outline" size={13} color="#64748B" />
+                          <Text style={[styles.qBadgeText, { color: '#64748B', fontFamily: FONTS.body }]}>
                             {t('profileQuestionnaires.resultsAfter14')}
                           </Text>
                         </View>
@@ -159,12 +159,12 @@ const styles = StyleSheet.create({
   qTitleRow:    { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   betaChip:     { backgroundColor: '#F0E8FA', borderWidth: 1, borderColor: '#C4A8E0', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   betaChipText: { fontSize: 11, color: '#6B3FA0', letterSpacing: 0.5 },
-  betaFootnote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 22, paddingHorizontal: 4, marginTop: 4, textAlign: 'center' },
+  betaFootnote: { fontSize: SIZES.caption, color: '#64748B', lineHeight: 22, paddingHorizontal: 4, marginTop: 4, textAlign: 'center' },
   qResultRow:   { gap: 4 },
   qBadge:       { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, flexShrink: 1 },
   qBadgeText:   { fontSize: SIZES.label, flexShrink: 1 },
-  qDate:        { fontSize: SIZES.caption, color: '#94A3B8' },
-  qPending:     { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  qDate:        { fontSize: SIZES.caption, color: '#64748B' },
+  qPending:     { fontSize: SIZES.bodySmall, color: '#64748B' },
   qBtn:         { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: 'rgba(74,123,181,0.12)', borderWidth: 0, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6, elevation: 3 },
   qBtnText:     { fontSize: SIZES.label, color: '#4A7BB5' },
   divider:      { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },

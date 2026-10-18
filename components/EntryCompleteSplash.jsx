@@ -15,14 +15,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Polyline, Defs, LinearGradient, Stop } from 'react-native-svg';
 import t from '../i18n';
 import { FONTS } from '../theme/typography';
+import { COLORS, THEME } from '../theme/colors';
 
-const PALETTE = {
-  morning: { title: '#C4623F', badge: '#F0A862', check: '#5FA3DB', button: '#B9D3EC' },
-  evening: { title: '#3F82C0', badge: '#A2C6E8', check: '#DD7F5A', button: '#F0A862' },
-};
-
-const CREAM = '#FFFDF7';
-const NAVY = '#1E3A5F';
+const CREAM = COLORS.cream;
+const NAVY = COLORS.navy;
 
 // Points evenly spaced around a circle, used for the scalloped badge edge.
 const lobes = (count, distance, radius) =>
@@ -88,7 +84,8 @@ function Badge({ fill, check }) {
 
 export default function EntryCompleteSplash({ type }) {
   const morning = type === 'morning';
-  const p = morning ? PALETTE.morning : PALETTE.evening;
+  const th = morning ? THEME.morning : THEME.evening;
+  const p = { title: th.splashTitle, badge: th.splashBadge, check: th.splashCheck, button: th.splashButton };
 
   return (
     <View style={styles.root}>

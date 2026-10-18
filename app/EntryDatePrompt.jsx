@@ -72,7 +72,7 @@ export default function EntryDatePromptScreen() {
           <Text style={[
             styles.optionSub,
             { fontFamily: FONTS.body },
-            { color: isSelected ? subSel : '#94A3B8' },
+            { color: isSelected ? subSel : '#64748B' },
           ]}>
             {sublabel}
           </Text>
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
 
   header:   { alignItems: 'center', gap: 10, paddingTop: 8 },
   title:    { fontSize: 26, textAlign: 'center', lineHeight: 32 },
-  subtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 22 },
+  subtitle: { fontSize: SIZES.body, color: '#64748B', textAlign: 'center', lineHeight: 22 },
 
   options: { gap: 12 },
   option: {

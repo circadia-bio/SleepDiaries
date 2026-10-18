@@ -59,7 +59,7 @@ export default {
     glossary: {
       sleepDuration: {
         title: 'Sleep Duration',
-        body:  'The total amount of time you were asleep. Most adults need between 7 and 9 hours per night.',
+        body:  'The total amount of time you were asleep. Most adults need 7–9 hours a night; teenagers need about 8–10 hours and adults over 65 about 7–8 hours.',
       },
       sleepEfficiency: {
         title: 'Sleep Efficiency',
@@ -67,7 +67,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Sleep Onset Latency',
-        body:  'How long it took you to fall asleep after getting into bed. Falling asleep within 30 minutes is typical.',
+        body:  'How long it took you to fall asleep after getting into bed. Falling asleep within 30 minutes is considered healthy (up to 60 minutes for adults over 65); the faster end of that range is shown in green in your report.',
       },
       waso: {
         title: 'Wake After Sleep Onset (WASO)',
@@ -364,6 +364,15 @@ export default {
     namePlaceholder: 'Medication name',
     add:             'Add Medication',
   },
+  dataSafety: {
+    installTitle:  'Keep your entries safe',
+    installBody:   'Add Sleep Diaries to your home screen. Browsers can clear saved data for sites that are not installed.',
+    installAction: 'How to install',
+    backupTitle:   'Back up your entries',
+    backupBody:    'Your entries are stored on this device only. Export a copy so you do not lose them if you change phone or clear your data.',
+    backupAction:  'Export now',
+    dismiss:       'Not now',
+  },
   ageBand: {
     label:    'Age group',
     hint:     'Optional. Only used to choose the reference ranges in your sleep report. Stays on this device.',
@@ -385,11 +394,6 @@ export default {
     "entrySavedMorning": "Morning Entry Complete!",
     "entrySavedEvening": "Evening Entry Complete!",
     "homepage": "Homepage",
-    "startEntry": "Start",
-    "editEntry": "Completed · Tap to edit",
-    "lockedEntry": "Complete your morning entry first",
-    "entrySaved": "Entry saved",
-    "returnHome": "Tap to return home",
     "holdMinute": "hold for ±1 min",
     "mitLicense": "MIT Licence",
     "madeWithLove": "Made with ❤️",

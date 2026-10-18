@@ -20,28 +20,19 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import t from '../i18n';
 import { FONTS, SIZES } from '../theme/typography';
-
-const PALETTE = {
-  morning: {
-    from: '#F2AF6C',
-    to: '#F7C77F',
-    title: '#A94100',
-    pill: 'rgba(255,255,255,0.38)',
-    pillText: '#8F3600',
-  },
-  evening: {
-    from: '#7EB0DE',
-    to: '#B2CFEC',
-    title: '#24496B',
-    pill: '#A9D2F7',
-    pillText: '#24496B',
-    lockedText: '#3D3C7A',
-  },
-};
+import { THEME } from '../theme/colors';
 
 export default function EntryCardContent({ type, completed = false, locked = false }) {
   const morning = type === 'morning';
-  const p = morning ? PALETTE.morning : PALETTE.evening;
+  const th = morning ? THEME.morning : THEME.evening;
+  const p = {
+    from: th.entryFrom,
+    to: th.entryTo,
+    title: th.entryTitle,
+    pill: th.entryPill,
+    pillText: th.entryPillText,
+    lockedText: th.entryLockedText,
+  };
   const suffix = morning ? 'Morning' : 'Evening';
   const gradId = `entryCardGrad_${type}`;
 

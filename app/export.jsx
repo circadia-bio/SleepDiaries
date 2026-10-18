@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON } from '../storage/storage';
+import { exportToCSV, exportToJSON, loadName, loadEntries, importFromJSON, recordExport } from '../storage/storage';
 import showAlert from '../utils/alert';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
@@ -37,8 +37,11 @@ export default function ExportScreen() {
         const a = document.createElement('a');
         a.href = url; a.download = filename; a.click();
         URL.revokeObjectURL(url);
+        await recordExport();
       } else {
-        await Share.share({ title: filename, message: content });
+        const result = await Share.share({ title: filename, message: content });
+        // iOS reports a dismissed share sheet; don't count that as a backup.
+        if (result?.action !== Share.dismissedAction) await recordExport();
       }
     } catch (e) { showAlert(t('export.exportFailTitle'), e.message); }
     setLoading(null);
@@ -141,8 +144,8 @@ const styles = StyleSheet.create({
   exportIcon:     { width: 56, height: 56, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   exportText:     { flex: 1, gap: 4 },
   exportTitle:    { fontSize: SIZES.body, color: '#1E3A5F' },
-  exportSubtitle: { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24 },
-  note:    { fontSize: SIZES.bodySmall, color: '#94A3B8', textAlign: 'center', lineHeight: 24, paddingHorizontal: 8 },
+  exportSubtitle: { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 24 },
+  note:    { fontSize: SIZES.bodySmall, color: '#64748B', textAlign: 'center', lineHeight: 24, paddingHorizontal: 8 },
   divider: { height: 1, backgroundColor: 'rgba(226,234,244,0.8)', marginVertical: 4 },
   splashOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 9999, backgroundColor: '#C8DFF5', alignItems: 'center', justifyContent: 'center' },
   splashImage:   { width: '100%', aspectRatio: 1 },

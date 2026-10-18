@@ -51,7 +51,7 @@ export default {
     glossary: {
       sleepDuration: {
         title: 'Sömnlängd',
-        body: 'Den sammanlagda tid du sov. De flesta vuxna behöver mellan 7 och 9 timmars sömn per natt.',
+        body: 'Den sammanlagda tid du sov. De flesta vuxna behöver 7–9 timmars sömn per natt, tonåringar ungefär 8–10 timmar och vuxna över 65 år ungefär 7–8 timmar.',
       },
       sleepEfficiency: {
         title: 'Sömneffektivitet',
@@ -59,7 +59,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Insomningstid',
-        body: 'Hur lång tid det tog att somna efter att du lagt dig. Det är vanligt att somna inom 30 minuter.',
+        body: 'Hur lång tid det tog att somna efter att du lagt dig. Att somna inom 30 minuter räknas som friskt (upp till 60 minuter för vuxna över 65 år). Den snabbare delen av det intervallet visas som grön i din rapport.',
       },
       waso: {
         title: 'Vaken tid efter insomnandet (WASO)',
@@ -325,6 +325,15 @@ export default {
     namePlaceholder: 'Läkemedlets namn',
     add: 'Lägg till läkemedel',
   },
+  dataSafety: {
+    installTitle: 'Håll dina anteckningar säkra',
+    installBody: 'Lägg till Sleep Diaries på hemskärmen. Webbläsare kan rensa sparad data för webbplatser som inte är installerade.',
+    installAction: 'Så installerar du',
+    backupTitle: 'Säkerhetskopiera dina anteckningar',
+    backupBody: 'Dina anteckningar sparas bara på den här enheten. Exportera en kopia så att du inte förlorar dem om du byter telefon eller rensar data.',
+    backupAction: 'Exportera nu',
+    dismiss: 'Inte nu',
+  },
   ageBand: {
     label: 'Åldersgrupp',
     hint: 'Valfritt. Används bara för att välja referensvärden i din sömnrapport. Stannar på den här enheten.',
@@ -346,11 +355,6 @@ export default {
     "entrySavedMorning": "Morgonanteckningen är klar!",
     "entrySavedEvening": "Kvällsanteckningen är klar!",
     "homepage": "Startsida",
-    "startEntry": "Starta",
-    "editEntry": "Klar · Tryck för att redigera",
-    "lockedEntry": "Fyll i morgonanteckningen först",
-    "entrySaved": "Anteckningen har sparats",
-    "returnHome": "Tryck för att gå till startsidan",
     "holdMinute": "Håll in för steg om ±1 min",
     "mitLicense": "MIT-licens",
     "madeWithLove": "Skapad med ❤️",

@@ -364,7 +364,7 @@ async function handleShareWeb({ metrics, userName, dateRange, ranges }) {
     ctx.fillStyle = s.accent;
     ctx.font = 'bold 22px system-ui, sans-serif';
     ctx.fillText(s.value, cx + cellW / 2, cy + 62);
-    ctx.fillStyle = '#94A3B8';
+    ctx.fillStyle = '#64748B';
     ctx.font = '12px system-ui, sans-serif';
     ctx.fillText(s.label, cx + cellW / 2, cy + 80, cellW - 12);
   });
@@ -704,36 +704,36 @@ const styles = StyleSheet.create({
   title:    { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   centred:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12, paddingTop: 80 },
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
-  emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
+  emptySubtitle: { fontSize: SIZES.body, color: '#64748B', textAlign: 'center', lineHeight: 26 },
   scrollContent: { padding: 16, gap: 20, paddingBottom: 40 },
   summaryCard:    { gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   summaryTop:      { flexDirection: 'row', alignItems: 'center', gap: 14 },
   summaryAvatar:   { width: 60, height: 60, borderRadius: 30, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
   summaryIdentity: { flex: 1, gap: 2 },
   summaryName:     { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
-  summaryCode:     { fontSize: SIZES.caption, color: '#94A3B8' },
+  summaryCode:     { fontSize: SIZES.caption, color: '#64748B' },
   summaryPeriod:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(74,123,181,0.15)' },
   summaryPeriodText: { fontSize: SIZES.bodySmall, color: '#5B7089', flexShrink: 1 },
   summaryStatsRow: { flexDirection: 'row', gap: 8 },
   summaryStatTile: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 12 },
   summaryStatValue: { fontSize: SIZES.screenTitle },
-  summaryStatLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  summaryStatLabel: { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
   metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   metricIcon:        { width: 72, height: 72, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   metricText:        { flex: 1, gap: 3 },
-  metricLabel:       { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  metricLabel:       { fontSize: SIZES.bodySmall, color: '#64748B' },
   metricValueRow:    { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   metricValue:       { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
   metricStatusLabel: { fontSize: SIZES.caption, fontWeight: '600' },
-  metricSubtext:     { fontSize: SIZES.caption, color: '#94A3B8' },
+  metricSubtext:     { fontSize: SIZES.caption, color: '#64748B' },
   qualityCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
-  qualityLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  qualityLabel: { fontSize: SIZES.bodySmall, color: '#64748B' },
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   starLabel:    { fontSize: SIZES.body, marginLeft: 6 },
-  disclaimer:   { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
-  thresholdNote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
+  disclaimer:   { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
+  thresholdNote: { fontSize: SIZES.caption, color: '#64748B', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
   actogramCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   actogramLegendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingHorizontal: 2 },
   legendItem:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   qReportInterpText: { flex: 1, gap: 4 },
   qReportInterpLabel:{ fontSize: SIZES.body },
   qReportInterpDesc: { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 22 },
-  qReportDate:       { fontSize: SIZES.caption, color: '#94A3B8' },
+  qReportDate:       { fontSize: SIZES.caption, color: '#64748B' },
 
   // Scale bar
   scaleBarContainer:  { gap: 4 },
@@ -762,9 +762,9 @@ const styles = StyleSheet.create({
   scaleBarSegment:    { height: '100%' },
   scaleBarMarker:     { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: '#1E3A5F' },
   scaleBarEndLabels:  { flexDirection: 'row', justifyContent: 'space-between' },
-  scaleBarEndText:    { fontSize: 12, color: '#94A3B8' },
+  scaleBarEndText:    { fontSize: 12, color: '#64748B' },
   scaleBarTickRow:    { flexDirection: 'row', justifyContent: 'space-between', position: 'relative', height: 16 },
-  scaleBarTickLabel:  { position: 'absolute', fontSize: 12, color: '#94A3B8', transform: [{ translateX: -10 }] },
+  scaleBarTickLabel:  { position: 'absolute', fontSize: 12, color: '#64748B', transform: [{ translateX: -10 }] },
 });
 
 // ─── Share card styles ────────────────────────────────────────────────────────
@@ -786,6 +786,6 @@ const shareStyles = StyleSheet.create({
   statCell:  { width: '47%', aspectRatio: 1.4, alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 14, padding: 10 },
   statEmoji: { fontSize: 32, lineHeight: 38 },
   statValue: { fontSize: 22, lineHeight: 28 },
-  statLabel: { fontSize: 11, color: '#94A3B8', textAlign: 'center', lineHeight: 15 },
+  statLabel: { fontSize: 11, color: '#64748B', textAlign: 'center', lineHeight: 15 },
   footer:    { fontSize: 13, color: '#1E3A5F', textAlign: 'center', letterSpacing: 0.4 },
 });

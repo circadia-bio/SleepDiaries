@@ -13,6 +13,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AGE_BANDS } from '../utils/referenceRanges';
 import { FONTS, SIZES } from '../theme/typography';
+import { COLORS } from '../theme/colors';
 import t from '../i18n';
 
 export default function AgeBandPicker({ value, onChange }) {
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  chipSelected: { backgroundColor: '#4A7BB5', borderColor: '#4A7BB5' },
-  chipText: { fontSize: SIZES.bodySmall, color: '#1E3A5F', textAlign: 'center' },
+  chipSelected: { backgroundColor: COLORS.blue, borderColor: COLORS.blue },
+  chipText: { fontSize: SIZES.bodySmall, color: COLORS.navy, textAlign: 'center' },
   chipTextSelected: { color: '#FFFFFF' },
 });

@@ -40,6 +40,8 @@ const KEYS = {
   USER_NAME:            'user_name',
   RESEARCH_CODE:        'research_code',
   AGE_BAND:             'age_band',
+  LAST_EXPORT_AT:       'last_export_at',
+  DATA_SAFETY_DISMISSALS: 'data_safety_dismissals',
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
   MEDICATION_PRESETS:   'medication_presets',
@@ -145,6 +147,54 @@ export const loadAgeBand = async () => {
   }
 };
 
+// ─── Backup reminders ──────────────────────────────────────────────────────────────────────────────────
+/**
+ * The Home tab reminds participants to install the PWA (web only) and to export
+ * a backup. These helpers remember when the last export happened and when each
+ * reminder was last dismissed, so the reminders stay occasional.
+ * See utils/dataSafety.js for the rules.
+ */
+export const recordExport = async (now = Date.now()) => {
+  try {
+    await AsyncStorage.setItem(KEYS.LAST_EXPORT_AT, String(now));
+  } catch (e) {
+    console.warn('[storage] recordExport failed:', e.message);
+  }
+};
+
+/** Timestamp (ms) of the last successful export, or null if none. */
+export const loadLastExportAt = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.LAST_EXPORT_AT);
+    const value = Number(raw);
+    return raw && Number.isFinite(value) ? value : null;
+  } catch (e) {
+    console.warn('[storage] loadLastExportAt failed:', e.message);
+    return null;
+  }
+};
+
+/** { install?: ms, backup?: ms } — when each reminder was last dismissed. */
+export const loadDismissals = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.DATA_SAFETY_DISMISSALS);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (e) {
+    console.warn('[storage] loadDismissals failed:', e.message);
+    return {};
+  }
+};
+
+export const dismissReminder = async (kind, now = Date.now()) => {
+  try {
+    const current = await loadDismissals();
+    await AsyncStorage.setItem(KEYS.DATA_SAFETY_DISMISSALS, JSON.stringify({ ...current, [kind]: now }));
+  } catch (e) {
+    console.warn('[storage] dismissReminder failed:', e.message);
+  }
+};
+
 // ─── Entries ──────────────────────────────────────────────────────────────────
 export const loadEntries = async () => {
   try {
@@ -202,7 +252,7 @@ export const clearAll = async () => {
     // Also remove any stored questionnaire results
     const allKeys = await AsyncStorage.getAllKeys();
     const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.LAST_EXPORT_AT, KEYS.DATA_SAFETY_DISMISSALS, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
   } catch (e) {
     console.warn('[storage] clearAll failed:', e.message);
     throw e;

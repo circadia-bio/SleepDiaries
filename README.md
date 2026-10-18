@@ -46,6 +46,7 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics with colour-coded reference bands
 - 🔭 **Sleep pattern actogram** — weekly chart of bedtime to out-of-bed time with night-waking markers and a sleep-midpoint trend line, so drifting schedules and missed days are visible at a glance
 - 🎯 **Age-aware reference ranges** — optional age group (under 18, 18–64, 65+) chosen at onboarding or in the Profile adjusts the green/amber/red bands for sleep duration, latency and WASO; stored on the device only
+- 🛟 **Data-safety reminders** — entries live on the device, so the Home tab nudges participants to install the PWA (web) and to export a backup; the browser is also asked to keep storage persistent
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
 - 🖼️ **Share card** — share a branded sleep report image to social media from the final report screen, with the original home screen background; works on iOS, Android, and mobile web (PWA)
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
@@ -93,6 +94,7 @@ SleepDiaries/
 │   ├── ActogramChart.jsx       # Weekly sleep pattern chart for the final report (react-native-svg)
 │   ├── AgeBandPicker.jsx       # Optional age group selector (onboarding + Profile)
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
+│   ├── DataSafetyBanner.jsx    # Install / back-up reminder on the Home tab
 │   ├── EntryCardContent.jsx    # Morning / evening entry cards (all languages, no PNGs)
 │   ├── EntryCompleteSplash.jsx # "Entry complete" screen shown after saving
 │   ├── NavButtons.jsx          # Questionnaire Back / Next buttons
@@ -115,11 +117,13 @@ SleepDiaries/
 ├── utils/
 │   ├── alert.js                # Cross-platform Alert helper (web fallback)
 │   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
+│   ├── dataSafety.js           # Persistent-storage request and install / back-up reminder rules
 │   ├── dateEntry.js            # Entry-date logic for post-midnight entries and the evening gate
 │   ├── metrics.js              # Final-report metrics (duration, efficiency, SOL, WASO, ...)
 │   ├── referenceRanges.js      # ⭐ Age-banded reference ranges and colour logic for the final report
 │   └── stats.js                # Shared stat helpers (computeStats)
 ├── theme/
+│   ├── colors.js               # ⭐ Central colour palette and morning/evening themes
 │   ├── typography.js           # Font constants (Livvic, Afacad)
 │   └── useInsets.js            # Cross-platform safe area hook
 ├── web/
@@ -133,9 +137,9 @@ SleepDiaries/
 │   └── crop_taskbars.py        # Legacy utility to centre-crop taskbar image assets
 ├── assets/
 │   └── images/                 # Logo, social preview and splash icon; index.js maps them
-├── __tests__/                  # Jest tests (metrics, stats, storage, export, i18n, questionnaires, Swedish)
+├── __tests__/                  # Jest tests (metrics, stats, storage, export, i18n and translation keys, questionnaires, Swedish, reference ranges, data safety)
 ├── .github/workflows/
-│   ├── test.yml                # Runs the Jest suite on every push and pull request
+│   ├── test.yml                # Runs the Jest suite and a web build check on every push and pull request
 │   └── release-pr.yml          # Opens a main → release PR pinned to a version tag
 ├── metro.config.js             # Metro bundler config (SVG support)
 ├── declarations.d.ts           # TypeScript declaration for SVG imports
@@ -485,6 +489,25 @@ Each question is a plain JavaScript object with a `type` field that controls how
 
 ---
 
+## 🎨 Customising Colours
+
+All colours live in `theme/colors.js` (fonts are in `theme/typography.js`):
+
+- `COLORS` — the shared brand palette (navy, blue, orange, light blue, background), the green/amber/red **status colours** used in the final report, and `textMuted`, the grey used for hints and captions
+- `THEME.morning` and `THEME.evening` — the amber and blue looks used by the daily questionnaire, the entry cards and the entry-complete screen. Change a value there and all three follow
+
+```js
+import { COLORS, THEME } from '../theme/colors';
+
+THEME.morning.primary;      // '#E07A20' — questionnaire buttons, text, progress bar
+THEME.evening.entryFrom;    // gradient start of the evening entry card
+COLORS.status.good;         // report green
+```
+
+`textMuted` is `#64748B` (about 4.8:1 on white) so small grey text stays readable; if you change it or the entry-card colours, check the contrast ratio. Some older screens still use hex values inline and can move to these tokens over time.
+
+---
+
 ## 🗺️ Navigation Architecture
 
 The app uses [expo-router](https://expo.github.io/router/) with file-based routing:
@@ -513,6 +536,8 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 // 'user_name'            → participant name string
 // 'research_code'        → optional research study identifier
 // 'age_band'             → optional age group ('under18' | 'adult' | 'older'); device-only, not exported
+// 'last_export_at'       → time of the last successful export (drives the back-up reminder)
+// 'data_safety_dismissals' → when the install / back-up reminders were last dismissed
 // 'entries'              → JSON array of diary entry objects
 // 'seen_instructions'    → 'true' once the instructions modal has been dismissed
 // 'questionnaire_{id}'   → one object per completed one-time questionnaire
@@ -750,7 +775,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Entry cards and completion screen rendered in code — no per-language artwork
 - [x] Release branch workflow — production deploys from `release` through a tag-pinned pull request
 - [x] Age-specific reference ranges — optional age group in onboarding and Profile
-- [ ] Theme customisation guide — document how to change the morning/evening colours (currently set in `app/questionnaire.jsx`, `components/EntryCardContent.jsx` and `components/EntryCompleteSplash.jsx`) and ideally centralise them in `theme/`
+- [x] Central colour theme — morning/evening looks, status colours and muted text in `theme/colors.js`
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
