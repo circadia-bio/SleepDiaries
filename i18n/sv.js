@@ -59,7 +59,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Insomningstid',
-        body: 'Hur lång tid det tog att somna efter att du lagt dig. Att somna inom 30 minuter räknas som friskt (upp till 60 minuter för vuxna över 65 år). Den snabbare delen av det intervallet visas som grön i din rapport.',
+        body: 'Hur lång tid det tog att somna efter att du lagt dig. Upp till 30 minuter räknas som god sömnkvalitet i alla åldrar.',
       },
       waso: {
         title: 'Vaken tid efter insomnandet (WASO)',
@@ -209,9 +209,9 @@ export default {
     thresholdEfficiency: 'Sömneffektivitet',
     thresholdEfficiencyRef: 'Morin, C. M. (1993). Insomnia: Psychological assessment and management. Guilford Press. Minst 85 % betraktas som hälsosamt.',
     thresholdLatency: 'Insomningstid',
-    thresholdLatencyRef: 'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: att somna inom 30 minuter är lämpligt (60 minuter för vuxna från 65 år). Insomningstiden visas som röd bortom den gränsen. Det gröna intervallet (högst 15 minuter, eller högst 30 minuter för vuxna från 65 år) är appens egen strängare riktlinje.',
+    thresholdLatencyRef: 'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. Expertpanelen bedömde att somna inom 30 minuter som god sömnkvalitet i alla åldrar, och mer än 45 minuter (mer än 60 minuter för vuxna från 65 år) som dålig. Värden däremellan är osäkra och visas som gula.',
     thresholdWaso: 'Vaken tid efter insomnandet',
-    thresholdWasoRef: 'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: att vara vaken högst 20 minuter efter insomnandet är lämpligt (30 minuter för vuxna från 65 år). Det gula intervallet sträcker sig 10 minuter bortom den gränsen (15 minuter för vuxna från 65 år) innan det blir rött.',
+    thresholdWasoRef: 'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. Panelen bedömde att vara vaken högst 20 minuter efter insomnandet som god sömnkvalitet i alla åldrar, och 41 minuter eller mer som dålig för vuxna (51 minuter eller mer för tonåringar). För vuxna från 65 år angav panelen ingen gräns för dålig sömn, så längre tider visas som gula.',
     thresholdAlcohol: 'Alkoholkonsumtion',
     thresholdAlcoholRef: 'UK Chief Medical Officers’ Low Risk Drinking Guidelines (2016). Högst 14 brittiska alkoholenheter per vecka. Appens gräns på högst 2 glas per natt är inte en likvärdig omräkning: dagbokens glas och brittiska alkoholenheter är olika mått.',
     questionnairesNote: 'Följande validerade instrument används i appen. Se till att du har de tillstånd som krävs innan du använder dem i forskning eller klinisk verksamhet.',

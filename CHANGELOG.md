@@ -22,12 +22,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Entry cards and completion screen are drawn in code** for every language, replacing the locale-specific PNG artwork. Text now scales with Bigger Text, and a new language only needs strings. Title and pill colours were darkened slightly to improve contrast
 - **Final report summary card** redesigned: participant identity, a localised date range and three count tiles that use the full width
-- **Latency and WASO references** now cite the National Sleep Foundation sleep-quality consensus (Ohayon et al., 2017, *Sleep Health*) and explain how the app’s colour bands relate to it
+- **Latency and WASO colour bands now follow the NSF sleep-quality consensus** (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19). For adults, sleep onset latency is green up to 30 min (previously 15), amber 31–45 min and red above 45 min (previously red above 30), and WASO is amber at 21–40 min and red from 41 min (previously red above 30). Teenage and 65+ ranges follow the paper’s age groups; the paper gives no “poor” level of WASO for 65+, so that band is amber and never red
 - **Decimal separators** in the final report follow the device language in every locale (e.g. “7,5” in Portuguese and Swedish)
 - **Portuguese (Brazil)**: reminder notifications, report sharing, import error messages and the completion screen are now translated
 - **Readable grey text**: hints, captions and reference texts use a darker grey (`#64748B`, about 4.8:1 on white instead of 2.6:1), and input placeholders were darkened to match
 - **Central colour theme**: the morning/evening looks, report status colours and muted-text grey now live in `theme/colors.js`
-- **Sleep-metric glossary** now matches the age-specific ranges (teenagers 8–10 h, adults 7–9 h, 65+ 7–8 h; latency up to 30 min, 60 min for 65+)
+- **Sleep-metric glossary** now matches the age-specific ranges (teenagers 8–10 h, adults 7–9 h, 65+ 7–8 h; latency up to 30 min at any age)
 
 ### Fixed
 

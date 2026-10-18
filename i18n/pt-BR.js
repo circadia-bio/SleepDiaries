@@ -67,7 +67,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Latência do Início do Sono',
-        body:  'Quanto tempo você levou para adormecer depois de deitar. Adormecer em até 30 minutos é considerado saudável (até 60 minutos para adultos acima de 65 anos); a parte mais rápida desse intervalo aparece em verde no seu relatório.',
+        body:  'Quanto tempo você levou para adormecer depois de deitar. Até 30 minutos é considerado boa qualidade de sono em qualquer idade.',
       },
       waso: {
         title: 'Vigília Após o Início do Sono (WASO)',
@@ -226,9 +226,9 @@ export default {
     thresholdEfficiency:     'Eficiência do Sono',
     thresholdEfficiencyRef:  'Morin, C. M. (1993). Insomnia: Psychological assessment and management. Guilford Press. ≥85% considerado saudável.',
     thresholdLatency:        'Latência do Início do Sono',
-    thresholdLatencyRef:     'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: adormecer em até 30 minutos é adequado (60 minutos para adultos a partir de 65 anos). A latência aparece em vermelho além desse limite. A faixa verde (até 15 minutos, ou até 30 para adultos a partir de 65 anos) é uma referência mais rigorosa do próprio aplicativo.',
+    thresholdLatencyRef:     'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. O painel de especialistas considerou adormecer em até 30 minutos como boa qualidade de sono em qualquer idade, e mais de 45 minutos (mais de 60 minutos para adultos a partir de 65 anos) como má qualidade. Os valores intermediários são incertos e aparecem em âmbar.',
     thresholdWaso:           'Vigília Após o Início do Sono',
-    thresholdWasoRef:        'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: ficar acordado(a) por até 20 minutos após adormecer é adequado (30 minutos para adultos a partir de 65 anos). A faixa âmbar se estende 10 minutos além desse limite (15 para adultos a partir de 65 anos) antes de ficar vermelha.',
+    thresholdWasoRef:        'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. O painel considerou ficar acordado(a) por até 20 minutos após adormecer como boa qualidade de sono em qualquer idade, e 41 minutos ou mais como má qualidade para adultos (51 minutos ou mais para adolescentes). Para adultos a partir de 65 anos o painel não definiu um limite de má qualidade, então tempos maiores aparecem em âmbar.',
     thresholdAlcohol:        'Consumo de Álcool',
     thresholdAlcoholRef:     'Diretrizes de Baixo Risco para Consumo de Álcool dos Chief Medical Officers do Reino Unido (2016). No máximo 14 unidades por semana, equivalente a ≤2 doses por noite em média.',
     questionnairesNote:    'Os seguintes instrumentos validados são utilizados neste aplicativo. Certifique-se de que possui as permissões adequadas antes de usá-los em pesquisa ou prática clínica.',

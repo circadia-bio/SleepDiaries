@@ -67,7 +67,7 @@ export default {
       },
       sleepOnsetLatency: {
         title: 'Sleep Onset Latency',
-        body:  'How long it took you to fall asleep after getting into bed. Falling asleep within 30 minutes is considered healthy (up to 60 minutes for adults over 65); the faster end of that range is shown in green in your report.',
+        body:  'How long it took you to fall asleep after getting into bed. Up to 30 minutes is considered good sleep quality at any age.',
       },
       waso: {
         title: 'Wake After Sleep Onset (WASO)',
@@ -226,9 +226,9 @@ export default {
     thresholdEfficiency:     'Sleep Efficiency',
     thresholdEfficiencyRef:  'Morin, C. M. (1993). Insomnia: Psychological assessment and management. Guilford Press. ≥85% considered healthy.',
     thresholdLatency:        'Sleep Onset Latency',
-    thresholdLatencyRef:     'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: falling asleep within 30 minutes is appropriate (60 minutes for adults 65 and over). Latency is shown red beyond that limit; the green band (15 minutes or less, or 30 for adults 65 and over) is this app’s own stricter guide.',
+    thresholdLatencyRef:     'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. The expert panel rated falling asleep within 30 minutes as good sleep quality at every age, and more than 45 minutes (more than 60 minutes for adults 65 and over) as poor. Values in between are uncertain and shown amber.',
     thresholdWaso:           'Wake After Sleep Onset',
-    thresholdWasoRef:        'Ohayon et al. (2017). Sleep Health, 3(1), 6–19: being awake for 20 minutes or less after falling asleep is appropriate (30 minutes for adults 65 and over). The amber band extends 10 minutes beyond that limit (15 for adults 65 and over) before it turns red.',
+    thresholdWasoRef:        'Ohayon et al. (2017). Sleep Health, 3(1), 6–19. The panel rated being awake for 20 minutes or less after falling asleep as good sleep quality at every age, and 41 minutes or more as poor for adults (51 minutes or more for teenagers). It gave no “poor” cut-off for adults 65 and over, so longer times are shown amber.',
     thresholdAlcohol:        'Alcohol Intake',
     thresholdAlcoholRef:     'UK Chief Medical Officers’ Low Risk Drinking Guidelines (2016). No more than 14 units per week, equating to ≤2 drinks per night on average.',
     questionnairesNote:    'The following validated instruments are used in this app. Please ensure you have the appropriate permissions before using them in research or clinical practice.',

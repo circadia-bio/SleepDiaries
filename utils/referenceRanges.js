@@ -7,36 +7,42 @@
  *
  * Age bands (the participant picks one, optionally, in onboarding or Profile;
  * when none is set the 'adult' band is used):
- *   under18 — teenagers and younger
+ *   under18 — teenagers (the paper's "teenager", 14–17)
  *   adult   — 18–64
  *   older   — 65 and over
  *
- * All durations are in minutes. Each metric has a green band and a wider amber
- * band; anything outside the amber band is shown red.
+ * All durations are in minutes. Green = within the recommended / "good sleep
+ * quality" range, amber = uncertain or "may be appropriate", red = rated poor
+ * or not recommended.
  *
  * Sources
  *   Duration    National Sleep Foundation, Hirshkowitz et al. (2015), Sleep
- *               Health 1(1), 40–43. Recommended range = green; "may be
- *               appropriate" range = amber.
- *                 teenagers 8–10 h (amber 7–11), adults 7–9 h (amber 6–10),
- *                 older adults 7–8 h (amber 5–9).
- *               NB: the teen range is for ~13–17. Children aged 6–12 need
- *               9–12 h (AASM/SRS consensus), so if the app is ever used with
- *               younger children, add a band rather than stretching this one.
- *   Latency /   National Sleep Foundation sleep quality recommendations,
- *   WASO        Ohayon et al. (2017), Sleep Health 3(1), 6–19. "Appropriate":
- *                 latency ≤30 min (≤60 min for 65+), WASO ≤20 min (≤30 min for 65+)
- *               and the same for children and teenagers as for adults.
- *               How this app maps those onto colours:
- *                 latency  red beyond the NSF limit; green is the app's own
- *                          stricter half (≤15 min, ≤30 min for 65+).
- *                 WASO     green up to the NSF limit; amber extends 10 min
- *                          further (15 min for 65+) before turning red.
- *               TODO(review): the 65+ amber ceiling for WASO (45 min) and the
- *               65+ latency green cut-off (30 min) follow the same proportions
- *               as the adult band; they are not taken from a published table.
- *   Efficiency  ≥85% green, 75–85% amber, in every age band (Morin, 1993; the
- *               NSF report also uses 85%). Not age-adjusted.
+ *               Health 1(1), 40–43. Recommended = green; "may be appropriate"
+ *               = amber; anything else = red.
+ *                 teenagers  8–10 h   (may be appropriate 7–8 h, 10–11 h)
+ *                 adults     7–9 h    (may be appropriate 6–7 h, 9–10 h)
+ *                 65 and over 7–8 h   (may be appropriate 5–7 h, 8–9 h)
+ *               The teen range is for 14–17. Younger children need more sleep
+ *               (school-aged 9–11 h), so add a band if the app is ever used
+ *               with them rather than stretching this one.
+ *   Latency,    National Sleep Foundation sleep quality consensus, Ohayon et
+ *   WASO,       al. (2017), Sleep Health 3(1), 6–19 (RAND/UCLA method: each
+ *   efficiency  value is rated appropriate, uncertain or inappropriate).
+ *               We colour appropriate = green, uncertain = amber, poor = red.
+ *                 Latency     good ≤30 min at every age (the panel rated both
+ *                             0–15 and 16–30 min as good). Poor: >45 min for
+ *                             everyone except adults 65+, for whom only >60 min
+ *                             is poor (31–60 min is uncertain).
+ *                 WASO        good ≤20 min at every age. Poor: ≥41 min for
+ *                             adults, ≥51 min for teenagers. The panel gave no
+ *                             "poor" cut-off for adults 65+, so for them
+ *                             anything above 20 min is amber and never red.
+ *                 Efficiency  good ≥85% at every age; poor ≤74% (≤64% for
+ *                             young adults 18–25, which we do not model
+ *                             separately). Not age-adjusted here.
+ *   The paper's categories map onto our bands as: teenager → under18,
+ *   adult (26–64) → adult (young adults 18–25 differ only in efficiency),
+ *   older adult → older.
  */
 
 import { COLORS } from '../theme/colors';
@@ -51,23 +57,26 @@ const NEUTRAL = COLORS.status.neutral;
 
 const EFFICIENCY = { greenMin: 85, amberMin: 75 };
 
+// latency / waso: greenMax and amberMax are the highest values (minutes) that
+// are still green / amber. amberMax: null means "no red" (open-ended amber).
+// barMax is the right-hand end of the scale bar in the report.
 export const REFERENCE_RANGES = {
   under18: {
     duration:   { greenMin: 480, greenMax: 600, amberMin: 420, amberMax: 660 },
-    latency:    { greenMax: 15, amberMax: 30 },
-    waso:       { greenMax: 20, amberMax: 30 },
+    latency:    { greenMax: 30, amberMax: 45, barMax: 90 },
+    waso:       { greenMax: 20, amberMax: 50, barMax: 100 },
     efficiency: EFFICIENCY,
   },
   adult: {
     duration:   { greenMin: 420, greenMax: 540, amberMin: 360, amberMax: 600 },
-    latency:    { greenMax: 15, amberMax: 30 },
-    waso:       { greenMax: 20, amberMax: 30 },
+    latency:    { greenMax: 30, amberMax: 45, barMax: 90 },
+    waso:       { greenMax: 20, amberMax: 40, barMax: 80 },
     efficiency: EFFICIENCY,
   },
   older: {
     duration:   { greenMin: 420, greenMax: 480, amberMin: 300, amberMax: 540 },
-    latency:    { greenMax: 30, amberMax: 60 },
-    waso:       { greenMax: 30, amberMax: 45 },
+    latency:    { greenMax: 30, amberMax: 60, barMax: 120 },
+    waso:       { greenMax: 20, amberMax: null, barMax: 80 },
     efficiency: EFFICIENCY,
   },
 };
@@ -92,19 +101,15 @@ export const durationColor = (mins, ranges) => {
   return RED;
 };
 
-export const latencyColor = (mins, ranges) => {
+const minutesColor = (mins, { greenMax, amberMax }) => {
   if (mins === null || mins === undefined) return NEUTRAL;
-  if (mins <= ranges.latency.greenMax) return GREEN;
-  if (mins <= ranges.latency.amberMax) return AMBER;
+  if (mins <= greenMax) return GREEN;
+  if (amberMax === null || amberMax === undefined || mins <= amberMax) return AMBER;
   return RED;
 };
 
-export const wasoColor = (mins, ranges) => {
-  if (mins === null || mins === undefined) return NEUTRAL;
-  if (mins <= ranges.waso.greenMax) return GREEN;
-  if (mins <= ranges.waso.amberMax) return AMBER;
-  return RED;
-};
+export const latencyColor = (mins, ranges) => minutesColor(mins, ranges.latency);
+export const wasoColor = (mins, ranges) => minutesColor(mins, ranges.waso);
 
 // ─── Scale bars ───────────────────────────────────────────────────────────────
 // Each builder returns the props for the BandBar component in final-report.jsx:
@@ -130,18 +135,21 @@ export const durationBar = (value, ranges) => {
   };
 };
 
-// Latency and WASO share one shape: green, then amber, then red out to twice the amber limit.
-const minutesBar = (value, { greenMax, amberMax }) => {
-  const max = amberMax * 2;
-  const pct = (m) => (m / max) * 100;
+// Latency and WASO share one shape: green, then amber, then (when the paper
+// defines a "poor" level) red out to the end of the bar.
+const minutesBar = (value, { greenMax, amberMax, barMax }) => {
+  const pct = (m) => (m / barMax) * 100;
+  const hasRed = amberMax !== null && amberMax !== undefined;
+  const amberEnd = hasRed ? amberMax : barMax;
+  const segments = [
+    { width: pct(greenMax), color: GREEN },
+    { width: pct(amberEnd - greenMax), color: AMBER },
+  ];
+  if (hasRed) segments.push({ width: 100 - pct(amberMax), color: RED });
   return {
-    segments: [
-      { width: pct(greenMax), color: GREEN },
-      { width: pct(amberMax - greenMax), color: AMBER },
-      { width: 100 - pct(amberMax), color: RED },
-    ],
-    marker: clampPct(value, max),
-    ticks: [greenMax, amberMax].map((m) => ({ pct: pct(m), label: `${m}m` })),
+    segments,
+    marker: clampPct(value, barMax),
+    ticks: (hasRed ? [greenMax, amberMax] : [greenMax]).map((m) => ({ pct: pct(m), label: `${m}m` })),
     endLabels: ['0m', ''],
   };
 };
@@ -160,6 +168,16 @@ export const rangeRows = (ranges, units) => {
   const d = ranges.duration;
   const hrs = ` ${units.hours}`;
   const min = ` ${units.minutes}`;
+
+  const minutesRow = (key, r) => ({
+    key,
+    good: `≤${r.greenMax}${min}`,
+    borderline:
+      r.amberMax === null || r.amberMax === undefined
+        ? `>${r.greenMax}${min}`
+        : `${r.greenMax + 1}–${r.amberMax}${min}`,
+  });
+
   return [
     {
       key: 'duration',
@@ -171,15 +189,7 @@ export const rangeRows = (ranges, units) => {
       good: `≥${ranges.efficiency.greenMin}%`,
       borderline: `${ranges.efficiency.amberMin}–${ranges.efficiency.greenMin}%`,
     },
-    {
-      key: 'latency',
-      good: `≤${ranges.latency.greenMax}${min}`,
-      borderline: `${ranges.latency.greenMax}–${ranges.latency.amberMax}${min}`,
-    },
-    {
-      key: 'waso',
-      good: `≤${ranges.waso.greenMax}${min}`,
-      borderline: `${ranges.waso.greenMax}–${ranges.waso.amberMax}${min}`,
-    },
+    minutesRow('latency', ranges.latency),
+    minutesRow('waso', ranges.waso),
   ];
 };

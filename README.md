@@ -603,11 +603,11 @@ The colour bands on the final report depend on an optional **age group** (under 
 |--------|----------|-------|-----------|
 | Sleep duration — green | 8–10 h | 7–9 h | 7–8 h |
 | Sleep duration — amber | 7–8 h, 10–11 h | 6–7 h, 9–10 h | 5–7 h, 8–9 h |
-| Sleep onset latency | green ≤15 min, amber ≤30 | green ≤15 min, amber ≤30 | green ≤30 min, amber ≤60 |
-| Wake after sleep onset | green ≤20 min, amber ≤30 | green ≤20 min, amber ≤30 | green ≤30 min, amber ≤45 |
-| Sleep efficiency | green ≥85%, amber 75–85% in every age group | | |
+| Sleep onset latency | green ≤30 min, amber 31–45, red >45 | green ≤30 min, amber 31–45, red >45 | green ≤30 min, amber 31–60, red >60 |
+| Wake after sleep onset | green ≤20 min, amber 21–50, red ≥51 | green ≤20 min, amber 21–40, red ≥41 | green ≤20 min, amber >20 (no red) |
+| Sleep efficiency | green ≥85%, amber 75–85%, red <75% in every age group | | |
 
-Anything outside the amber band is shown red. The duration ranges come from the National Sleep Foundation recommendations (Hirshkowitz et al., 2015); the latency and WASO limits follow the NSF sleep-quality consensus (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19). The green latency band (≤15 min) is this app's own stricter guide, and the 65+ WASO ceiling and latency green cut-off follow the adult band's proportions rather than a published table. The under-18 band is based on the teenage range (about 13–17); younger children need more sleep, so add a band if the app is ever used with them.
+Duration is red outside the amber band. For latency, WASO and efficiency the colours follow the NSF Sleep Quality Consensus Panel (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19), which rated each value for each age group as appropriate, uncertain or inappropriate: green = appropriate (good sleep quality), amber = uncertain, red = rated poor. The panel rated sleep latency up to 30 minutes as good at every age. It gave no “poor” level of WASO for adults 65 and over, so their WASO band is amber above 20 minutes and never red. Efficiency uses ≥85% as good and ≤74% as poor for every group (the paper uses ≤64% for 18–25-year-olds, which the app does not model separately). Duration ranges come from the NSF duration recommendations (Hirshkowitz et al., 2015). The under-18 band uses the teenage (14–17) values; younger children need more sleep, so add a band if the app is ever used with them.
 
 All of the numbers, the colour logic and the scale-bar geometry live in `utils/referenceRanges.js`, so changing a threshold is a one-file edit. The same ranges drive the metric cards, the share card and **Settings → Sleep metric thresholds**.
 
