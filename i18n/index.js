@@ -18,15 +18,19 @@
  *   t('home.entriesNeeded', { count: 1 }) // "1 more entry needed"
  *   t('home.entriesNeeded', { count: 3 }) // "3 more entries needed"
  *
- * Supported locales: en (default), pt-BR
+ * Supported locales: en (default), pt-BR, sv (including sv-SE and sv-FI)
  */
 
 import { getLocales } from 'expo-localization';
 import en   from './en';
 import ptBR from './pt-BR';
+import sv from './sv';
 
 const TRANSLATIONS = {
   en,
+  sv,
+  'sv-SE': sv,
+  'sv-FI': sv,
   'pt-BR': ptBR,
   pt:      ptBR,  // also map bare 'pt' → pt-BR
 };
@@ -83,5 +87,7 @@ function t(key, options = {}) {
   );
 }
 
-export { t, locale, strings };
+const isSwedish = locale === 'sv' || locale.startsWith('sv-');
+
+export { t, locale, strings, isSwedish };
 export default t;

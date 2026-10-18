@@ -7,6 +7,7 @@
  * Stored keys:
  *   user_name               — participant's name string
  *   research_code           — optional research code string
+ *   age_band                — optional age group ('under18' | 'adult' | 'older'); device-only, never exported
  *   entries                 — JSON array of diary entry objects
  *   seen_instructions       — 'true' once the instructions modal has been dismissed
  *   questionnaire_{id}      — one object per completed one-time questionnaire
@@ -30,12 +31,17 @@
  *
  * Also exports CSV and JSON export helpers used by the export screen.
  */
+import t from '../i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isValidAgeBand } from '../utils/referenceRanges';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const KEYS = {
   USER_NAME:            'user_name',
   RESEARCH_CODE:        'research_code',
+  AGE_BAND:             'age_band',
+  LAST_EXPORT_AT:       'last_export_at',
+  DATA_SAFETY_DISMISSALS: 'data_safety_dismissals',
   ENTRIES:              'entries',
   SEEN_INSTRUCTIONS:    'seen_instructions',
   MEDICATION_PRESETS:   'medication_presets',
@@ -111,6 +117,84 @@ export const loadResearchCode = async () => {
   }
 };
 
+// ─── Age band ──────────────────────────────────────────────────────────────────────────────────
+/**
+ * Optional age group used only to choose the reference ranges in the final
+ * report. Stored on the device; deliberately not part of the CSV/JSON export.
+ * Passing null/undefined/an unknown value clears it (back to the adult default).
+ */
+export const saveAgeBand = async (band) => {
+  try {
+    if (isValidAgeBand(band)) {
+      await AsyncStorage.setItem(KEYS.AGE_BAND, band);
+    } else {
+      await AsyncStorage.removeItem(KEYS.AGE_BAND);
+    }
+  } catch (e) {
+    console.warn('[storage] saveAgeBand failed:', e.message);
+    throw e;
+  }
+};
+
+/** Returns 'under18' | 'adult' | 'older', or null when the participant hasn't chosen one. */
+export const loadAgeBand = async () => {
+  try {
+    const value = await AsyncStorage.getItem(KEYS.AGE_BAND);
+    return isValidAgeBand(value) ? value : null;
+  } catch (e) {
+    console.warn('[storage] loadAgeBand failed:', e.message);
+    return null;
+  }
+};
+
+// ─── Backup reminders ──────────────────────────────────────────────────────────────────────────────────
+/**
+ * The Home tab reminds participants to install the PWA (web only) and to export
+ * a backup. These helpers remember when the last export happened and when each
+ * reminder was last dismissed, so the reminders stay occasional.
+ * See utils/dataSafety.js for the rules.
+ */
+export const recordExport = async (now = Date.now()) => {
+  try {
+    await AsyncStorage.setItem(KEYS.LAST_EXPORT_AT, String(now));
+  } catch (e) {
+    console.warn('[storage] recordExport failed:', e.message);
+  }
+};
+
+/** Timestamp (ms) of the last successful export, or null if none. */
+export const loadLastExportAt = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.LAST_EXPORT_AT);
+    const value = Number(raw);
+    return raw && Number.isFinite(value) ? value : null;
+  } catch (e) {
+    console.warn('[storage] loadLastExportAt failed:', e.message);
+    return null;
+  }
+};
+
+/** { install?: ms, backup?: ms } — when each reminder was last dismissed. */
+export const loadDismissals = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.DATA_SAFETY_DISMISSALS);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (e) {
+    console.warn('[storage] loadDismissals failed:', e.message);
+    return {};
+  }
+};
+
+export const dismissReminder = async (kind, now = Date.now()) => {
+  try {
+    const current = await loadDismissals();
+    await AsyncStorage.setItem(KEYS.DATA_SAFETY_DISMISSALS, JSON.stringify({ ...current, [kind]: now }));
+  } catch (e) {
+    console.warn('[storage] dismissReminder failed:', e.message);
+  }
+};
+
 // ─── Entries ──────────────────────────────────────────────────────────────────
 export const loadEntries = async () => {
   try {
@@ -168,7 +252,7 @@ export const clearAll = async () => {
     // Also remove any stored questionnaire results
     const allKeys = await AsyncStorage.getAllKeys();
     const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.LAST_EXPORT_AT, KEYS.DATA_SAFETY_DISMISSALS, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
   } catch (e) {
     console.warn('[storage] clearAll failed:', e.message);
     throw e;
@@ -364,15 +448,15 @@ export const exportToCSV = async (userName) => {
  * Returns an array of valid diary entries, or throws if the file is unrecognised.
  */
 const validateImport = (parsed) => {
-  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file format.');
+  if (!parsed || typeof parsed !== 'object') throw new Error(t('appText.invalidImportFormat'));
   const entries = Array.isArray(parsed) ? parsed : parsed.entries;
-  if (!Array.isArray(entries)) throw new Error('No entries array found in file.');
+  if (!Array.isArray(entries)) throw new Error(t('appText.missingImportEntries'));
   const valid = entries.filter(
     (e) => e && e.id && e.type && e.date && e.answers
   );
   // Only throw if entries were supplied but every one failed validation.
   // An empty entries array is allowed (e.g. questionnaire-only import).
-  if (entries.length > 0 && valid.length === 0) throw new Error('No valid entries found in file.');
+  if (entries.length > 0 && valid.length === 0) throw new Error(t('appText.invalidImportEntries'));
   return valid;
 };
 

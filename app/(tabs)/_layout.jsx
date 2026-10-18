@@ -18,7 +18,7 @@ const TABS = [
 ];
 
 const ACTIVE_COLOR   = '#E07A20';
-const INACTIVE_COLOR = '#94A3B8';
+const INACTIVE_COLOR = '#64748B';
 
 function CustomTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
@@ -66,9 +66,9 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen name="home"     options={{ title: 'Home' }} />
-      <Tabs.Screen name="entry"    options={{ title: 'Entry' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
+      <Tabs.Screen name="home"     options={{ title: t('tabs.home') }} />
+      <Tabs.Screen name="entry"    options={{ title: t('tabs.entry') }} />
+      <Tabs.Screen name="settings" options={{ title: t('tabs.settings') }} />
     </Tabs>
   );
 }

@@ -1,5 +1,36 @@
 #!/bin/bash
 set -e
+
+# ── Release guard ────────────────────────────────────────────────────────────
+# Production is only deployed from the `release` branch so that unreleased work
+# on `main` can never reach users by accident.
+# Override (e.g. for a hotfix preview): FORCE_DEPLOY=1 ./scripts/deploy.sh
+REQUIRED_BRANCH="release"
+if [ "$NETLIFY" = "true" ]; then
+  # Netlify uses a detached checkout, so use its env vars instead of git.
+  # Previews and branch deploys are allowed (that's their purpose); only a
+  # *production* build must come from the release branch.
+  if [ "$CONTEXT" = "production" ] && [ "$BRANCH" != "$REQUIRED_BRANCH" ] && [ "$FORCE_DEPLOY" != "1" ]; then
+    echo "❌ Production build from '$BRANCH'. Set Netlify's production branch to '$REQUIRED_BRANCH'."
+    exit 1
+  fi
+  echo "✅ Netlify build: context=$CONTEXT branch=$BRANCH"
+else
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$CURRENT_BRANCH" != "$REQUIRED_BRANCH" ] && [ "$FORCE_DEPLOY" != "1" ]; then
+    echo "❌ Refusing to deploy from '$CURRENT_BRANCH'. Production deploys come from '$REQUIRED_BRANCH'."
+    echo "   Run: git checkout $REQUIRED_BRANCH && git pull"
+    echo "   (or set FORCE_DEPLOY=1 to override)"
+    exit 1
+  fi
+  # Ignores untracked files and the generated docs/ folder (rebuilt on every deploy)
+  if [ -n "$(git status --porcelain --untracked-files=no -- . ':!docs')" ] && [ "$FORCE_DEPLOY" != "1" ]; then
+    echo "❌ Tracked files have uncommitted changes. Commit or stash them before deploying."
+    exit 1
+  fi
+  echo "✅ Deploying from branch '$CURRENT_BRANCH'"
+fi
+
 npx expo export -p web --output-dir docs --clear
 touch docs/.nojekyll
 cp docs/index.html docs/404.html

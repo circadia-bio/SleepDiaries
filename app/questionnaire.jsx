@@ -19,7 +19,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, Pressable, StyleSheet,
   ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, Image, Alert,
+  Platform, Alert,
 } from 'react-native';
 import ScreenBackground from '../components/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,30 +30,8 @@ import { saveEntry, loadMedicationPresets } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import t from '../i18n';
 import { BackButton, NextButton } from '../components/NavButtons';
-import IMAGES from '../assets/images';
-
-const THEME = {
-  morning: {
-    primary:      '#E07A20',
-    primaryLight: '#F5C96A',
-    progressBg:   '#F5DEB3',
-    background:   'transparent',
-    cardBg:       '#FFF8EE',
-    progressFill: '#E07A20',
-    progressTrackBg: '#FFFFFF',
-    progressTrackBorder: '#F5C96A',
-  },
-  evening: {
-    primary:      '#2A6CB5',
-    primaryLight: '#7EB0E0',
-    progressBg:   '#C8DFF5',
-    background:   'transparent',
-    cardBg:       '#EEF5FF',
-    progressFill: '#4A9FE0',
-    progressTrackBg: '#FFFFFF',
-    progressTrackBorder: '#A8D0F0',
-  },
-};
+import EntryCompleteSplash from '../components/EntryCompleteSplash';
+import { THEME } from '../theme/colors';
 
 const pad = (n) => String(n).padStart(2, '0');
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
@@ -154,7 +132,7 @@ const TimeInput = ({ value, onChange, theme }) => {
           </Pressable>
         </View>
       </View>
-      <Text style={[styles.stepHint, { color: c.primary }]}>hold for ±1 min</Text>
+      <Text style={[styles.stepHint, { color: c.primary }]}>{t('appText.holdMinute')}</Text>
     </View>
   );
 };
@@ -471,18 +449,15 @@ export default function QuestionnaireScreen() {
   };
 
   if (done) {
-    const isMorning = entryType === 'morning';
     return (
       <TouchableOpacity
         style={styles.splashContainer}
         activeOpacity={1}
         onPress={() => router.replace('/(tabs)/home')}
+        accessibilityRole="button"
+        accessibilityLabel={t('appText.homepage')}
       >
-        <Image
-          source={isMorning ? IMAGES.splashEndMorning : IMAGES.splashEndNight}
-          style={styles.splashImage}
-          resizeMode="cover"
-        />
+        <EntryCompleteSplash type={entryType === 'morning' ? 'morning' : 'evening'} />
       </TouchableOpacity>
     );
   }
@@ -635,6 +610,5 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  splashContainer: { flex: 1, backgroundColor: '#C8DFF5' },
-  splashImage:     { width: '100%', height: '100%' },
+  splashContainer: { flex: 1, backgroundColor: '#FFFDF7' },
 });

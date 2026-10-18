@@ -5,7 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loadName, saveName, loadResearchCode, saveResearchCode, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
+import { loadName, saveName, loadResearchCode, saveResearchCode, loadAgeBand, saveAgeBand, loadEntries, loadAllQuestionnaires, loadMedicationPresets } from '../storage/storage';
+import AgeBandPicker from '../components/AgeBandPicker';
 import { useRouter } from 'expo-router';
 import { FONTS, SIZES } from '../theme/typography';
 import showAlert from '../utils/alert';
@@ -41,6 +42,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const [code, setCode]               = useState('');
   const [editingCode, setEditingCode] = useState(false);
   const [draftCode, setDraftCode]     = useState('');
+  const [ageBand, setAgeBand]         = useState(null);
+  const [editingAge, setEditingAge]   = useState(false);
   const [morningCount, setMorningCount] = useState(0);
   const [eveningCount, setEveningCount] = useState(0);
   const [streak, setStreak]             = useState(0);
@@ -50,8 +53,8 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   const router = useRouter();
 
   const load = useCallback(async () => {
-    const [n, c, entries, qResults, meds] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets()]);
-    setName(n ?? ''); setCode(c ?? '');
+    const [n, c, entries, qResults, meds, band] = await Promise.all([loadName(), loadResearchCode(), loadEntries(), loadAllQuestionnaires(), loadMedicationPresets(), loadAgeBand()]);
+    setName(n ?? ''); setCode(c ?? ''); setAgeBand(band);
     const morningCount = entries.filter((e) => e.type === 'morning').length;
     setMorningCount(morningCount);
     setEveningCount(entries.filter((e) => e.type === 'evening').length);
@@ -69,6 +72,9 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
   };
   const handleSaveCode = async () => {
     await saveResearchCode(draftCode.trim()); setCode(draftCode.trim()); setEditingCode(false);
+  };
+  const handleSaveAgeBand = async (band) => {
+    await saveAgeBand(band); setAgeBand(band); setEditingAge(false);
   };
 
   const inner = (
@@ -90,26 +96,44 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
               <View style={styles.editRow}>
                 <TextInput style={[styles.editInput, { fontFamily: FONTS.body }]} value={draftName} onChangeText={setDraftName} autoFocus autoCapitalize="words" autoCorrect={false} returnKeyType="done" onSubmitEditing={handleSaveName} />
                 <TouchableOpacity onPress={handleSaveName} style={styles.editSaveBtn}><Ionicons name="checkmark" size={22} color="#fff" /></TouchableOpacity>
-                <TouchableOpacity onPress={() => setEditingName(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#94A3B8" /></TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingName(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#64748B" /></TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity style={styles.nameRow} onPress={() => { setDraftName(name); setEditingName(true); }}>
                 <Text style={[styles.nameText, { fontFamily: FONTS.heading }]}>{name || t('profile.tapToSetName')}</Text>
-                <Ionicons name="pencil-outline" size={18} color="#94A3B8" style={{ marginLeft: 6 }} />
+                <Ionicons name="pencil-outline" size={18} color="#64748B" style={{ marginLeft: 6 }} />
               </TouchableOpacity>
             )}
 
             {editingCode ? (
               <View style={styles.editRow}>
-                <TextInput style={[styles.editInput, { fontFamily: FONTS.bodyMedium }]} value={draftCode} onChangeText={setDraftCode} autoFocus autoCapitalize="none" autoCorrect={false} placeholder={t('profile.researchCodePlaceholder')} placeholderTextColor="#A0B8D0" returnKeyType="done" onSubmitEditing={handleSaveCode} />
+                <TextInput style={[styles.editInput, { fontFamily: FONTS.bodyMedium }]} value={draftCode} onChangeText={setDraftCode} autoFocus autoCapitalize="none" autoCorrect={false} placeholder={t('profile.researchCodePlaceholder')} placeholderTextColor="#64748B" returnKeyType="done" onSubmitEditing={handleSaveCode} />
                 <TouchableOpacity onPress={handleSaveCode} style={styles.editSaveBtn}><Ionicons name="checkmark" size={22} color="#fff" /></TouchableOpacity>
-                <TouchableOpacity onPress={() => setEditingCode(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#94A3B8" /></TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingCode(false)} style={styles.editCancelBtn}><Ionicons name="close" size={22} color="#64748B" /></TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity style={styles.codeRow} onPress={() => { setDraftCode(code); setEditingCode(true); }}>
-                <Ionicons name="code-slash-outline" size={16} color="#94A3B8" />
+                <Ionicons name="code-slash-outline" size={16} color="#64748B" />
                 <Text style={[styles.codeText, { fontFamily: FONTS.bodyMedium }]}>{code || t('profile.addResearchCode')}</Text>
-                <Ionicons name="pencil-outline" size={15} color="#94A3B8" style={{ marginLeft: 4 }} />
+                <Ionicons name="pencil-outline" size={15} color="#64748B" style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            )}
+
+            {editingAge ? (
+              <View style={styles.ageEdit}>
+                <AgeBandPicker value={ageBand} onChange={handleSaveAgeBand} />
+                <Text style={[styles.ageHint, { fontFamily: FONTS.bodyMedium }]}>{t('ageBand.hint')}</Text>
+                <TouchableOpacity onPress={() => setEditingAge(false)} style={styles.ageDoneBtn} accessibilityRole="button">
+                  <Text style={[styles.ageDoneText, { fontFamily: FONTS.body }]}>{t('common.ok')}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.codeRow} onPress={() => setEditingAge(true)}>
+                <Ionicons name="people-outline" size={16} color="#64748B" />
+                <Text style={[styles.codeText, { fontFamily: FONTS.bodyMedium }]}>
+                  {ageBand ? t('ageBand.current', { band: t(`ageBand.${ageBand}`) }) : t('ageBand.add')}
+                </Text>
+                <Ionicons name="pencil-outline" size={15} color="#64748B" style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             )}
           </View>
@@ -129,31 +153,31 @@ export default function ProfileModal({ visible, onClose, onShowInstructions }) {
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/QuestionnairesScreen'), 400); }}>
               <Ionicons name="clipboard-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profileQuestionnaires.sectionTitle')}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={18} color="#64748B" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/MedicationsScreen'), 400); }}>
               <Ionicons name="medkit-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('medications.title')}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={18} color="#64748B" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(() => router.push('/SleepMetricsScreen'), 400); }}>
               <Ionicons name="bar-chart-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.sectionGlossary')}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={18} color="#64748B" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => { onClose(); setTimeout(onShowInstructions, 400); }}>
               <Ionicons name="book-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.replayInstructions')}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={18} color="#64748B" />
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity style={styles.actionRow} onPress={() => Linking.openURL('https://circadia-lab.uk')}>
               <Ionicons name="globe-outline" size={22} color="#4A7BB5" style={styles.actionIcon} />
               <Text style={[styles.actionLabel, { fontFamily: FONTS.body }]}>{t('profile.website')}</Text>
-              <Ionicons name="open-outline" size={18} color="#94A3B8" />
+              <Ionicons name="open-outline" size={18} color="#64748B" />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -185,7 +209,11 @@ const styles = StyleSheet.create({
   nameRow:       { flexDirection: 'row', alignItems: 'center' },
   nameText:      { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
   codeRow:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  codeText:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  codeText:      { fontSize: SIZES.bodySmall, color: '#64748B' },
+  ageEdit:       { width: '100%', gap: 8 },
+  ageHint:       { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
+  ageDoneBtn:    { alignSelf: 'center', paddingHorizontal: 24, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)' },
+  ageDoneText:   { fontSize: SIZES.bodySmall, color: '#4A7BB5' },
   editRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%' },
   editInput:     { flex: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: SIZES.body, color: '#1E3A5F', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
   editSaveBtn:   { backgroundColor: '#4A7BB5', borderRadius: 12, padding: 12, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
@@ -194,7 +222,7 @@ const styles = StyleSheet.create({
   statsGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statChip:      { flex: 1, minWidth: '45%', aspectRatio: 1, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 4, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   statValue:     { fontSize: SIZES.body, textAlign: 'center', paddingHorizontal: 6 },
-  statLabel:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  statLabel:     { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
   card:          { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   actionRow:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
   actionIcon:    { marginRight: 12 },

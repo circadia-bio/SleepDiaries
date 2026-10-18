@@ -28,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { saveQuestionnaire } from '../storage/storage';
 import { FONTS, SIZES } from '../theme/typography';
-import t from '../i18n';
+import t, { isSwedish } from '../i18n';
 import ScreenBackground from '../components/ScreenBackground';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ const TimeInput = ({ value, onChange }) => {
           </Pressable>
         </View>
       </View>
-      <Text style={[styles.stepHint, { color: C.primary }]}>hold for ±1 min</Text>
+      <Text style={[styles.stepHint, { color: C.primary }]}>{t('appText.holdMinute')}</Text>
     </View>
   );
 };
@@ -305,7 +305,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
     return (
       <View style={styles.resultContainer}>
         <View style={styles.resultCard}>
-          <Ionicons name="time-outline" size={48} color="#94A3B8" />
+          <Ionicons name="time-outline" size={48} color="#64748B" />
           <Text style={styles.resultTitle}>{t('questionnaireModal.allDone')}</Text>
           <Text style={styles.pendingDesc}>
             {t('questionnaireModal.pendingDesc', { shortTitle: questionnaire.shortTitle })}
@@ -343,7 +343,7 @@ const ResultScreen = ({ questionnaire, score, resultsUnlocked, onClose }) => {
   return (
     <View style={styles.resultContainer}>
       <View style={styles.resultCard}>
-        <Text style={styles.resultTitle}>{questionnaire.shortTitle} complete</Text>
+        <Text style={styles.resultTitle}>{t('appText.questionnaireComplete', { title: questionnaire.shortTitle })}</Text>
         <View style={[styles.scoreBadge, { backgroundColor: interpretation.color + '18', borderColor: interpretation.color }]}>
           <Text style={[styles.scoreNumber, { color: interpretation.color }]}>{scoreDisplay}</Text>
           {!!scoreMax && <Text style={[styles.scoreMax, { color: interpretation.color }]}>{scoreMax}</Text>}
@@ -448,6 +448,12 @@ export default function QuestionnaireModal({ visible, questionnaire, onClose, on
             <Ionicons name="close" size={26} color="#1E3A5F" />
           </TouchableOpacity>
         </View>
+
+        {isSwedish && (
+          <View style={styles.betaBanner}>
+            <Text style={styles.betaBannerText}>{t('appText.instrumentLanguage')}</Text>
+          </View>
+        )}
 
         {questionnaire.beta && (
           <View style={styles.betaBanner}>
@@ -627,7 +633,7 @@ const styles = StyleSheet.create({
   },
   scale010BtnText:  { fontSize: 17, fontFamily: FONTS.heading },
   scale010Labels:   { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
-  scale010Anchor:   { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8' },
+  scale010Anchor:   { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#64748B' },
 
   // Yes / No
   yesNoRow: { flexDirection: 'row', gap: 20, marginTop: 8, justifyContent: 'center' },
@@ -682,7 +688,7 @@ const styles = StyleSheet.create({
   scoreMax:       { fontSize: 22, fontFamily: FONTS.bodyMedium },
   interpretLabel: { fontSize: SIZES.sectionTitle, fontFamily: FONTS.heading },
   interpretDesc:  { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
-  referenceText:  { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#94A3B8', textAlign: 'center', lineHeight: 20, marginTop: 4 },
+  referenceText:  { fontSize: 13, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 20, marginTop: 4 },
   pendingDesc:    { fontSize: SIZES.bodySmall, fontFamily: FONTS.bodyMedium, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   doneBtn: {
     backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center',

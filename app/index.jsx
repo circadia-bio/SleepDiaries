@@ -6,7 +6,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingVi
 import ScreenBackground from '../components/ScreenBackground';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { saveName, saveResearchCode } from '../storage/storage';
+import { saveName, saveResearchCode, saveAgeBand } from '../storage/storage';
+import AgeBandPicker from '../components/AgeBandPicker';
 import { FONTS, SIZES } from '../theme/typography';
 import t from '../i18n';
 import IMAGES from '../assets/images';
@@ -16,6 +17,7 @@ export default function LoginScreen() {
   const insets  = useSafeAreaInsets();
   const [name, setName]                 = useState('');
   const [researchCode, setResearchCode] = useState('');
+  const [ageBand, setAgeBand]           = useState(null);
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState('');
 
@@ -24,6 +26,7 @@ export default function LoginScreen() {
     setError(''); setLoading(true);
     await saveName(name.trim());
     if (researchCode.trim()) await saveResearchCode(researchCode.trim());
+    if (ageBand) await saveAgeBand(ageBand);
     setLoading(false);
     router.replace({ pathname: '/(tabs)/home', params: { showInstructions: '1' } });
   };
@@ -39,16 +42,22 @@ export default function LoginScreen() {
           <Text style={[styles.subtitle, { fontFamily: FONTS.bodyMedium }]}>{t('login.subtitle')}</Text>
 
           <View style={styles.inputWrapper}>
-            <TextInput style={[styles.input, { fontFamily: FONTS.bodyMedium }]} placeholder={t('login.namePlaceholder')} placeholderTextColor="#A0B8D0" value={name} onChangeText={setName} autoCapitalize="words" autoCorrect={false} returnKeyType="next" />
+            <TextInput style={[styles.input, { fontFamily: FONTS.bodyMedium }]} placeholder={t('login.namePlaceholder')} placeholderTextColor="#64748B" value={name} onChangeText={setName} autoCapitalize="words" autoCorrect={false} returnKeyType="next" />
           </View>
 
           <View style={styles.inputWrapper}>
-            <TextInput style={[styles.input, styles.inputOptional, { fontFamily: FONTS.bodyMedium }]} placeholder={t('login.codePlaceholder')} placeholderTextColor="#A0B8D0" value={researchCode} onChangeText={setResearchCode} autoCapitalize="none" autoCorrect={false} returnKeyType="go" onSubmitEditing={handleStart} />
+            <TextInput style={[styles.input, styles.inputOptional, { fontFamily: FONTS.bodyMedium }]} placeholder={t('login.codePlaceholder')} placeholderTextColor="#64748B" value={researchCode} onChangeText={setResearchCode} autoCapitalize="none" autoCorrect={false} returnKeyType="go" onSubmitEditing={handleStart} />
             <Text style={[styles.optionalLabel, { fontFamily: FONTS.bodyMedium }]}>{t('login.codeHint')}</Text>
           </View>
 
+          <View style={styles.inputWrapper}>
+            <Text style={[styles.ageLabel, { fontFamily: FONTS.bodyMedium }]}>{t('ageBand.label')}</Text>
+            <AgeBandPicker value={ageBand} onChange={setAgeBand} />
+            <Text style={[styles.optionalLabel, { fontFamily: FONTS.bodyMedium }]}>{t('ageBand.hint')}</Text>
+          </View>
+
           <TouchableOpacity style={[styles.loginBtn, (!name.trim() || loading) && styles.loginBtnDisabled]} onPress={handleStart} activeOpacity={0.85} disabled={!name.trim() || loading}>
-            {loading ? <ActivityIndicator color="#2C5282" /> : <Text style={[styles.loginBtnText, { color: name.trim() ? '#2C5282' : '#94A3B8' }, { fontFamily: FONTS.heading }]}>{t('login.cta')}</Text>}
+            {loading ? <ActivityIndicator color="#2C5282" /> : <Text style={[styles.loginBtnText, { color: name.trim() ? '#2C5282' : '#64748B' }, { fontFamily: FONTS.heading }]}>{t('login.cta')}</Text>}
           </TouchableOpacity>
 
           <Image source={IMAGES.logo} style={styles.logo} resizeMode="contain" />
@@ -77,5 +86,6 @@ const styles = StyleSheet.create({
   loginBtnDisabled: { backgroundColor: 'rgba(255,255,255,0.45)', shadowOpacity: 0 },
   loginBtnText:     { color: '#2C5282', fontSize: SIZES.cardTitle, letterSpacing: 0.3, fontFamily: undefined, fontWeight: '700' },
   inputOptional:    { borderStyle: 'dashed', borderColor: 'rgba(160,200,232,0.6)' },
-  optionalLabel:    { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  optionalLabel:    { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
+  ageLabel:         { fontSize: SIZES.bodySmall, color: '#4A6A8A', textAlign: 'center' },
 });

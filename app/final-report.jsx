@@ -7,21 +7,32 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadAllQuestionnaires, loadResearchCode } from '../storage/storage';
+import { loadAllQuestionnaires, loadResearchCode, loadAgeBand } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { computeMetrics } from '../utils/metrics';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
-import t, { locale } from '../i18n';
+import t, { locale, isSwedish } from '../i18n';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import ScreenBackground from '../components/ScreenBackground';
+import ActogramChart from '../components/ActogramChart';
+import {
+  getReferenceRanges,
+  durationColor as durationColorFor,
+  latencyColor as latencyColorFor,
+  wasoColor as wasoColorFor,
+  durationBar,
+  latencyBar,
+  wasoBar,
+} from '../utils/referenceRanges';
 import IMAGES from '../assets/images';
 
 
+const formatDecimal = (n) => n.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
 const pad = (n) => String(Math.round(n)).padStart(2, '0');
-const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h}h ${pad(m)}m` : `${m}m`; };
+const formatMinutes = (mins) => { if (mins === null || isNaN(mins)) return '—'; const h = Math.floor(Math.abs(mins) / 60); const m = Math.round(Math.abs(mins) % 60); return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`; };
 
 const MetricCard = ({ icon, label, value, subtext, color = '#4A7BB5', statusLabel, bar }) => (
   <View
@@ -146,7 +157,7 @@ const QuestionnaireReportCard = ({ result, questionnaire, locale }) => {
         </View>
       </View>
       {!isMCTQ && <ScaleBar questionnaire={questionnaire} score={result.score} />}
-      <Text style={[styles.qReportDate, { fontFamily: FONTS.bodyMedium }]}>Completed {completedDate}</Text>
+      <Text style={[styles.qReportDate, { fontFamily: FONTS.bodyMedium }]}>{t('appText.completedOn', { date: completedDate })}</Text>
     </View>
   );
 };
@@ -171,21 +182,9 @@ const BandBar = ({ segments, marker, ticks, endLabels }) => (
   </View>
 );
 
-const DurationBar = ({ value }) => {
+const DurationBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 600;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 60, color: '#DC2626' },
-      { width: 10, color: '#F59E0B' },
-      { width: 20, color: '#2E7D32' },
-      { width: 10, color: '#F59E0B' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 60, label: '6h' }, { pct: 70, label: '7h' }, { pct: 90, label: '9h' }]}
-    endLabels={['0h', '']}
-  />;
+  return <BandBar {...durationBar(value, ranges)} />;
 };
 
 const EfficiencyBar = ({ value }) => {
@@ -203,42 +202,19 @@ const EfficiencyBar = ({ value }) => {
   />;
 };
 
-const LatencyBar = ({ value }) => {
+const LatencyBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 60;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 25, color: '#2E7D32' },
-      { width: 25, color: '#F59E0B' },
-      { width: 50, color: '#DC2626' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 25, label: '15m' }, { pct: 50, label: '30m' }]}
-    endLabels={['0m', '']}
-  />;
+  return <BandBar {...latencyBar(value, ranges)} />;
 };
 
-const WasoBar = ({ value }) => {
+const WasoBar = ({ value, ranges }) => {
   if (value === null || isNaN(value)) return null;
-  const MAX = 60;
-  const marker = Math.min(Math.max(value, 0), MAX) / MAX * 100;
-  return <BandBar
-    segments={[
-      { width: 33, color: '#2E7D32' },
-      { width: 17, color: '#F59E0B' },
-      { width: 50, color: '#DC2626' },
-    ]}
-    marker={marker}
-    ticks={[{ pct: 33, label: '20m' }, { pct: 50, label: '30m' }]}
-    endLabels={['0m', '']}
-  />;
+  return <BandBar {...wasoBar(value, ranges)} />;
 };
 
-const durationColor  = (m) => m === null ? '#4A7BB5' : m >= 420 && m <= 540 ? '#2E7D32' : m >= 360 && m <= 600 ? '#F59E0B' : '#DC2626';
+// Duration, latency and WASO colours depend on the participant's age band, so
+// they live in utils/referenceRanges.js and take the ranges as an argument.
 const alcoholColor   = (n) => n === null ? '#4A7BB5' : n < 1 ? '#2E7D32' : n <= 2 ? '#F59E0B' : '#DC2626';
-const latencyColor   = (m) => m === null ? '#4A7BB5' : m <= 15 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
-const wasoColor      = (m) => m === null ? '#4A7BB5' : m <= 20 ? '#2E7D32' : m <= 30 ? '#F59E0B' : '#DC2626';
 
 const AlcoholBar = ({ value }) => {
   // NHS guideline: ≤14 units/week = 2 units/night avg; max display 5
@@ -263,6 +239,18 @@ const StarRow = ({ value, max = 5, color = '#E07A20' }) => (
   </View>
 );
 
+const SummaryStat = ({ icon, value, label, color }) => (
+  <View
+    style={[styles.summaryStatTile, { backgroundColor: color + '14' }]}
+    accessible={true}
+    accessibilityLabel={`${value} ${label}`}
+  >
+    <Ionicons name={icon} size={22} color={color} accessibilityElementsHidden={true} importantForAccessibility="no" />
+    <Text style={[styles.summaryStatValue, { color, fontFamily: FONTS.heading }]}>{value}</Text>
+    <Text style={[styles.summaryStatLabel, { fontFamily: FONTS.bodyMedium }]}>{label}</Text>
+  </View>
+);
+
 const Section = ({ title, children }) => (
   <View style={styles.section}>
     <Text style={[styles.sectionTitle, { fontFamily: FONTS.body }]}>{title}</Text>
@@ -273,7 +261,10 @@ const Section = ({ title, children }) => (
 // ─── Web canvas share ────────────────────────────────────────────────────────
 // Loads the original HomeBg SVG as an <img> onto the canvas, then draws
 // the stats panel on top — pixel-perfect with the native render.
-async function handleShareWeb({ metrics, userName, dateRange }) {
+async function handleShareWeb({ metrics, userName, dateRange, ranges }) {
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const dpr    = Math.min(window.devicePixelRatio || 1, 2);
   const W      = 390;
   const H      = 844;
@@ -321,7 +312,7 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   // Title
   ctx.fillStyle = '#1E3A5F';
   ctx.font = 'bold 28px system-ui, sans-serif';
-  ctx.fillText('My Sleep Report', W / 2, y + 28);
+  ctx.fillText(t('appText.mySleepReport'), W / 2, y + 28);
   y += 38;
 
   // Subtitle
@@ -341,20 +332,20 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     if (mins === null || isNaN(mins)) return '\u2014';
     const h = Math.floor(Math.abs(mins) / 60);
     const m = Math.round(Math.abs(mins) % 60);
-    return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+    return h > 0 ? `${h} ${t('questionnaire.hrs')} ${String(m).padStart(2, '0')} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`;
   };
   const eff     = metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '\u2014';
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
   const effColor  = effGood ? '#2E7D32' : '#F59E0B';
   const stats   = [
-    { label: 'Sleep Duration',   value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration),         emoji: '\u23F1\uFE0F' },
-    { label: 'Sleep Efficiency', value: eff,                               accent: effColor,                                        emoji: '\uD83D\uDCCA' },
-    { label: 'Onset Latency',    value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency),       emoji: '\u23F3' },
+    { label: t('profile.glossary.sleepDuration.title'),   value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration),         emoji: '\u23F1\uFE0F' },
+    { label: t('profile.glossary.sleepEfficiency.title'), value: eff,                               accent: effColor,                                        emoji: '\uD83D\uDCCA' },
+    { label: t('profile.glossary.sleepOnsetLatency.title'),    value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency),       emoji: '\u23F3' },
     { label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO),                      emoji: '\uD83C\uDF19' },
-    { label: 'Night Wakings',    value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
-    { label: 'Early Waking',     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
-    { label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
-    { label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
+    { label: t('profile.glossary.nightWakings.title'),    value: metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)}x` : '\u2014', accent: '#4A7BB5', emoji: '\uD83D\uDD14' },
+    { label: t('profile.glossary.earlyWaking.title'),     value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '\u2014',              accent: '#4A7BB5', emoji: '\u2600\uFE0F' },
+    { label: t('report.drinksNight'),          value: metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)}` : '\u2014',             accent: alcoholColor(metrics.avgAlcohol),                 emoji: '\uD83C\uDF77' },
+    { label: t('report.morningRestedness'),       value: metrics.avgRestedness !== null ? `${formatDecimal(metrics.avgRestedness)}/5` : '\u2014',     accent: '#E07A20',                                       emoji: '\uD83C\uDF05' },
   ];
   const cols    = 2;
   const cellW   = (cW - cellGap * (cols - 1)) / cols;
@@ -373,9 +364,9 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
     ctx.fillStyle = s.accent;
     ctx.font = 'bold 22px system-ui, sans-serif';
     ctx.fillText(s.value, cx + cellW / 2, cy + 62);
-    ctx.fillStyle = '#94A3B8';
+    ctx.fillStyle = '#64748B';
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillText(s.label, cx + cellW / 2, cy + 80);
+    ctx.fillText(s.label, cx + cellW / 2, cy + 80, cellW - 12);
   });
   y += gridH + 20;
 
@@ -414,9 +405,9 @@ async function handleShareWeb({ metrics, userName, dateRange }) {
   const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
   const file = new File([blob], 'sleep-report.png', { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
-    await navigator.share({ files: [file], title: 'My Sleep Report' });
+    await navigator.share({ files: [file], title: t('appText.mySleepReport') });
   } else if (navigator.share) {
-    await navigator.share({ title: 'My Sleep Report', text: `${userName} \u00B7 ${dateRange} \u2014 sleepdiaries.circadia-lab.uk` });
+    await navigator.share({ title: t('appText.mySleepReport'), text: `${userName} \u00B7 ${dateRange} \u2014 sleepdiaries.circadia-lab.uk` });
   } else {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -442,26 +433,29 @@ function roundRect(ctx, x, y, w, h, r) {
 
 // ─── Share card ──────────────────────────────────────────────────────────────
 // Rendered off-screen, captured as a PNG, then shared via native share sheet.
-const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, height }, ref) => {
+const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, height, ranges }, ref) => {
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const pad2 = (n) => String(Math.round(n)).padStart(2, '0');
   const fmt = (mins) => {
     if (mins === null || isNaN(mins)) return '—';
     const h = Math.floor(Math.abs(mins) / 60);
     const m = Math.round(Math.abs(mins) % 60);
-    return h > 0 ? `${h}h ${pad2(m)}m` : `${m}m`;
+    return h > 0 ? `${h} ${t('questionnaire.hrs')} ${pad2(m)} ${t('questionnaire.min')}` : `${m} ${t('questionnaire.min')}`;
   };
   const eff = metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—';
   const effGood = metrics.avgSleepEfficiency !== null && metrics.avgSleepEfficiency >= 85;
 
   const stats = [
-    { emoji: '⏱️', label: 'Sleep Duration',  value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration) },
-    { emoji: '📊', label: 'Sleep Efficiency', value: eff,                               accent: effGood ? '#2E7D32' : '#F59E0B' },
-    { emoji: '⏳', label: 'Onset Latency',   value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency) },
+    { emoji: '⏱️', label: t('profile.glossary.sleepDuration.title'),  value: fmt(metrics.avgSleepDuration),    accent: durationColor(metrics.avgSleepDuration) },
+    { emoji: '📊', label: t('profile.glossary.sleepEfficiency.title'), value: eff,                               accent: effGood ? '#2E7D32' : '#F59E0B' },
+    { emoji: '⏳', label: t('profile.glossary.sleepOnsetLatency.title'),   value: fmt(metrics.avgSleepOnsetLatency), accent: latencyColor(metrics.avgSleepOnsetLatency) },
     { emoji: '🌙', label: 'WASO',             value: fmt(metrics.avgWASO),              accent: wasoColor(metrics.avgWASO) },
-    { emoji: '🔔', label: 'Night Wakings',   value: metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)}x` : '—', accent: '#4A7BB5' },
-    { emoji: '☀️', label: 'Early Waking',    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
-    { emoji: '🍷', label: 'Drinks/Night',          value: metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
-    { emoji: '🌅', label: 'Restedness',       value: metrics.avgRestedness !== null ? `${metrics.avgRestedness.toFixed(1)}/5` : '—',     accent: '#E07A20' },
+    { emoji: '🔔', label: t('profile.glossary.nightWakings.title'),   value: metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)}x` : '—', accent: '#4A7BB5' },
+    { emoji: '☀️', label: t('profile.glossary.earlyWaking.title'),    value: metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}%` : '—',              accent: '#4A7BB5' },
+    { emoji: '🍷', label: t('report.drinksNight'),          value: metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)}` : '—',             accent: alcoholColor(metrics.avgAlcohol) },
+    { emoji: '🌅', label: t('report.morningRestedness'),       value: metrics.avgRestedness !== null ? `${formatDecimal(metrics.avgRestedness)}/5` : '—',     accent: '#E07A20' },
   ];
 
   return (
@@ -481,7 +475,7 @@ const ShareCard = React.forwardRef(({ metrics, userName, dateRange, width, heigh
             <Text style={{ fontSize: 16, lineHeight: 20 }}>🌙</Text>
             <Text style={[shareStyles.logoText, { fontFamily: FONTS.body }]}>SLEEP DIARIES</Text>
           </View>
-          <Text style={[shareStyles.title, { fontFamily: FONTS.heading }]}>My Sleep Report</Text>
+          <Text style={[shareStyles.title, { fontFamily: FONTS.heading }]}>{t('appText.mySleepReport')}</Text>
           <Text style={[shareStyles.subtitle, { fontFamily: FONTS.bodyMedium }]}>{userName}  ·  {dateRange}</Text>
         </View>
 
@@ -518,6 +512,12 @@ export default function FinalReportScreen() {
   const [loading,  setLoading]  = useState(true);
   const [qResults, setQResults] = useState([]);
   const [researchCode, setResearchCode] = useState('');
+  const [ageBand, setAgeBand] = useState(null);
+  // Reference ranges follow the participant's (optional) age group; adult by default.
+  const ranges = useMemo(() => getReferenceRanges(ageBand), [ageBand]);
+  const durationColor = (m) => durationColorFor(m, ranges);
+  const latencyColor  = (m) => latencyColorFor(m, ranges);
+  const wasoColor     = (m) => wasoColorFor(m, ranges);
   const [sharing, setSharing] = useState(false);
   const shareCardRef = useRef(null);
 
@@ -534,13 +534,21 @@ export default function FinalReportScreen() {
     const dates = morning.map((e) => e.date).sort();
     return `${dates[0]} → ${dates[dates.length - 1]}`;
   }, [morning]);
+  // Localised, human-readable period for the summary card (dateRange above stays ISO for sharing).
+  const periodLabel = useMemo(() => {
+    if (morning.length === 0) return '';
+    const dates = morning.map((e) => e.date).sort();
+    const fmt = (d) => new Date(`${d}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    return dates[0] === dates[dates.length - 1] ? fmt(dates[0]) : `${fmt(dates[0])} \u2013 ${fmt(dates[dates.length - 1])}`;
+  }, [morning]);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [, allQResults, code] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode()]);
+      const [, allQResults, code, band] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode(), loadAgeBand()]);
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setResearchCode(code ?? '');
+      setAgeBand(band);
       setLoading(false);
     };
     load();
@@ -550,7 +558,7 @@ export default function FinalReportScreen() {
     if (!metrics) return;
     try {
       if (Platform.OS === 'web') {
-        await handleShareWeb({ metrics, userName, dateRange });
+        await handleShareWeb({ metrics, userName, dateRange, ranges });
         return;
       }
       // Mount the share card, wait for it to render, then capture
@@ -560,20 +568,18 @@ export default function FinalReportScreen() {
       setSharing(false);
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
-        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Share Sleep Report' });
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t('appText.shareReport') });
       } else {
-        await Share.share({ message: `My Sleep Report — ${userName} · ${dateRange}` });
+        await Share.share({ message: t('appText.reportMessage', { name: userName, period: dateRange }) });
       }
     } catch (e) {
       setSharing(false);
       if (e?.message !== 'User did not share') {
         console.warn('[handleShare]', e);
-        if (Platform.OS === 'web') alert('Share failed: ' + e.message);
+        if (Platform.OS === 'web') alert(t('appText.shareFailed') + ': ' + e.message);
       }
     }
   };
-
-  const entriesLabel = metrics ? (metrics.n === 1 ? t('report.morningEntries_one', { count: metrics.n }) : t('report.morningEntries_other', { count: metrics.n })) : '';
 
   return (
     <View style={[styles.root, { minHeight: height }]}>
@@ -600,67 +606,73 @@ export default function FinalReportScreen() {
           {/* Share card — only mounted during capture to avoid background bleed */}
           {sharing && (
             <View style={shareStyles.offscreen} aria-hidden>
-              <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} />
+              <ShareCard ref={shareCardRef} metrics={metrics} userName={userName} dateRange={dateRange} width={width} height={height} ranges={ranges} />
             </View>
           )}
 
           <View style={styles.summaryCard}>
-            <View style={styles.summaryLeft}>
+            <View style={styles.summaryTop}>
               <View style={styles.summaryAvatar}>
-                <Ionicons name="person" size={36} color="#4A7BB5" />
+                <Ionicons name="person" size={30} color="#4A7BB5" />
               </View>
-              <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]}>{userName}</Text>
-              {researchCode ? <Text style={[styles.summaryCode, { fontFamily: FONTS.bodyMedium }]}>{researchCode}</Text> : null}
+              <View style={styles.summaryIdentity}>
+                <Text style={[styles.summaryName, { fontFamily: FONTS.heading }]} numberOfLines={1}>{userName}</Text>
+                {researchCode ? <Text style={[styles.summaryCode, { fontFamily: FONTS.bodyMedium }]}>{researchCode}</Text> : null}
+              </View>
             </View>
-            <View style={styles.summaryInfo}>
-              <View style={styles.summaryStat}>
-                <Ionicons name="calendar-outline" size={15} color="#94A3B8" />
-                <View>
-                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort()[0]}</Text>
-                  <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{morning.map(e => e.date).sort().slice(-1)[0]}</Text>
-                </View>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="sunny-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{entriesLabel}</Text>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="moon-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{allEntries.filter(e => e.type === 'evening').length} {t('report.eveningEntries')}</Text>
-              </View>
-              <View style={styles.summaryStat}>
-                <Ionicons name="clipboard-outline" size={15} color="#94A3B8" />
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length}</Text>
-                <Text style={[styles.summaryStatText, { fontFamily: FONTS.bodyMedium }]}>{qResults.length === 1 ? t('report.questionnaireOne') : t('report.questionnaireOther')}</Text>
-              </View>
+
+            <View style={styles.summaryPeriod}>
+              <Ionicons name="calendar-outline" size={18} color="#5B7089" />
+              <Text style={[styles.summaryPeriodText, { fontFamily: FONTS.bodyMedium }]}>{periodLabel}</Text>
+            </View>
+
+            <View style={styles.summaryStatsRow}>
+              <SummaryStat icon="sunny-outline"     value={metrics.n}                                          label={t('profile.statMorningShort')}    color="#E07A20" />
+              <SummaryStat icon="moon-outline"      value={allEntries.filter((e) => e.type === 'evening').length} label={t('profile.statEveningShort')}    color="#2A6CB5" />
+              <SummaryStat icon="clipboard-outline" value={qResults.length}                                     label={t('profile.statQuestionnaires')} color="#4A7BB5" />
             </View>
           </View>
 
+          <Section title={t('report.sleepPattern')}>
+            <View style={styles.actogramLegendRow}>
+              <View style={styles.legendItem}><View style={[styles.legendSwatch, { backgroundColor: '#2E7D3233', borderWidth: 1, borderColor: '#2E7D3255' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendAsleep')}</Text></View>
+              <View style={styles.legendItem}><View style={[styles.legendSwatch, { backgroundColor: '#F59E0B33', borderWidth: 1, borderColor: '#F59E0B55' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendAwake')}</Text></View>
+              <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#DC2626' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendWaking')}</Text></View>
+              <View style={styles.legendItem}><View style={styles.legendDash} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendMidpoint')}</Text></View>
+            </View>
+            <View style={styles.actogramCard}>
+              <ActogramChart entries={morning} />
+            </View>
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.sleepPatternNote')}</Text>
+          </Section>
+
           <Section title={t('report.sleepTiming')}>
-            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color={durationColor(metrics.avgSleepDuration)}  bar={<DurationBar value={metrics.avgSleepDuration} />} />
+            <MetricCard icon="time-outline"        label={t('report.avgSleepDuration')}   value={formatMinutes(metrics.avgSleepDuration)}    subtext={t('report.avgSleepDurationSub')}  color={durationColor(metrics.avgSleepDuration)}  bar={<DurationBar value={metrics.avgSleepDuration} ranges={ranges} />} />
             <MetricCard icon="speedometer-outline" label={t('report.sleepEfficiency')} value={metrics.avgSleepEfficiency !== null ? `${Math.round(metrics.avgSleepEfficiency)}%` : '—'} subtext={t('report.sleepEfficiencySub')} color={metrics.avgSleepEfficiency >= 85 ? '#2E7D32' : '#C25E00'} bar={<EfficiencyBar value={metrics.avgSleepEfficiency} />} />
-            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color={latencyColor(metrics.avgSleepOnsetLatency)}  bar={<LatencyBar value={metrics.avgSleepOnsetLatency} />} />
-            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color={wasoColor(metrics.avgWASO)}               bar={<WasoBar value={metrics.avgWASO} />} />
+            <MetricCard icon="hourglass-outline"   label={t('report.sleepOnsetLatency')}  value={formatMinutes(metrics.avgSleepOnsetLatency)} subtext={t('report.sleepOnsetLatencySub')} color={latencyColor(metrics.avgSleepOnsetLatency)}  bar={<LatencyBar value={metrics.avgSleepOnsetLatency} ranges={ranges} />} />
+            <MetricCard icon="moon-outline"        label={t('report.waso')}               value={formatMinutes(metrics.avgWASO)}              subtext={t('report.wasoSub')}              color={wasoColor(metrics.avgWASO)}               bar={<WasoBar value={metrics.avgWASO} ranges={ranges} />} />
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.ageBandNote', { band: t(`ageBand.${ranges.band}`) })}</Text>
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.thresholdNote')}</Text>
           </Section>
 
           <Section title={t('report.sleepQuality')}>
-            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? metrics.avgQuality.toFixed(1) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
-            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? metrics.avgRestedness.toFixed(1) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
+            <MetricCard icon="star-outline"        label={t('report.nightQuality')}      value={metrics.avgQuality !== null ? formatDecimal(metrics.avgQuality) : '—'} color="#4A7BB5" bar={metrics.avgQuality !== null ? <StarRow value={metrics.avgQuality} color="#4A7BB5" /> : null} />
+            <MetricCard icon="battery-half-outline" label={t('report.morningRestedness')} value={metrics.avgRestedness !== null ? formatDecimal(metrics.avgRestedness) : '—'} color="#E07A20" bar={metrics.avgRestedness !== null ? <StarRow value={metrics.avgRestedness} color="#E07A20" /> : null} />
           </Section>
 
           <Section title={t('report.nightDisruptions')}>
-            <MetricCard icon="alert-circle-outline" label={t('report.avgNightWakings')} value={metrics.avgNightWakings !== null ? `${metrics.avgNightWakings.toFixed(1)} ${t('report.times')}` : '—'} subtext={t('report.avgNightWakingsSub')} color="#4A7BB5" />
+            <MetricCard icon="alert-circle-outline" label={t('report.avgNightWakings')} value={metrics.avgNightWakings !== null ? `${formatDecimal(metrics.avgNightWakings)} ${t('report.times')}` : '—'} subtext={t('report.avgNightWakingsSub')} color="#4A7BB5" />
             <MetricCard icon="alarm-outline"        label={t('report.earlyWaking')}     value={metrics.earlyWakingPct !== null ? `${metrics.earlyWakingPct}${t('report.ofNights')}` : '—'}          subtext={t('report.earlyWakingSub')}     color="#4A7BB5" />
           </Section>
 
           <Section title={t('report.lifestyle')}>
-            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${metrics.avgAlcohol.toFixed(1)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color={alcoholColor(metrics.avgAlcohol)} bar={<AlcoholBar value={metrics.avgAlcohol} />} />
+            <MetricCard icon="wine-outline" label={t('report.avgAlcohol')} value={metrics.avgAlcohol !== null ? `${formatDecimal(metrics.avgAlcohol)} ${t('report.drinksNight')}` : '—'} subtext={t('report.avgAlcoholSub')} color={alcoholColor(metrics.avgAlcohol)} bar={<AlcoholBar value={metrics.avgAlcohol} />} />
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.alcoholNote')}</Text>
           </Section>
 
           {qResults.length > 0 && (
             <Section title={t('report.sectionQuestionnaires')}>
+              {isSwedish && <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('appText.instrumentLanguage')}</Text>}
               {qResults.map((result) => {
                 const questionnaire = QUESTIONNAIRES.find((q) => q.id === result.id);
                 if (!questionnaire) return null;
@@ -692,34 +704,43 @@ const styles = StyleSheet.create({
   title:    { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   centred:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 12, paddingTop: 80 },
   emptyTitle:    { fontSize: SIZES.cardTitle, color: '#4A7BB5', textAlign: 'center' },
-  emptySubtitle: { fontSize: SIZES.body, color: '#94A3B8', textAlign: 'center', lineHeight: 26 },
+  emptySubtitle: { fontSize: SIZES.body, color: '#64748B', textAlign: 'center', lineHeight: 26 },
   scrollContent: { padding: 16, gap: 20, paddingBottom: 40 },
-  summaryCard:    { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
-  summaryLeft:    { alignItems: 'center', gap: 6 },
-  summaryAvatar:   { width: 72, height: 72, borderRadius: 36, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
-  summaryInfo:     { flex: 1, gap: 4, justifyContent: 'center', paddingRight: 8 },
-  summaryName:     { fontSize: SIZES.body, color: '#1A3A5C' },
-  summaryCode:     { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
-  summaryDivider:  { height: 1, backgroundColor: 'rgba(74,123,181,0.15)', width: '100%' },
-  summaryStats:    { gap: 8, width: '100%' },
-  summaryStat:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  summaryStatText: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  summaryCard:    { gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  summaryTop:      { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  summaryAvatar:   { width: 60, height: 60, borderRadius: 30, backgroundColor: '#D6E8F7', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#A8C8E8', flexShrink: 0 },
+  summaryIdentity: { flex: 1, gap: 2 },
+  summaryName:     { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
+  summaryCode:     { fontSize: SIZES.caption, color: '#64748B' },
+  summaryPeriod:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(74,123,181,0.15)' },
+  summaryPeriodText: { fontSize: SIZES.bodySmall, color: '#5B7089', flexShrink: 1 },
+  summaryStatsRow: { flexDirection: 'row', gap: 8 },
+  summaryStatTile: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 12 },
+  summaryStatValue: { fontSize: SIZES.screenTitle },
+  summaryStatLabel: { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
   section:        { gap: 10 },
   sectionTitle:   { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8 },
   metricCard:        { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   metricIcon:        { width: 72, height: 72, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   metricText:        { flex: 1, gap: 3 },
-  metricLabel:       { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  metricLabel:       { fontSize: SIZES.bodySmall, color: '#64748B' },
   metricValueRow:    { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   metricValue:       { fontSize: SIZES.sectionTitle, color: '#1E3A5F' },
   metricStatusLabel: { fontSize: SIZES.caption, fontWeight: '600' },
-  metricSubtext:     { fontSize: SIZES.caption, color: '#94A3B8' },
+  metricSubtext:     { fontSize: SIZES.caption, color: '#64748B' },
   qualityCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
-  qualityLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  qualityLabel: { fontSize: SIZES.bodySmall, color: '#64748B' },
   starRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   starLabel:    { fontSize: SIZES.body, marginLeft: 6 },
-  disclaimer:   { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
-  thresholdNote: { fontSize: SIZES.caption, color: '#94A3B8', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
+  disclaimer:   { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
+  thresholdNote: { fontSize: SIZES.caption, color: '#64748B', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
+  actogramCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
+  actogramLegendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingHorizontal: 2 },
+  legendItem:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendSwatch:  { width: 12, height: 12, borderRadius: 3 },
+  legendDot:     { width: 10, height: 10, borderRadius: 5 },
+  legendDash:    { width: 16, height: 0, borderTopWidth: 2, borderStyle: 'dashed', borderColor: '#1E3A5F' },
+  legendLabel:   { fontSize: SIZES.caption, color: '#5B7089' },
 
   // Questionnaire report cards
   qReportCard:       { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
@@ -733,7 +754,7 @@ const styles = StyleSheet.create({
   qReportInterpText: { flex: 1, gap: 4 },
   qReportInterpLabel:{ fontSize: SIZES.body },
   qReportInterpDesc: { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 22 },
-  qReportDate:       { fontSize: SIZES.caption, color: '#94A3B8' },
+  qReportDate:       { fontSize: SIZES.caption, color: '#64748B' },
 
   // Scale bar
   scaleBarContainer:  { gap: 4 },
@@ -741,9 +762,9 @@ const styles = StyleSheet.create({
   scaleBarSegment:    { height: '100%' },
   scaleBarMarker:     { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: '#1E3A5F' },
   scaleBarEndLabels:  { flexDirection: 'row', justifyContent: 'space-between' },
-  scaleBarEndText:    { fontSize: 12, color: '#94A3B8' },
+  scaleBarEndText:    { fontSize: 12, color: '#64748B' },
   scaleBarTickRow:    { flexDirection: 'row', justifyContent: 'space-between', position: 'relative', height: 16 },
-  scaleBarTickLabel:  { position: 'absolute', fontSize: 12, color: '#94A3B8', transform: [{ translateX: -10 }] },
+  scaleBarTickLabel:  { position: 'absolute', fontSize: 12, color: '#64748B', transform: [{ translateX: -10 }] },
 });
 
 // ─── Share card styles ────────────────────────────────────────────────────────
@@ -765,6 +786,6 @@ const shareStyles = StyleSheet.create({
   statCell:  { width: '47%', aspectRatio: 1.4, alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 14, padding: 10 },
   statEmoji: { fontSize: 32, lineHeight: 38 },
   statValue: { fontSize: 22, lineHeight: 28 },
-  statLabel: { fontSize: 11, color: '#94A3B8', textAlign: 'center', lineHeight: 15 },
+  statLabel: { fontSize: 11, color: '#64748B', textAlign: 'center', lineHeight: 15 },
   footer:    { fontSize: 13, color: '#1E3A5F', textAlign: 'center', letterSpacing: 0.4 },
 });

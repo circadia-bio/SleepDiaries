@@ -21,7 +21,7 @@ import Svg, { Rect, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { markInstructionsSeen } from '../storage/storage';
 import { FONTS } from '../theme/typography';
-import { strings } from '../i18n';
+import t, { strings, isSwedish } from '../i18n';
 
 const TITLE_COLOR  = '#4988BC';
 const BODY_COLOR   = '#A5A5A5';
@@ -118,6 +118,7 @@ export default function InstructionsModal({ visible, onClose }) {
               <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>{slide.title}</Text>
                 <Text style={styles.body}>{slide.body}</Text>
+                {isSwedish && isFirst && <Text style={[styles.body, { marginTop: 16, fontSize: 16 }]}>{t('appText.diaryTranslationNote')}</Text>}
               </ScrollView>
               <Dots total={NUM_SLIDES} current={index} />
               <View style={styles.navRow}>
@@ -162,6 +163,7 @@ export default function InstructionsModal({ visible, onClose }) {
           >
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.body}>{slide.body}</Text>
+            {isSwedish && isFirst && <Text style={[styles.body, { marginTop: 16, fontSize: 16 }]}>{t('appText.diaryTranslationNote')}</Text>}
           </ScrollView>
 
           {/* Dots */}

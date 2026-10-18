@@ -13,7 +13,7 @@ import showAlert from '../../utils/alert';
 import { loadNotificationsEnabled, saveNotificationsEnabled, sendTestNotification, requestNotificationPermission } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
 
-const LANGUAGE_NAMES = { 'en': 'English', 'pt-BR': 'Português (Brasil)', 'pt': 'Português (Brasil)' };
+const LANGUAGE_NAMES = { 'sv': 'Svenska', 'sv-SE': 'Svenska (Sverige)', 'sv-FI': 'Svenska (Finland)', 'en': 'English', 'pt-BR': 'Português (Brasil)', 'pt': 'Português (Brasil)' };
 const currentLanguageName = LANGUAGE_NAMES[locale] ?? locale;
 
 const TAB_BAR_HEIGHT = 60;
@@ -70,7 +70,7 @@ export default function SettingsScreen() {
             <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionLanguage')}</Text>
             <View style={styles.card}>
               <Row label={t('settings.chooseLanguage')} icon="language-outline"
-                right={<View style={styles.rowRight}><Text style={[styles.rowValue, { fontFamily: FONTS.bodyMedium }]}>{currentLanguageName}</Text><Ionicons name="chevron-forward" size={18} color="#94A3B8" /></View>} />
+                right={<View style={styles.rowRight}><Text style={[styles.rowValue, { fontFamily: FONTS.bodyMedium }]}>{currentLanguageName}</Text><Ionicons name="chevron-forward" size={18} color="#64748B" /></View>} />
             </View>
 
             <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionNotifications')}</Text>
@@ -95,7 +95,7 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionData')}</Text>
         <View style={styles.card}>
-          <Row label={t('settings.exportData')} icon="download-outline" onPress={() => router.push('/export')} right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
+          <Row label={t('settings.exportData')} icon="download-outline" onPress={() => router.push('/export')} right={<Ionicons name="chevron-forward" size={18} color="#64748B" />} />
           <Text style={[styles.cardHint, { fontFamily: FONTS.bodyMedium }]}>{t('settings.exportDataHint')}</Text>
         </View>
 
@@ -104,7 +104,7 @@ export default function SettingsScreen() {
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={[styles.aboutText, { fontFamily: FONTS.body }]}>© Circadia Lab</Text>
           <Text style={[styles.aboutVersion, { fontFamily: FONTS.bodyMedium }]}>v{Constants.expoConfig?.version}</Text>
-          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>MIT Licence</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>{t('appText.mitLicense')}</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Lucas França · Mario Leocadio-Miguel</Text>
           <Text style={[styles.aboutLabel, { fontFamily: FONTS.body }]}>{t('settings.aboutDesign')}</Text>
           <Text style={[styles.aboutSmall, { fontFamily: FONTS.bodyMedium }]}>Bri Baehl · Jacob Howard</Text>
@@ -112,16 +112,16 @@ export default function SettingsScreen() {
           <TouchableOpacity onPress={() => Linking.openURL('https://circadia-lab.uk')} style={styles.aboutLink}>
             <Text style={[styles.aboutLinkText, { fontFamily: FONTS.body }]}>circadia-lab.uk</Text>
           </TouchableOpacity>
-          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>Made with ❤️</Text>
+          <Text style={[styles.aboutText, { fontFamily: FONTS.bodyMedium }]}>{t('appText.madeWithLove')}</Text>
         </View>
         <View style={styles.card}>
           <Row label={t('settings.sectionQuestionnaires')} icon="information-circle-outline"
             onPress={() => router.push('/QuestionnaireCreditsScreen')}
-            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
+            right={<Ionicons name="chevron-forward" size={18} color="#64748B" />} />
           <View style={styles.divider} />
           <Row label={t('settings.sectionThresholds')} icon="stats-chart-outline"
             onPress={() => router.push('/ThresholdReferencesScreen')}
-            right={<Ionicons name="chevron-forward" size={18} color="#94A3B8" />} />
+            right={<Ionicons name="chevron-forward" size={18} color="#64748B" />} />
         </View>
 
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionAccount')}</Text>
@@ -147,17 +147,17 @@ const styles = StyleSheet.create({
   row:           { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 16 },
   rowLabel:      { flex: 1, fontSize: SIZES.body, color: '#1E3A5F' },
   rowRight:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  rowValue:      { fontSize: SIZES.bodySmall, color: '#94A3B8' },
+  rowValue:      { fontSize: SIZES.bodySmall, color: '#64748B' },
   divider:       { height: 1, backgroundColor: '#E2EAF4' },
-  cardHint:      { fontSize: SIZES.bodySmall, color: '#94A3B8', paddingBottom: 14, paddingHorizontal: 16, lineHeight: 24 },
+  cardHint:      { fontSize: SIZES.bodySmall, color: '#64748B', paddingBottom: 14, paddingHorizontal: 16, lineHeight: 24 },
   testBtn:       { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14, paddingHorizontal: 16 },
   testBtnText:   { fontSize: SIZES.bodySmall, color: '#4A7BB5' },
   aboutCard:     { alignItems: 'center', paddingVertical: 20, gap: 4 },
   logo:          { width: 160, height: 60, marginBottom: 8 },
   aboutText:     { fontSize: SIZES.body, color: '#1E3A5F' },
   aboutLabel:    { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
-  aboutSmall:    { fontSize: SIZES.bodySmall, color: '#94A3B8', textAlign: 'center', lineHeight: 24 },
+  aboutSmall:    { fontSize: SIZES.bodySmall, color: '#64748B', textAlign: 'center', lineHeight: 24 },
   aboutLink:     { marginTop: 8 },
   aboutLinkText: { fontSize: SIZES.body, color: '#4A7BB5', textDecorationLine: 'underline' },
-  aboutVersion:  { fontSize: SIZES.bodySmall, color: '#94A3B8', fontFamily: FONTS.bodyMedium },
+  aboutVersion:  { fontSize: SIZES.bodySmall, color: '#64748B', fontFamily: FONTS.bodyMedium },
 });

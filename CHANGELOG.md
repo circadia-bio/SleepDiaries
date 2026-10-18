@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] — 2026-10-19
+
+### Added
+
+- **Swedish localisation**: UI, daily diary questions and instructions are available in Swedish (translation by Jonatan Nyberg). The one-time research questionnaires stay in English, with a note explaining that no validated Swedish version is included
+- **Sleep pattern actogram**: the final report opens with a weekly chart showing each night from bedtime to out-of-bed time, night-waking markers and a dashed sleep-midpoint trend line; days with no entry stay visible as gaps
+- **Age-specific reference ranges**: an optional age group (under 18, 18–64, 65 or over) can be set during onboarding or edited in the Profile. It adjusts the green/amber/red bands for sleep duration, sleep onset latency and WASO, and **Settings → Sleep metric thresholds** now lists the ranges for the chosen group. The age group is stored on the device only and is not included in exports. All ranges live in `utils/referenceRanges.js`
+- **Release workflow**: production now deploys from a `release` branch. The *Open release PR* GitHub Action opens a pull request from a snapshot of a version tag, and `deploy.sh` refuses production builds from any other branch
+- **Tests**: Swedish locale completeness and a reference-range suite that pins the adult band to the previous thresholds
+- **Data-safety reminders**: entries live only on the device, so the Home tab now offers a dismissible reminder to install the PWA (touch browsers, after the first entry) and to export a backup (after 7 entries with no export for 14 days). On the web the browser is also asked to keep storage persistent
+- **Translation-key tests and a web build check in CI**: a test fails if code uses a translation key that does not exist or if Swedish or Portuguese lack an English key, and the build now also bundles the web app so a broken import or missing asset fails before Netlify
+
+### Changed
+
+- **Entry cards and completion screen are drawn in code** for every language, replacing the locale-specific PNG artwork. Text now scales with Bigger Text, and a new language only needs strings. Title and pill colours were darkened slightly to improve contrast
+- **Final report summary card** redesigned: participant identity, a localised date range and three count tiles that use the full width
+- **Latency and WASO colour bands now follow the NSF sleep-quality consensus** (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19). For adults, sleep onset latency is green up to 30 min (previously 15), amber 31–45 min and red above 45 min (previously red above 30), and WASO is amber at 21–40 min and red from 41 min (previously red above 30). Teenage and 65+ ranges follow the paper’s age groups; the paper gives no “poor” level of WASO for 65+, so that band is amber and never red
+- **Decimal separators** in the final report follow the device language in every locale (e.g. “7,5” in Portuguese and Swedish)
+- **Portuguese (Brazil)**: reminder notifications, report sharing, import error messages and the completion screen are now translated
+- **Readable grey text**: hints, captions and reference texts use a darker grey (`#64748B`, about 4.8:1 on white instead of 2.6:1), and input placeholders were darkened to match
+- **Central colour theme**: the morning/evening looks, report status colours and muted-text grey now live in `theme/colors.js`
+- **Sleep-metric glossary** now matches the age-specific ranges (teenagers 8–10 h, adults 7–9 h, 65+ 7–8 h; latency up to 30 min at any age)
+
+### Fixed
+
+- **Actogram Y-axis labels clipped in browsers**: the time axis could be squeezed by the scrolling chart beside it; it now has a fixed width
+- **Home tab entry cards**: square bottom corners and extra spacing caused by a stale fixed-aspect wrapper
+- **Portuguese typo** in the questionnaire completion button
+
+### Removed
+
+- Unused PNG artwork: entry cards (including `pt-BR/`), end-of-entry screens, taskbar and back/next button images
+- Unused entry-card strings (`startEntry`, `editEntry`, `lockedEntry`, `entrySaved`, `returnHome`) and stray files from the repository root
+
+---
+
 ## [1.1.3] — 2026-05-23
 
 ### Added

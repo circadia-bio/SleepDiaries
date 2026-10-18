@@ -2,7 +2,7 @@
  * app/(tabs)/entry.jsx — Entry tab
  */
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInsets } from '../../theme/useInsets';
@@ -11,7 +11,7 @@ import { MIN_ENTRIES_FOR_REPORT } from '../../utils/constants';
 import { computeStats } from '../../utils/stats';
 import { FONTS, SIZES } from '../../theme/typography';
 import t from '../../i18n';
-import IMAGES from '../../assets/images';
+import EntryCardContent from '../../components/EntryCardContent';
 import ScreenBackground from '../../components/ScreenBackground';
 
 
@@ -38,8 +38,6 @@ export default function EntryTab() {
   const eveningCompleted = todayStatus.eveningCompleted;
   const stats            = useMemo(() => computeStats(entries), [entries]);
   const eveningLocked    = !morningCompleted;
-  const morningImage = morningCompleted ? IMAGES.morningCompleted : IMAGES.morningPending;
-  const eveningImage = eveningLocked ? IMAGES.eveningLocked : eveningCompleted ? IMAGES.eveningCompleted : IMAGES.eveningPending;
   const s = stats ?? {};
 
   return (
@@ -69,7 +67,7 @@ export default function EntryTab() {
 
         {s && s.morningCount < MIN_ENTRIES_FOR_REPORT && (
           <View style={styles.statsUnlockHint}>
-            <Ionicons name="lock-closed-outline" size={18} color="#94A3B8" />
+            <Ionicons name="lock-closed-outline" size={18} color="#64748B" />
             <Text style={[styles.statsUnlockText, { fontFamily: FONTS.bodyMedium }]}>
               {t('entry.statsUnlock', { count: MIN_ENTRIES_FOR_REPORT - s.morningCount })}
             </Text>
@@ -83,7 +81,7 @@ export default function EntryTab() {
           accessibilityRole="button"
           accessibilityLabel={morningCompleted ? t('entry.a11y.morningCompleted') : t('entry.a11y.morningStart')}
         >
-          <Image source={morningImage} style={styles.cardImage} resizeMode="cover" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <EntryCardContent type="morning" completed={morningCompleted} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => !eveningLocked && router.push({ pathname: '/questionnaire', params: { entryType: 'evening' } })}
@@ -94,7 +92,7 @@ export default function EntryTab() {
           accessibilityLabel={eveningLocked ? t('entry.a11y.eveningLocked') : eveningCompleted ? t('entry.a11y.eveningCompleted') : t('entry.a11y.eveningStart')}
           accessibilityState={{ disabled: eveningLocked }}
         >
-          <Image source={eveningImage} style={styles.cardImage} resizeMode="cover" accessibilityElementsHidden={true} importantForAccessibility="no" />
+          <EntryCardContent type="evening" completed={eveningCompleted} locked={eveningLocked} />
         </TouchableOpacity>
       </View>
     </View>
@@ -104,8 +102,7 @@ export default function EntryTab() {
 const styles = StyleSheet.create({
   root:      { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16, gap: 10, paddingBottom: 120, justifyContent: 'flex-end' },
-  cardWrapper: { width: '100%', aspectRatio: 948 / 312, borderRadius: 14, overflow: 'hidden' },
-  cardImage:   { width: '100%', height: '100%' },
+  cardWrapper: { width: '100%', minHeight: 118, flexShrink: 0, borderRadius: 14, overflow: 'hidden' },
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 18,
@@ -115,7 +112,7 @@ const styles = StyleSheet.create({
   },
   streakIconWrap: { width: 64, height: 64, borderRadius: 16, backgroundColor: '#E07A2020', alignItems: 'center', justifyContent: 'center' },
   streakValue: { fontSize: SIZES.sectionTitle, color: '#1A3A5C' },
-  streakLabel: { fontSize: SIZES.bodySmall, color: '#94A3B8', marginTop: 2 },
+  streakLabel: { fontSize: SIZES.bodySmall, color: '#64748B', marginTop: 2 },
   statRow: { flexDirection: 'row', gap: 8 },
   statBox: {
     flex: 1, aspectRatio: 1,
@@ -125,7 +122,7 @@ const styles = StyleSheet.create({
     shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3,
   },
   statValue: { fontSize: SIZES.body },
-  statLabel: { fontSize: SIZES.caption, color: '#94A3B8', textAlign: 'center' },
+  statLabel: { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center' },
   statsUnlockHint: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 12,
@@ -133,5 +130,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 12,
     shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
   },
-  statsUnlockText: { fontSize: SIZES.bodySmall, color: '#94A3B8', flex: 1 },
+  statsUnlockText: { fontSize: SIZES.bodySmall, color: '#64748B', flex: 1 },
 });

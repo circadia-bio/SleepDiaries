@@ -51,11 +51,11 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: SIZES.cardTitle, color: '#1E3A5F' },
   backBtn:     { width: 44, alignItems: 'flex-start' },
   content:     { padding: 20, gap: 12, paddingBottom: 40 },
-  note:        { fontSize: SIZES.bodySmall, color: '#94A3B8', lineHeight: 24, textAlign: 'center' },
+  note:        { fontSize: SIZES.bodySmall, color: '#64748B', lineHeight: 24, textAlign: 'center' },
   sectionHeader: { fontSize: SIZES.label, color: '#E07A20', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 8 },
   card:        { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', overflow: 'hidden', paddingHorizontal: 16, shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
   divider:     { height: 1, backgroundColor: 'rgba(226,234,244,0.8)' },
   creditRow:   { paddingVertical: 14, gap: 4 },
   creditTitle: { fontSize: SIZES.bodySmall, color: '#1E3A5F' },
-  creditBody:  { fontSize: 13, color: '#94A3B8', lineHeight: 20 },
+  creditBody:  { fontSize: 13, color: '#64748B', lineHeight: 20 },
 });

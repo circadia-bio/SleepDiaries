@@ -5,7 +5,7 @@
 An open-source, research-grade sleep diary app built with React Native and Expo. Available on **iOS**, **Android**, and the **web**. Designed to be easily tailored by researchers, clinicians, and developers for their own sleep studies and clinical needs.
 
 [![Tests](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml/badge.svg)](https://github.com/circadia-bio/SleepDiaries/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-1.1.3-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/circadia-bio/SleepDiaries/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19683378.svg)](https://doi.org/10.5281/zenodo.19683378)
 [![Stable](https://img.shields.io/badge/status-stable-brightgreen)](#)
 [![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)](https://expo.dev)
@@ -43,7 +43,10 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 🎨 **Dual themes** — amber for morning entries, blue for evening entries
 - 💾 **Local persistence** — all entries saved to device storage via AsyncStorage
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
-- 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics
+- 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics with colour-coded reference bands
+- 🔭 **Sleep pattern actogram** — weekly chart of bedtime to out-of-bed time with night-waking markers and a sleep-midpoint trend line, so drifting schedules and missed days are visible at a glance
+- 🎯 **Age-aware reference ranges** — optional age group (under 18, 18–64, 65+) chosen at onboarding or in the Profile adjusts the green/amber/red bands for sleep duration, latency and WASO; stored on the device only
+- 🛟 **Data-safety reminders** — entries live on the device, so the Home tab nudges participants to install the PWA (web) and to export a backup; the browser is also asked to keep storage persistent
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
 - 🖼️ **Share card** — share a branded sleep report image to social media from the final report screen, with the original home screen background; works on iOS, Android, and mobile web (PWA)
 - 🔔 **Push notifications** — daily 8am and 9pm reminders
@@ -54,7 +57,8 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 📱 **iOS & Android** — single codebase via React Native + Expo
 - 🌐 **Web** — Progressive Web App (PWA) installable on any device
 - 📲 **Installable** — installs to home screen on iOS, Android, and desktop Chrome with full offline support
-- 🌍 **Localisation** — full Portuguese (Brazilian) translation 🇧🇷, locale detected automatically from device settings
+- 🌍 **Localisation** — English, Portuguese (Brazil) 🇧🇷 and Swedish 🇸🇪 (UI and daily diary), locale detected automatically from device settings
+- 🧩 **Fully coded UI** — entry cards, the completion screen, tab bar, nav buttons and backgrounds are drawn in code with no per-language artwork, so a new language only needs strings
 - 📋 **Research questionnaires** — validated one-time instruments (ESS, ISI, DBAS-16, MEQ, PSQI, RU-SATED, STOP-BANG, MCTQ) accessible from the Profile, with results unlocking after 14 diary days
 - 💊 **My Medications** — save regular treatments to your profile; they auto-populate the morning and evening medication questions
 
@@ -71,6 +75,8 @@ SleepDiaries/
 │   ├── past-entries.jsx        # Scrollable entry history
 │   ├── final-report.jsx        # Sleep metrics summary report
 │   ├── export.jsx              # CSV / JSON export + JSON import
+│   ├── EntryDatePrompt.jsx     # "Which night is this for?" prompt for entries made after midnight
+│   ├── QuestionnaireScreen.jsx # Full-screen runner for one-time research questionnaires
 │   ├── InstructionsModal.jsx   # Full-screen instructions slideshow (coded, no PNGs)
 │   ├── ProfileModal.jsx        # Profile sheet (name, code, stats, glossary, questionnaires)
 │   ├── QuestionnaireModal.jsx  # Step-by-step one-time research questionnaire modal
@@ -85,18 +91,25 @@ SleepDiaries/
 │       ├── entry.jsx           # Entry tab with sleep stats dashboard
 │       └── settings.jsx        # Settings (includes questionnaire credits)
 ├── components/
+│   ├── ActogramChart.jsx       # Weekly sleep pattern chart for the final report (react-native-svg)
+│   ├── AgeBandPicker.jsx       # Optional age group selector (onboarding + Profile)
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
+│   ├── DataSafetyBanner.jsx    # Install / back-up reminder on the Home tab
+│   ├── EntryCardContent.jsx    # Morning / evening entry cards (all languages, no PNGs)
+│   ├── EntryCompleteSplash.jsx # "Entry complete" screen shown after saving
 │   ├── NavButtons.jsx          # Questionnaire Back / Next buttons
 │   └── ScreenBackground.jsx    # Shared gradient/background wrapper used across screens
 ├── data/
 │   ├── questions.js            # ⭐ Daily diary question definitions — start here to customise
 │   ├── questions.pt-BR.js      # Portuguese (BR) translations of question text
+│   ├── questions.sv.js         # Swedish translations of question text
 │   ├── useQuestions.js         # Merges locale overrides at startup
 │   └── questionnaires.js       # ⭐ One-time research questionnaire definitions (ESS, ISI, etc.)
 ├── i18n/
 │   ├── index.js                # Locale detector + t() helper (interpolation, plurals)
 │   ├── en.js                   # English strings
-│   └── pt-BR.js                # Portuguese (Brazil) strings
+│   ├── pt-BR.js                # Portuguese (Brazil) strings
+│   └── sv.js                   # Swedish strings
 ├── storage/
 │   ├── storage.js              # AsyncStorage helpers + CSV/JSON export + import
 │   ├── EntriesContext.jsx      # React Context — shared entry cache consumed by all screens
@@ -104,8 +117,13 @@ SleepDiaries/
 ├── utils/
 │   ├── alert.js                # Cross-platform Alert helper (web fallback)
 │   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
+│   ├── dataSafety.js           # Persistent-storage request and install / back-up reminder rules
+│   ├── dateEntry.js            # Entry-date logic for post-midnight entries and the evening gate
+│   ├── metrics.js              # Final-report metrics (duration, efficiency, SOL, WASO, ...)
+│   ├── referenceRanges.js      # ⭐ Age-banded reference ranges and colour logic for the final report
 │   └── stats.js                # Shared stat helpers (computeStats)
 ├── theme/
+│   ├── colors.js               # ⭐ Central colour palette and morning/evening themes
 │   ├── typography.js           # Font constants (Livvic, Afacad)
 │   └── useInsets.js            # Cross-platform safe area hook
 ├── web/
@@ -114,13 +132,15 @@ SleepDiaries/
 │   ├── icons/                  # PWA icons (192px, 512px)
 │   └── splashscreens/          # iPhone/iPad splash screens
 ├── scripts/
-│   ├── deploy.sh               # Web export + PWA injection + deploy prep
-│   └── crop_taskbars.py        # Utility to centre-crop taskbar image assets
+│   ├── deploy.sh               # Web export + PWA injection + deploy prep (with release-branch guard)
+│   ├── fix-paths.js            # Rewrites asset paths for sub-path (GitHub Pages) hosting
+│   └── crop_taskbars.py        # Legacy utility to centre-crop taskbar image assets
 ├── assets/
-│   └── images/
-│       ├── pt-BR/              # Locale-specific image assets (entry cards)
-│       └── index.js            # Locale-aware image map
-├── netlify.toml                # CI/CD build configuration
+│   └── images/                 # Logo, social preview and splash icon; index.js maps them
+├── __tests__/                  # Jest tests (metrics, stats, storage, export, i18n and translation keys, questionnaires, Swedish, reference ranges, data safety)
+├── .github/workflows/
+│   ├── test.yml                # Runs the Jest suite and a web build check on every push and pull request
+│   └── release-pr.yml          # Opens a main → release PR pinned to a version tag
 ├── metro.config.js             # Metro bundler config (SVG support)
 ├── declarations.d.ts           # TypeScript declaration for SVG imports
 ├── app.json                    # Expo configuration
@@ -165,7 +185,19 @@ npx expo start --web
 npm run deploy
 ```
 
-This runs the deploy script which exports the web build, injects PWA tags, copies assets, and outputs everything to the `docs/` folder. The repository is configured for automatic deployment on every push to `main`.
+This runs the deploy script which exports the web build, injects PWA tags, copies assets, and outputs everything to the `docs/` folder.
+
+### Release workflow
+
+Production is deployed from the **`release`** branch, not `main`. `main` is the integration branch: pull requests (new features, translations) merge there and get a Netlify branch-deploy preview, while `release` only moves when you cut a version, so unreleased work can never reach users by accident.
+
+1. Bump the version (`app.json`, `package.json`, `CITATION.cff`, `CHANGELOG.md`, `README.md`) on `main`, then tag it: `git tag v1.2.0 && git push origin v1.2.0`
+2. Run **Actions → Open release PR** with that tag. It opens a PR into `release` from a snapshot of the tag (`release-candidate/v1.2.0`), so anything merged to `main` afterwards is not included. It fails if the tag is not on `main` or does not match the version in `package.json`.
+3. Merge the PR. Netlify then deploys `release` to production.
+
+`scripts/deploy.sh` includes a guard: locally it refuses to run unless you are on `release` with no uncommitted changes to tracked files (override with `FORCE_DEPLOY=1`); on Netlify it fails any *production* build that is not from `release`, while deploy previews and branch deploys are allowed.
+
+> The workflow needs **Allow GitHub Actions to create and approve pull requests** enabled under Settings → Actions → General (and at organisation level for org-owned repositories).
 
 🌐 **Live web app:** https://sleepdiaries.circadia-lab.uk
 
@@ -181,12 +213,30 @@ The app detects the device locale at startup using `expo-localization` and selec
 |----------|-------------|--------|
 | 🇬🇧 English | `en` | ✅ Complete |
 | 🇧🇷 Portuguese (Brazil) | `pt-BR` | ✅ Complete |
+| 🇸🇪 Swedish | `sv`, `sv-SE`, `sv-FI` | UI and daily diary; research instruments remain in English |
+
+Swedish is selected automatically for Swedish device/browser locales, including
+Sweden and Finland. Restart the app after changing the device/browser language.
+Notification text, sharing controls, report labels, dates and decimal separators (e.g. "7,5" in Swedish and Portuguese) also follow the locale.
+If reminders were already enabled before changing language, switch reminders off
+and back on in Settings to reschedule their text in the new language.
+
+The Swedish daily diary and instructions are an **unvalidated app translation**,
+not an authorized or clinically validated Swedish Consensus Sleep Diary version.
+Research instrument titles, instructions, questions, response options, scale
+anchors, credits and interpretations remain in their original English. A Swedish
+notice makes this explicit in the questionnaire list, both questionnaire views,
+and the final report. Scoring, stored answer values and CSV/JSON keys are unchanged.
+
+The Swedish alcohol help retains the source diary's 355/150/45 ml serving sizes.
+It clarifies that these servings are not equivalent to UK alcohol units; no
+numeric thresholds or calculation logic have been changed.
 
 All other locales fall back to English.
 
 ### How it works
 
-All UI strings are defined in `i18n/en.js` and `i18n/pt-BR.js`. The `i18n/index.js` module resolves the correct bundle at startup and exports a `t()` helper used throughout the app:
+All UI strings are defined in `i18n/en.js`, `i18n/pt-BR.js` and `i18n/sv.js`. The `i18n/index.js` module resolves the correct bundle at startup and exports a `t()` helper used throughout the app:
 
 ```js
 import t from '../i18n';
@@ -199,21 +249,20 @@ The helper supports `{{variable}}` interpolation and automatic `_one` / `_other`
 
 ### Question translations
 
-Question text, rating labels, units, and placeholders are defined separately in `data/questions.pt-BR.js` and merged over the base English definitions at startup by `data/useQuestions.js`. Only translatable fields are overridden — IDs, types, defaults, and conditional logic remain in `data/questions.js`.
+Question text, rating labels, units, and placeholders are defined separately in `data/questions.<locale>.js` (`questions.pt-BR.js`, `questions.sv.js`) and merged over the base English definitions at startup by `data/useQuestions.js`. Only translatable fields are overridden — IDs, types, defaults, and conditional logic remain in `data/questions.js`.
 
 ### Adding a new language
 
 1. Create `i18n/<locale>.js` following the structure of `en.js`
 2. Create `data/questions.<locale>.js` for the question text
 3. Add the locale to the `TRANSLATIONS` map in `i18n/index.js`
-4. Add the locale to the `LANGUAGE_NAMES` map in `app/(tabs)/settings.jsx`
-5. Export any locale-specific image assets to `assets/images/<locale>/`
+4. Register the question overrides in `data/useQuestions.js`
+5. Add the locale to the `LANGUAGE_NAMES` map in `app/(tabs)/settings.jsx`
+6. Add the strings for the entry cards and completion screen under `appText` (`morningCard`, `eveningCard`, `entryPendingMorning`, `entryDoneMorning`, `entryLocked`, `entrySavedMorning`, `homepage`, ...). No image assets are needed
 
-### Locale-specific image assets
+### No locale-specific artwork
 
-Entry cards (morning/evening pending, completed, locked) contain baked-in text and require locale-specific versions. These live in `assets/images/pt-BR/` and are selected at module load time by `assets/images/index.js`.
-
-The tab bar, questionnaire nav buttons, instructions slideshow, and bottom shortcut cards are all rendered in code — no locale-specific image exports are needed for these.
+Everything that used to be baked into PNGs is now rendered in code from the `i18n` strings: the morning/evening entry cards (`components/EntryCardContent.jsx`), the entry-complete screen (`components/EntryCompleteSplash.jsx`), the tab bar, the questionnaire nav buttons, the instructions slideshow, the bottom shortcut cards and the screen backgrounds. Adding a language therefore only needs strings, never new image exports.
 
 ---
 
@@ -440,30 +489,22 @@ Each question is a plain JavaScript object with a `type` field that controls how
 
 ---
 
-## 🎨 Customising Themes
+## 🎨 Customising Colours
 
-The morning/evening colour themes are defined at the top of `app/questionnaire.jsx`:
+All colours live in `theme/colors.js` (fonts are in `theme/typography.js`):
+
+- `COLORS` — the shared brand palette (navy, blue, orange, light blue, background), the green/amber/red **status colours** used in the final report, and `textMuted`, the grey used for hints and captions
+- `THEME.morning` and `THEME.evening` — the amber and blue looks used by the daily questionnaire, the entry cards and the entry-complete screen. Change a value there and all three follow
 
 ```js
-const THEME = {
-  morning: {
-    primary:      '#E07A20',   // Amber — buttons, text, progress bar
-    primaryLight: '#F5C96A',   // Light amber — stepper backgrounds
-    progressBg:   '#F5DEB3',
-    background:   '#FDFAF5',
-    cardBg:       '#FFF8EE',
-  },
-  evening: {
-    primary:      '#2A6CB5',   // Blue
-    primaryLight: '#7EB0E0',
-    progressBg:   '#C8DFF5',
-    background:   '#F5F9FF',
-    cardBg:       '#EEF5FF',
-  },
-};
+import { COLORS, THEME } from '../theme/colors';
+
+THEME.morning.primary;      // '#E07A20' — questionnaire buttons, text, progress bar
+THEME.evening.entryFrom;    // gradient start of the evening entry card
+COLORS.status.good;         // report green
 ```
 
-The one-time research questionnaire modal uses a **purple theme** (`#6B3FA0`) to visually distinguish it from the daily diary flows.
+`textMuted` is `#64748B` (about 4.8:1 on white) so small grey text stays readable; if you change it or the entry-card colours, check the contrast ratio. Some older screens still use hex values inline and can move to these tokens over time.
 
 ---
 
@@ -494,6 +535,9 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 // Stored keys:
 // 'user_name'            → participant name string
 // 'research_code'        → optional research study identifier
+// 'age_band'             → optional age group ('under18' | 'adult' | 'older'); device-only, not exported
+// 'last_export_at'       → time of the last successful export (drives the back-up reminder)
+// 'data_safety_dismissals' → when the install / back-up reminders were last dismissed
 // 'entries'              → JSON array of diary entry objects
 // 'seen_instructions'    → 'true' once the instructions modal has been dismissed
 // 'questionnaire_{id}'   → one object per completed one-time questionnaire
@@ -549,6 +593,24 @@ The final report (unlocked after 14 morning entries) automatically computes:
 | Sleep quality | Average of 1–5 ratings |
 | Restedness | Average of 1–5 ratings |
 
+The report also opens with a **sleep pattern actogram** (`components/ActogramChart.jsx`): one bar per night from bedtime to out-of-bed time, shaded by time asleep and time awake in bed, with red markers for the number of night wakings and a dashed line tracing the midpoint of sleep. It shows seven days at a time (swipe or use the arrows), and a day with no entry leaves a visible gap instead of closing up. The waking markers show *how many* times a participant woke, not when, because the diary records a count and a total duration rather than timestamps.
+
+### Age-specific reference ranges
+
+The colour bands on the final report depend on an optional **age group** (under 18, 18–64, or 65 and over). Participants can set it during onboarding or change it later in the Profile; tapping the selected option again clears it. It is stored only on the device, is not part of CSV/JSON exports, and defaults to the 18–64 ranges when left blank.
+
+| Metric | Under 18 | 18–64 | 65 or over |
+|--------|----------|-------|-----------|
+| Sleep duration — green | 8–10 h | 7–9 h | 7–8 h |
+| Sleep duration — amber | 7–8 h, 10–11 h | 6–7 h, 9–10 h | 5–7 h, 8–9 h |
+| Sleep onset latency | green ≤30 min, amber 31–45, red >45 | green ≤30 min, amber 31–45, red >45 | green ≤30 min, amber 31–60, red >60 |
+| Wake after sleep onset | green ≤20 min, amber 21–50, red ≥51 | green ≤20 min, amber 21–40, red ≥41 | green ≤20 min, amber >20 (no red) |
+| Sleep efficiency | green ≥85%, amber 75–85%, red <75% in every age group | | |
+
+Duration is red outside the amber band. For latency, WASO and efficiency the colours follow the NSF Sleep Quality Consensus Panel (Ohayon et al., 2017, *Sleep Health*, 3(1), 6–19), which rated each value for each age group as appropriate, uncertain or inappropriate: green = appropriate (good sleep quality), amber = uncertain, red = rated poor. The panel rated sleep latency up to 30 minutes as good at every age. It gave no “poor” level of WASO for adults 65 and over, so their WASO band is amber above 20 minutes and never red. Efficiency uses ≥85% as good and ≤74% as poor for every group (the paper uses ≤64% for 18–25-year-olds, which the app does not model separately). Duration ranges come from the NSF duration recommendations (Hirshkowitz et al., 2015). The under-18 band uses the teenage (14–17) values; younger children need more sleep, so add a band if the app is ever used with them.
+
+All of the numbers, the colour logic and the scale-bar geometry live in `utils/referenceRanges.js`, so changing a threshold is a one-file edit. The same ranges drive the metric cards, the share card and **Settings → Sleep metric thresholds**.
+
 ### Research code
 
 The onboarding screen includes an optional **research code** field. This allows researchers to assign a unique identifier to each participant at enrolment. The code is:
@@ -565,6 +627,7 @@ Participants leave the field blank if they are using the app independently.
 The **Profile** button on the home screen slides up a modal showing:
 
 - Editable participant name and research code
+- Optional age group, which selects the reference ranges used in the final report
 - Summary stats: morning entries, evening entries, current streak, member since date
 - **Questionnaires** — one-time research instruments with status badges and Start/Redo buttons
 - Sleep metrics glossary with plain-language explanations of each metric
@@ -589,7 +652,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 
 ## 📄 Citation
 
-**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.1.0) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
+**França, L. G. S., Baehl, B., Howard, J., Kussow, F., Luna Colón, Y., & Leocadio-Miguel, M.** (2026). *Sleep Diaries* (v1.2.0) [Software]. Circadia Lab. https://doi.org/10.5281/zenodo.19683378
 
 ---
 
@@ -600,6 +663,7 @@ The **Entry tab** shows a live stats dashboard above the entry cards:
 | Principal Investigators | Lucas França, Mario Leocadio-Miguel |
 | Development | Lucas França |
 | Design | Bri Baehl, Jacob Howard, Frederic Kussow, Yuliana Luna Colón |
+| Swedish translation | Jonatan Nyberg |
 
 ---
 
@@ -646,7 +710,7 @@ Contributions are welcome. If you are adapting this for a research study and wan
 | `react-native-paper` | ^5.12.0 | UI component library |
 | `react-native-safe-area-context` | 5.6.2 | Safe area handling |
 | `react-native-screens` | 4.23.0 | Native screen management |
-| `react-native-svg` | 15.15.3 | SVG rendering (instructions background) |
+| `react-native-svg` | 15.15.3 | SVG rendering (screen backgrounds, entry cards, completion screen, actogram) |
 | `react-native-svg-transformer` | ^1.5.3 | SVG imports as React components |
 | `babel-preset-expo` | ~55.0.0 | Babel transpilation |
 | `expo-document-picker` | ~55.0.9 | JSON file import |
@@ -659,6 +723,9 @@ Contributions are welcome. If you are adapting this for a research study and wan
 ## 🤝 Related Tools
 
 - 🧬 [**SleepDiaries Protocol**](https://github.com/circadia-bio/SleepDiaries-Protocol) — template repo for adapting SleepDiaries to your own study, pinned to a specific release
+- 🧪 [**slumbR**](https://github.com/circadia-bio/slumbR) — R package for reading, scoring and analysing Sleep Diaries exports ([docs](https://slumbr.circadia-lab.uk))
+- 🧮 [**ScoreMe**](https://scoreme.circadia-lab.uk) — researcher-facing web app for scoring questionnaires from JSON
+- 🌱 [**Teenage Sleep Diaries**](https://teensleepdiaries.circadia-lab.uk) — fork of the protocol template for adolescent sleep research
 - 🌀 [**nonparametric-actigraphy-clustering**](https://github.com/circadia-bio/nonparametric-actigraphy-clustering) — unsupervised clustering of actigraphy rest-activity profiles using nonparametric methods
 - ⚡ [**ACTT_validation_study**](https://github.com/circadia-bio/ACTT_validation_study) — validation study for actigraphy-based sleep staging cut-points
 - 🔬 [**circadia-bio**](https://github.com/circadia-bio) — the Circadia Lab GitHub organisation
@@ -703,6 +770,12 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Full UI modernisation — glassy card system, gradient backgrounds, blur effects, refined typography and icons throughout
 - [x] Questionnaire result validation and removal of beta flag — all eight instruments now stable
 - [x] Entry date prompt — participants filling in entries between midnight and 14:00 are asked which night the entry belongs to, correctly attributing data for night owls and delayed sleep schedules
+- [x] Swedish localisation — UI and daily diary (research instruments stay in English)
+- [x] Sleep pattern actogram in the final report
+- [x] Entry cards and completion screen rendered in code — no per-language artwork
+- [x] Release branch workflow — production deploys from `release` through a tag-pinned pull request
+- [x] Age-specific reference ranges — optional age group in onboarding and Profile
+- [x] Central colour theme — morning/evening looks, status colours and muted text in `theme/colors.js`
 - [ ] KSS (Karolinska Sleepiness Scale) — protocol integration pending
 - [ ] Backend API integration
 - [ ] Additional language support
