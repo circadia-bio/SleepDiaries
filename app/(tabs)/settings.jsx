@@ -8,7 +8,9 @@ import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES } from '../../theme/typography';
-import { clearAll } from '../../storage/storage';
+import { clearAll, loadBandWidth, saveBandWidth } from '../../storage/storage';
+import BandWidthPicker from '../../components/BandWidthPicker';
+import { DEFAULT_BAND_WIDTH } from '../../utils/chronotypeBand';
 import showAlert from '../../utils/alert';
 import { loadNotificationsEnabled, saveNotificationsEnabled, sendTestNotification, requestNotificationPermission } from '../../storage/notifications';
 import t, { locale } from '../../i18n';
@@ -24,6 +26,14 @@ export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [textToSpeech, setTextToSpeech]   = useState(false);
   const [biggerText, setBiggerText]       = useState(false);
+  const [bandWidth, setBandWidth]         = useState(DEFAULT_BAND_WIDTH);
+
+  useEffect(() => { loadBandWidth().then(setBandWidth); }, []);
+
+  const handleBandWidth = async (minutes) => {
+    setBandWidth(minutes);
+    try { await saveBandWidth(minutes); } catch (_) { loadBandWidth().then(setBandWidth); }
+  };
 
   useEffect(() => { loadNotificationsEnabled().then(setNotifications); }, []);
 
@@ -93,6 +103,15 @@ export default function SettingsScreen() {
           </>
         )}
 
+        <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionReport')}</Text>
+        <View style={styles.card}>
+          <Row label={t('settings.bandWidth')} icon="resize-outline" right={null} />
+          <View style={styles.cardControl}>
+            <BandWidthPicker value={bandWidth} onChange={handleBandWidth} />
+          </View>
+          <Text style={[styles.cardHint, { fontFamily: FONTS.bodyMedium }]}>{t('settings.bandWidthHint')}</Text>
+        </View>
+
         <Text style={[styles.sectionHeader, { fontFamily: FONTS.body }]}>{t('settings.sectionData')}</Text>
         <View style={styles.card}>
           <Row label={t('settings.exportData')} icon="download-outline" onPress={() => router.push('/export')} right={<Ionicons name="chevron-forward" size={18} color="#64748B" />} />
@@ -150,6 +169,7 @@ const styles = StyleSheet.create({
   rowValue:      { fontSize: SIZES.bodySmall, color: '#64748B' },
   divider:       { height: 1, backgroundColor: '#E2EAF4' },
   cardHint:      { fontSize: SIZES.bodySmall, color: '#64748B', paddingBottom: 14, paddingHorizontal: 16, lineHeight: 24 },
+  cardControl:   { paddingHorizontal: 16, paddingBottom: 12 },
   testBtn:       { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 14, paddingHorizontal: 16 },
   testBtnText:   { fontSize: SIZES.bodySmall, color: '#4A7BB5' },
   aboutCard:     { alignItems: 'center', paddingVertical: 20, gap: 4 },

@@ -35,6 +35,13 @@
  * construction. Free dragging still works for finer navigation, and the
  * header — including the average sleep duration for the visible week, also
  * Apple-Health-style — updates as you scroll either way.
+ *
+ * Optional chronotype band: when a `chronotypeBand` prop is passed (built from
+ * the participant's MCTQ chronotype by utils/chronotypeBand.js), a soft navy
+ * band is drawn behind the grid at that clock range on every row. Each night's
+ * sleep-midpoint marker is then filled when it falls inside the band and
+ * hollow when it falls outside, and the header counts how many of the nights
+ * in view landed inside. Without the prop the chart is unchanged.
  */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
@@ -42,6 +49,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Circle, Line, Path, Text as SvgText, Defs, ClipPath, G } from 'react-native-svg';
 import t, { locale } from '../i18n';
 import { computeMetrics } from '../utils/metrics';
+import { isMidSleepInBand } from '../utils/chronotypeBand';
 import { FONTS, SIZES } from '../theme/typography';
 
 const ASLEEP_FILL   = '#2E7D3233'; // green @ 20% — matches BandBar's band alpha
@@ -51,6 +59,8 @@ const WAKING_DOT_R      = 3;
 const WAKING_DOT_GAP    = 7;   // preferred centre-to-centre spacing
 const WAKING_ROW_OFFSET = 9;   // distance above the bar's top edge
 const MIDPOINT_COLOR = '#1E3A5F';  // navy dashed trend line — sleep midpoint
+const BAND_FILL      = '#1E3A5F17'; // navy @ ~9% — chronotype band, drawn behind the grid
+const BAND_EDGE      = '#1E3A5F59'; // navy @ ~35% — the band's top and bottom edge
 const GRID_COLOR    = '#E2EAF4';
 const EMPTY_COLOR    = '#D8E2EC';  // placeholder line for a day with no entry
 const AXIS_TEXT     = '#64748B';
@@ -99,7 +109,7 @@ const nextDateStr = (dateStr) => {
   return `${y}-${m}-${dd}`;
 };
 
-export default function ActogramChart({ entries }) {
+export default function ActogramChart({ entries, chronotypeBand = null }) {
   const scrollRef = useRef(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [scrollX, setScrollX] = useState(0);
@@ -131,6 +141,11 @@ export default function ActogramChart({ entries }) {
       const out = shiftedMinutes(e.answers.mq7);
       if (bed !== null) min = Math.min(min, bed);
       if (out !== null) max = Math.max(max, out);
+    }
+    // Keep the whole band on the axis even when the diary times sit outside it.
+    if (chronotypeBand) {
+      min = Math.min(min, chronotypeBand.lo);
+      max = Math.max(max, chronotypeBand.hi);
     }
     return {
       rangeStart: floorTo(min - 30, 120),
@@ -212,6 +227,8 @@ export default function ActogramChart({ entries }) {
       x: i * colStep + colStep / 2,
       y: yFor((onset + finalWake) / 2) + TOP_PAD,
       date: day.date,
+      // null when there is no band, so nothing is marked inside or outside.
+      inside: chronotypeBand ? isMidSleepInBand((onset + finalWake) / 2, chronotypeBand) : null,
     };
   });
 
@@ -227,10 +244,19 @@ export default function ActogramChart({ entries }) {
   }
   if (currentRun.length) midpointRuns.push(currentRun);
 
+  // Nights in view with a midpoint, and how many of them fall inside the band.
+  const visibleMids  = midpoints.slice(leftIndex, rightIndex + 1).filter(Boolean);
+  const nightsInBand = visibleMids.filter((p) => p.inside).length;
+
   return (
     <View>
       <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.avgSleepDuration')}</Text>
       <Text style={[styles.statValue, { fontFamily: FONTS.heading }]}>{formatDuration(avgSleepDuration)}</Text>
+      {chronotypeBand && visibleMids.length > 0 && (
+        <Text style={[styles.bandSummary, { fontFamily: FONTS.bodyMedium }]}>
+          {t('report.bandSummary', { inBand: nightsInBand, count: visibleMids.length })}
+        </Text>
+      )}
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => goToWeek(-1)} disabled={atStart} hitSlop={8}>
@@ -287,6 +313,26 @@ export default function ActogramChart({ entries }) {
                 );
               })}
             </Defs>
+
+            {chronotypeBand && (
+              <>
+                <Rect
+                  x={0} y={yFor(chronotypeBand.lo) + TOP_PAD}
+                  width={plotWidth} height={(chronotypeBand.hi - chronotypeBand.lo) * PX_PER_MIN}
+                  fill={BAND_FILL}
+                />
+                <Line
+                  x1={0} y1={yFor(chronotypeBand.lo) + TOP_PAD}
+                  x2={plotWidth} y2={yFor(chronotypeBand.lo) + TOP_PAD}
+                  stroke={BAND_EDGE} strokeWidth={1}
+                />
+                <Line
+                  x1={0} y1={yFor(chronotypeBand.hi) + TOP_PAD}
+                  x2={plotWidth} y2={yFor(chronotypeBand.hi) + TOP_PAD}
+                  stroke={BAND_EDGE} strokeWidth={1}
+                />
+              </>
+            )}
 
             {gridTimes.map((m) => (
               <Line
@@ -397,9 +443,18 @@ export default function ActogramChart({ entries }) {
                     fill="none"
                   />
                 )}
-                {run.map((p) => (
-                  <Circle key={p.date} cx={p.x} cy={p.y} r={3} fill={MIDPOINT_COLOR} stroke="#fff" strokeWidth={1} />
-                ))}
+                {run.map((p) => {
+                  // Hollow = outside the band. Shape, not colour, carries the meaning.
+                  const outside = chronotypeBand && !p.inside;
+                  return (
+                    <Circle
+                      key={p.date} cx={p.x} cy={p.y} r={3}
+                      fill={outside ? '#fff' : MIDPOINT_COLOR}
+                      stroke={outside ? MIDPOINT_COLOR : '#fff'}
+                      strokeWidth={outside ? 1.5 : 1}
+                    />
+                  );
+                })}
               </React.Fragment>
             ))}
           </Svg>
@@ -418,4 +473,5 @@ const styles = StyleSheet.create({
   headerLabel: { fontSize: SIZES.caption, color: '#1E3A5F' },
   statLabel:   { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4 },
   statValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F', paddingHorizontal: 4, marginBottom: 8 },
+  bandSummary: { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4, marginBottom: 8 },
 });

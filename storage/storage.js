@@ -8,6 +8,7 @@
  *   user_name               — participant's name string
  *   research_code           — optional research code string
  *   age_band                — optional age group ('under18' | 'adult' | 'older'); device-only, never exported
+ *   chronotype_band_width   — half-width of the actogram chronotype band, in minutes (15 | 30 | 45); device-only, never exported
  *   entries                 — JSON array of diary entry objects
  *   seen_instructions       — 'true' once the instructions modal has been dismissed
  *   questionnaire_{id}      — one object per completed one-time questionnaire
@@ -34,12 +35,14 @@
 import t from '../i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isValidAgeBand } from '../utils/referenceRanges';
+import { isValidBandWidth, DEFAULT_BAND_WIDTH } from '../utils/chronotypeBand';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const KEYS = {
   USER_NAME:            'user_name',
   RESEARCH_CODE:        'research_code',
   AGE_BAND:             'age_band',
+  BAND_WIDTH:           'chronotype_band_width',
   LAST_EXPORT_AT:       'last_export_at',
   DATA_SAFETY_DISMISSALS: 'data_safety_dismissals',
   ENTRIES:              'entries',
@@ -144,6 +147,34 @@ export const loadAgeBand = async () => {
   } catch (e) {
     console.warn('[storage] loadAgeBand failed:', e.message);
     return null;
+  }
+};
+
+// ─── Chronotype band width ─────────────────────────────────────────────────────────────────────
+/**
+ * Half-width, in minutes, of the shaded chronotype band on the final report's
+ * actogram. A display preference: stored on the device, not part of the export.
+ * Anything that is not one of BAND_WIDTH_OPTIONS is rejected on save and
+ * ignored on load, so a corrupted value falls back to the default.
+ */
+export const saveBandWidth = async (minutes) => {
+  try {
+    if (!isValidBandWidth(minutes)) throw new Error(`Invalid band width: ${minutes}`);
+    await AsyncStorage.setItem(KEYS.BAND_WIDTH, String(minutes));
+  } catch (e) {
+    console.warn('[storage] saveBandWidth failed:', e.message);
+    throw e;
+  }
+};
+
+/** Returns the saved half-width in minutes, or DEFAULT_BAND_WIDTH when none is saved. */
+export const loadBandWidth = async () => {
+  try {
+    const value = Number(await AsyncStorage.getItem(KEYS.BAND_WIDTH));
+    return isValidBandWidth(value) ? value : DEFAULT_BAND_WIDTH;
+  } catch (e) {
+    console.warn('[storage] loadBandWidth failed:', e.message);
+    return DEFAULT_BAND_WIDTH;
   }
 };
 
@@ -252,7 +283,7 @@ export const clearAll = async () => {
     // Also remove any stored questionnaire results
     const allKeys = await AsyncStorage.getAllKeys();
     const qKeys = allKeys.filter((k) => k.startsWith('questionnaire_'));
-    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.LAST_EXPORT_AT, KEYS.DATA_SAFETY_DISMISSALS, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
+    await AsyncStorage.multiRemove([KEYS.USER_NAME, KEYS.RESEARCH_CODE, KEYS.AGE_BAND, KEYS.BAND_WIDTH, KEYS.LAST_EXPORT_AT, KEYS.DATA_SAFETY_DISMISSALS, KEYS.ENTRIES, KEYS.SEEN_INSTRUCTIONS, KEYS.MEDICATION_PRESETS, ...qKeys]);
   } catch (e) {
     console.warn('[storage] clearAll failed:', e.message);
     throw e;

@@ -45,6 +45,7 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 📋 **Past entries** — scrollable history grouped by date with expandable answer cards
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics with colour-coded reference bands
 - 🔭 **Sleep pattern actogram** — weekly chart of bedtime to out-of-bed time with night-waking markers and a sleep-midpoint trend line, so drifting schedules and missed days are visible at a glance
+- 🕰️ **Chronotype band** — for participants who have completed the MCTQ, the actogram shades their chronotype and marks each night's sleep midpoint as inside or outside it; the band width is a setting, stored on the device only
 - 🎯 **Age-aware reference ranges** — optional age group (under 18, 18–64, 65+) chosen at onboarding or in the Profile adjusts the green/amber/red bands for sleep duration, latency and WASO; stored on the device only
 - 🛟 **Data-safety reminders** — entries live on the device, so the Home tab nudges participants to install the PWA (web) and to export a backup; the browser is also asked to keep storage persistent
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
@@ -93,6 +94,7 @@ SleepDiaries/
 ├── components/
 │   ├── ActogramChart.jsx       # Weekly sleep pattern chart for the final report (react-native-svg)
 │   ├── AgeBandPicker.jsx       # Optional age group selector (onboarding + Profile)
+│   ├── BandWidthPicker.jsx     # Chronotype band width selector (Settings → Report)
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
 │   ├── DataSafetyBanner.jsx    # Install / back-up reminder on the Home tab
 │   ├── EntryCardContent.jsx    # Morning / evening entry cards (all languages, no PNGs)
@@ -116,6 +118,7 @@ SleepDiaries/
 │   └── notifications.js        # Push notification scheduling
 ├── utils/
 │   ├── alert.js                # Cross-platform Alert helper (web fallback)
+│   ├── chronotypeBand.js       # MCTQ chronotype band for the actogram (centre, width, inside/outside)
 │   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
 │   ├── dataSafety.js           # Persistent-storage request and install / back-up reminder rules
 │   ├── dateEntry.js            # Entry-date logic for post-midnight entries and the evening gate
@@ -536,6 +539,7 @@ All data is stored locally on the device using `@react-native-async-storage/asyn
 // 'user_name'            → participant name string
 // 'research_code'        → optional research study identifier
 // 'age_band'             → optional age group ('under18' | 'adult' | 'older'); device-only, not exported
+// 'chronotype_band_width' → actogram band half-width in minutes (15 | 30 | 45); device-only, not exported
 // 'last_export_at'       → time of the last successful export (drives the back-up reminder)
 // 'data_safety_dismissals' → when the install / back-up reminders were last dismissed
 // 'entries'              → JSON array of diary entry objects
@@ -594,6 +598,41 @@ The final report (unlocked after 14 morning entries) automatically computes:
 | Restedness | Average of 1–5 ratings |
 
 The report also opens with a **sleep pattern actogram** (`components/ActogramChart.jsx`): one bar per night from bedtime to out-of-bed time, shaded by time asleep and time awake in bed, with red markers for the number of night wakings and a dashed line tracing the midpoint of sleep. It shows seven days at a time (swipe or use the arrows), and a day with no entry leaves a visible gap instead of closing up. The waking markers show *how many* times a participant woke, not when, because the diary records a count and a total duration rather than timestamps.
+
+### Chronotype band
+
+The actogram can shade the participant's chronotype behind the diary data, so each night can be read against their usual rhythm. The MCTQ is optional in Sleep Diaries, so the band only appears for participants who have completed it.
+
+| Element | Meaning |
+|---------|---------|
+| Shaded band | A fixed clock range on every row, centred on **MSFsc** (mid-sleep on free days, corrected for sleep debt) from the MCTQ, and extending the chosen half-width either side. MSFsc 03:30 with ±30 min gives a band of 03:00–04:00 |
+| Filled marker | That night's sleep midpoint fell inside the band (edges included) |
+| Hollow marker | That night's sleep midpoint fell outside the band |
+| Header line | "N of M nights with mid-sleep in the band" for the nights currently in view. It changes as the participant scrolls, like the average sleep duration above it |
+
+A night's midpoint is the middle of its asleep segment: sleep onset (time tried to sleep plus time to fall asleep) to final waking. This is the same midpoint the dashed trend line already traces. Filled versus hollow is the only cue for inside versus outside, so it does not rely on colour.
+
+**Width.** Participants choose ±15, ±30 (default) or ±45 minutes under **Settings → Report**. It applies on the next visit to the report, and `BAND_WIDTH_OPTIONS` and `DEFAULT_BAND_WIDTH` in `utils/chronotypeBand.js` define the choices (keep the default one of them). The width is a presentation setting: the MCTQ literature defines no tolerance around MSFsc, so "inside the band" is not a clinical category. State the width you used if you report these counts.
+
+**When no band is drawn.** The chart is unchanged, with no placeholder, if the MCTQ has not been completed or its result holds no usable MSFsc. It is also hidden when the participant reported working or having mandatory commitments on all 7 days (`mctq_wd = 7`). They then have no free days, and the free-day answers behind MSFsc would be defaults rather than their own.
+
+**Wording.** The band is a reference for the participant's own rhythm, not a target, and the in-app text says so. Avoid calling it "ideal" or "optimal" in anything built on top of it. MSFsc is an estimate of timing from self-report, shifted by the sleep-debt correction.
+
+```jsx
+import { getChronotypeBand } from '../utils/chronotypeBand';
+
+const band = getChronotypeBand(mctqResult, halfWidthMinutes); // null when unusable
+<ActogramChart entries={morningEntries} chronotypeBand={band} />
+```
+
+| Export (`utils/chronotypeBand.js`) | Purpose |
+|-----------------------------------|---------|
+| `getChronotypeBand(result, halfWidth)` | Stored MCTQ result → `{ centre, lo, hi, halfWidth }` in shifted minutes, or `null` |
+| `isMidSleepInBand(midpoint, band)` | Inclusive test on a 24-hour circle, so a band across midnight works |
+| `formatBandClock(minutes)` | Shifted minutes → `HH:MM` |
+| `BAND_WIDTH_OPTIONS`, `DEFAULT_BAND_WIDTH`, `isValidBandWidth` | The offered half-widths (15, 30, 45) and the default (30) |
+
+Shifted minutes are minutes since midnight with anything before noon counted as the next day (23:30 is 1410, 03:30 is 1650), which is the scale the actogram already plots on. When a band is passed, the chart also widens its time axis so the whole band is always visible. `loadBandWidth` and `saveBandWidth` in `storage/storage.js` keep the setting.
 
 ### Age-specific reference ranges
 
@@ -772,6 +811,7 @@ Design by Bri Baehl, Jacob Howard, Frederic Kussow, and Yuliana Luna Colón.
 - [x] Entry date prompt — participants filling in entries between midnight and 14:00 are asked which night the entry belongs to, correctly attributing data for night owls and delayed sleep schedules
 - [x] Swedish localisation — UI and daily diary (research instruments stay in English)
 - [x] Sleep pattern actogram in the final report
+- [x] Chronotype band on the actogram — MCTQ chronotype shaded behind the diary data, with a width setting
 - [x] Entry cards and completion screen rendered in code — no per-language artwork
 - [x] Release branch workflow — production deploys from `release` through a tag-pinned pull request
 - [x] Age-specific reference ranges — optional age group in onboarding and Profile

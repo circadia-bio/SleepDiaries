@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Chronotype band on the actogram.** When the participant has completed the MCTQ, the final report's sleep-pattern chart shades a band behind the diary data, centred on their chronotype (MSFsc) at the same clock time on every row. Each night's sleep-midpoint marker is filled when it falls inside the band and hollow when it falls outside, and the header counts how many of the nights in view landed inside. The legend and a short note under the chart explain it, and the note says the band is a reference, not a target
+- **Band width setting** under **Settings → Report**: ±15, ±30 (default) or ±45 minutes either side of MSFsc. It is stored on the device only and is not part of the export. The Report section shows on the web build as well as on the phone apps
+- `utils/chronotypeBand.js` (band, inside/outside test, clock formatting), `components/BandWidthPicker.jsx`, and `loadBandWidth` / `saveBandWidth` in `storage/storage.js`
+- **Tests** for the band centre and widths, inclusive edges, a band that straddles midnight, agreement with the real MCTQ scoring, and the stored width
+
+### Changed
+
+- `ActogramChart` takes an optional `chronotypeBand` prop. Without it the chart is unchanged. With it, the time axis widens if needed so the whole band is visible
+- `clearAll` also removes the saved band width
+- English, Portuguese (Brazil) and Swedish strings for the legend, summary line, chart note and setting
+
+### Notes
+
+- The MCTQ is optional in Sleep Diaries, so the band only appears for participants who have completed it. It is also not drawn if the result has no usable MSFsc, or if the participant reported working or having commitments on all 7 days (no free days, so MSFsc is not meaningful)
+- The width is a presentation choice. The MCTQ literature defines no tolerance around MSFsc, so "inside the band" is not a clinical category
+
+---
+
 ## [1.2.0] — 2026-10-19
 
 ### Added

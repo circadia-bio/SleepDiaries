@@ -7,10 +7,11 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loadAllQuestionnaires, loadResearchCode, loadAgeBand } from '../storage/storage';
+import { loadAllQuestionnaires, loadResearchCode, loadAgeBand, loadBandWidth } from '../storage/storage';
 import { useEntries } from '../storage/EntriesContext';
 import { MIN_ENTRIES_FOR_REPORT } from '../utils/constants';
 import { computeMetrics } from '../utils/metrics';
+import { getChronotypeBand, formatBandClock, DEFAULT_BAND_WIDTH } from '../utils/chronotypeBand';
 import { QUESTIONNAIRES } from '../data/questionnaires';
 import { FONTS, SIZES } from '../theme/typography';
 import t, { locale, isSwedish } from '../i18n';
@@ -515,6 +516,13 @@ export default function FinalReportScreen() {
   const [ageBand, setAgeBand] = useState(null);
   // Reference ranges follow the participant's (optional) age group; adult by default.
   const ranges = useMemo(() => getReferenceRanges(ageBand), [ageBand]);
+  // Chronotype band for the actogram: MSFsc from the MCTQ, with the participant's chosen width.
+  // null (no band drawn) when the MCTQ is missing or has no free days.
+  const [bandWidth, setBandWidth] = useState(DEFAULT_BAND_WIDTH);
+  const chronotypeBand = useMemo(
+    () => getChronotypeBand(qResults.find((r) => r.id === 'mctq'), bandWidth),
+    [qResults, bandWidth],
+  );
   const durationColor = (m) => durationColorFor(m, ranges);
   const latencyColor  = (m) => latencyColorFor(m, ranges);
   const wasoColor     = (m) => wasoColorFor(m, ranges);
@@ -545,10 +553,11 @@ export default function FinalReportScreen() {
   useFocusEffect(useCallback(() => {
     const load = async () => {
       setLoading(true);
-      const [, allQResults, code, band] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode(), loadAgeBand()]);
+      const [, allQResults, code, band, width] = await Promise.all([refresh(), loadAllQuestionnaires(), loadResearchCode(), loadAgeBand(), loadBandWidth()]);
       setQResults(allQResults.filter((r) => QUESTIONNAIRES.find((q) => q.id === r.id)));
       setResearchCode(code ?? '');
       setAgeBand(band);
+      setBandWidth(width);
       setLoading(false);
     };
     load();
@@ -639,11 +648,21 @@ export default function FinalReportScreen() {
               <View style={styles.legendItem}><View style={[styles.legendSwatch, { backgroundColor: '#F59E0B33', borderWidth: 1, borderColor: '#F59E0B55' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendAwake')}</Text></View>
               <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#DC2626' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendWaking')}</Text></View>
               <View style={styles.legendItem}><View style={styles.legendDash} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendMidpoint')}</Text></View>
+              {chronotypeBand && (
+                <>
+                  <View style={styles.legendItem}><View style={styles.legendBand} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendBand', { start: formatBandClock(chronotypeBand.lo), end: formatBandClock(chronotypeBand.hi) })}</Text></View>
+                  <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#1E3A5F' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendMidInBand')}</Text></View>
+                  <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#1E3A5F' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendMidOutBand')}</Text></View>
+                </>
+              )}
             </View>
             <View style={styles.actogramCard}>
-              <ActogramChart entries={morning} />
+              <ActogramChart entries={morning} chronotypeBand={chronotypeBand} />
             </View>
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.sleepPatternNote')}</Text>
+            {chronotypeBand && (
+              <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.sleepPatternBandNote', { centre: formatBandClock(chronotypeBand.centre), minutes: chronotypeBand.halfWidth })}</Text>
+            )}
           </Section>
 
           <Section title={t('report.sleepTiming')}>
@@ -740,6 +759,7 @@ const styles = StyleSheet.create({
   legendSwatch:  { width: 12, height: 12, borderRadius: 3 },
   legendDot:     { width: 10, height: 10, borderRadius: 5 },
   legendDash:    { width: 16, height: 0, borderTopWidth: 2, borderStyle: 'dashed', borderColor: '#1E3A5F' },
+  legendBand:    { width: 14, height: 10, backgroundColor: '#1E3A5F17', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#1E3A5F59' },
   legendLabel:   { fontSize: SIZES.caption, color: '#5B7089' },
 
   // Questionnaire report cards
