@@ -46,6 +46,7 @@ It also includes a suite of validated one-time research questionnaires (ESS, ISI
 - 📊 **Final report** — auto-unlocks after 14 morning entries, computes sleep metrics with colour-coded reference bands
 - 🔭 **Sleep pattern actogram** — weekly chart of bedtime to out-of-bed time with night-waking markers and a sleep-midpoint trend line, so drifting schedules and missed days are visible at a glance
 - 🕰️ **Usual-sleep bands** — for participants who have completed the MCTQ, the actogram shades their usual workday and free-day sleep and highlights nights whose sleep midpoint falls in either band, or both; the band width is a setting, stored on the device only
+- 🔎 **Full sleep pattern view** — tap the actogram to open a full-screen view with one row per night, so a month or more can be read at once; rows scale to the screen and the usual-sleep bands carry over
 - 🎯 **Age-aware reference ranges** — optional age group (under 18, 18–64, 65+) chosen at onboarding or in the Profile adjusts the green/amber/red bands for sleep duration, latency and WASO; stored on the device only
 - 🛟 **Data-safety reminders** — entries live on the device, so the Home tab nudges participants to install the PWA (web) and to export a backup; the browser is also asked to keep storage persistent
 - 📤 **Data export** — CSV and JSON export via native share sheet, including questionnaire results
@@ -93,6 +94,8 @@ SleepDiaries/
 │       └── settings.jsx        # Settings (includes questionnaire credits)
 ├── components/
 │   ├── ActogramChart.jsx       # Weekly sleep pattern chart for the final report (react-native-svg)
+│   ├── ActogramFullView.jsx    # Full-screen horizontal sleep pattern, opened from the weekly chart
+│   ├── ActogramLegend.jsx      # Legend shared by the report and the full-screen view
 │   ├── AgeBandPicker.jsx       # Optional age group selector (onboarding + Profile)
 │   ├── BandWidthPicker.jsx     # Band width selector (Settings → Report)
 │   ├── BottomCards.jsx         # Past Entries and Final Report shortcut cards
@@ -117,6 +120,7 @@ SleepDiaries/
 │   ├── EntriesContext.jsx      # React Context — shared entry cache consumed by all screens
 │   └── notifications.js        # Push notification scheduling
 ├── utils/
+│   ├── actogram.js             # Shared actogram helpers: calendar, night times, time range, full-view row sizing
 │   ├── alert.js                # Cross-platform Alert helper (web fallback)
 │   ├── chronotypeBand.js       # MCTQ usual-sleep bands for the actogram (workday and free-day centres, width, classification)
 │   ├── constants.js            # ⭐ Shared constants (e.g. MIN_ENTRIES_FOR_REPORT)
@@ -598,6 +602,21 @@ The final report (unlocked after 14 morning entries) automatically computes:
 | Restedness | Average of 1–5 ratings |
 
 The report also opens with a **sleep pattern actogram** (`components/ActogramChart.jsx`): one bar per night from bedtime to out-of-bed time, shaded by time asleep and time awake in bed, with red markers for the number of night wakings and a dashed line tracing the midpoint of sleep. It shows seven days at a time (swipe or use the arrows), and a day with no entry leaves a visible gap instead of closing up. The waking markers show *how many* times a participant woke, not when, because the diary records a count and a total duration rather than timestamps.
+
+### Full sleep pattern view
+
+Tapping the actogram card in the final report (or its expand button) opens a full-screen view, `components/ActogramFullView.jsx`. It turns the weekly chart on its side, the way a classic actogram is drawn: time runs left to right and each night is a row, oldest at the top, so a month or more can be read at a glance. It opens at the newest night, with a fixed time axis at the top and a thin line at the start of each Monday.
+
+| Behaviour | Detail |
+|-----------|--------|
+| Row height | Rows fill the screen. The view measures the space below the time axis and sets the row height so every night fits, between 14 px and 36 px. The report unlocks at 14 mornings, so a short study gets taller rows instead of a mostly empty screen |
+| A month | 31 days need at least 440 px below the time axis (14 px rows plus padding). When the screen leaves that much room, a month fits without scrolling; otherwise the view scrolls |
+| Longer studies | Rows stay at the 14 px minimum and the view scrolls vertically |
+| Font size | The minimum row height, the labels and the label column grow with the system font size (up to 1.4×), so the view scrolls sooner rather than squeezing text |
+| Content | The same bars, midpoint line and usual-sleep bands as the weekly chart (vertical stripes here), from the shared helpers in `utils/actogram.js`. Night wakings are red dots to the left of each bar |
+| Counts | The summary lines cover every night in the study. The weekly card counts only the nights in view, so the two numbers differ |
+
+The app is locked to portrait (`"orientation": "portrait"` in `app.json`), so on phones this is a portrait view. The modal allows both orientations, so it rotates on the web build and if the lock is ever lifted. Letting only this view rotate while the rest of the app stays in portrait would need `expo-screen-orientation` and a native rebuild.
 
 ### Usual-sleep bands
 

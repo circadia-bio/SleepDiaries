@@ -47,6 +47,12 @@
  * a night in neither gets a hollow marker and a dash. If the two bands sit
  * close together they are drawn as one. The header counts the nights in view
  * that landed in a band. Without the prop the chart is unchanged.
+ *
+ * When an `onExpand` handler is passed, a small expand button in the top
+ * corner calls it. The final report uses it (and a tap on the chart card) to
+ * open the full-screen horizontal view, components/ActogramFullView.jsx. The
+ * calendar, night times and time range come from utils/actogram.js, shared
+ * with that view.
  */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
@@ -55,6 +61,7 @@ import Svg, { Rect, Circle, Line, Path, Text as SvgText, Defs, ClipPath, G } fro
 import t, { locale } from '../i18n';
 import { computeMetrics } from '../utils/metrics';
 import { classifyMidSleep } from '../utils/chronotypeBand';
+import { clamp, formatClock, formatDuration, buildCalendar, nightTimes, timeRange } from '../utils/actogram';
 import { FONTS, SIZES } from '../theme/typography';
 
 const ASLEEP_FILL   = '#2E7D3233'; // green @ 20% — matches BandBar's band alpha
@@ -86,86 +93,17 @@ const TOP_PAD    = 10;
 const LABEL_GAP  = 20;
 const AXIS_WIDTH = 58;
 
-// Shifts a clock time so hours before noon count as "the next day" — lets us
-// compare/plot bedtime and wake time on one continuous scale across midnight.
-const shiftedMinutes = (time) => {
-  if (!time) return null;
-  const h = time.hour < 12 ? time.hour + 24 : time.hour;
-  return h * 60 + time.minute;
-};
-
-const floorTo = (mins, step) => Math.floor(mins / step) * step;
-const ceilTo  = (mins, step) => Math.ceil(mins / step) * step;
-const clamp   = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-
-const formatClock = (mins) => {
-  const h = Math.floor(mins / 60) % 24;
-  const m = Math.round(mins % 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-};
-
-const formatDuration = (mins) => {
-  if (mins === null || mins === undefined || isNaN(mins)) return '\u2014';
-  const h = Math.floor(Math.abs(mins) / 60);
-  const m = Math.round(Math.abs(mins) % 60);
-  return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
-};
-
-// 'YYYY-MM-DD' + 1 day, as a 'YYYY-MM-DD' string — avoids timezone drift by
-// anchoring at noon before doing the date arithmetic.
-const nextDateStr = (dateStr) => {
-  const d = new Date(`${dateStr}T12:00:00`);
-  d.setDate(d.getDate() + 1);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${dd}`;
-};
-
-export default function ActogramChart({ entries, chronotypeBands = null }) {
+export default function ActogramChart({ entries, chronotypeBands = null, onExpand = null }) {
   const scrollRef = useRef(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [scrollX, setScrollX] = useState(0);
 
-  const realEntries = entries
-    .filter((e) => e.type === 'morning' && e.answers?.mq1 && e.answers?.mq7)
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  // Build the full contiguous calendar range so a missed diary entry shows
-  // up as an empty column rather than silently disappearing from the
-  // timeline. { date, entry } — entry is null for a day with nothing logged.
-  const calendarDays = [];
-  if (realEntries.length > 0) {
-    const byDate = new Map(realEntries.map((e) => [e.date, e]));
-    let cursor = realEntries[0].date;
-    const last = realEntries[realEntries.length - 1].date;
-    while (cursor <= last) {
-      calendarDays.push({ date: cursor, entry: byDate.get(cursor) ?? null });
-      cursor = nextDateStr(cursor);
-    }
-  }
-
-  const rangeCalc = (() => {
-    if (realEntries.length === 0) return { rangeStart: 20 * 60, rangeEnd: 36 * 60 };
-    let min = Infinity;
-    let max = -Infinity;
-    for (const e of realEntries) {
-      const bed = shiftedMinutes(e.answers.mq1);
-      const out = shiftedMinutes(e.answers.mq7);
-      if (bed !== null) min = Math.min(min, bed);
-      if (out !== null) max = Math.max(max, out);
-    }
-    // Keep the whole of the bands on the axis even when the diary times sit outside them.
-    if (chronotypeBands) {
-      min = Math.min(min, chronotypeBands.lo);
-      max = Math.max(max, chronotypeBands.hi);
-    }
-    return {
-      rangeStart: floorTo(min - 30, 120),
-      rangeEnd:   ceilTo(max + 30, 120),
-    };
-  })();
-  const { rangeStart, rangeEnd } = rangeCalc;
+  // The drawable entries, and the full contiguous calendar range so a missed
+  // diary entry shows up as an empty column rather than silently disappearing
+  // from the timeline. { date, entry } — entry is null for a day with nothing
+  // logged. Shared with the full-screen view (utils/actogram.js).
+  const { realEntries, calendarDays } = buildCalendar(entries);
+  const { rangeStart, rangeEnd } = timeRange(realEntries, chronotypeBands);
 
   const chartHeight = (rangeEnd - rangeStart) * PX_PER_MIN;
   const yFor = (mins) => (mins - rangeStart) * PX_PER_MIN;
@@ -228,20 +166,14 @@ export default function ActogramChart({ entries, chronotypeBands = null }) {
   // A missing day is simply a null here, which breaks the run automatically
   // (see the loop below) — so we never draw a line across a missed night.
   const midpoints = calendarDays.map((day, i) => {
-    const entry = day.entry;
-    if (!entry) return null;
-    const a = entry.answers;
-    const tried    = shiftedMinutes(a.mq2) ?? shiftedMinutes(a.mq1);
-    const solMin   = a.mq3 ? a.mq3.hours * 60 + a.mq3.minutes : 0;
-    const onset    = tried !== null ? tried + solMin : null;
-    const finalWake = shiftedMinutes(a.mq6) ?? shiftedMinutes(a.mq7);
-    if (onset === null || finalWake === null) return null;
+    const night = day.entry ? nightTimes(day.entry) : null;
+    if (!night) return null;
     return {
       x: i * colStep + colStep / 2,
-      y: yFor((onset + finalWake) / 2) + TOP_PAD,
+      y: yFor(night.mid) + TOP_PAD,
       date: day.date,
       // null when there are no bands, so nothing is marked or counted.
-      kind: chronotypeBands ? classifyMidSleep((onset + finalWake) / 2, chronotypeBands) : null,
+      kind: chronotypeBands ? classifyMidSleep(night.mid, chronotypeBands) : null,
     };
   });
 
@@ -284,6 +216,17 @@ export default function ActogramChart({ entries, chronotypeBands = null }) {
 
   return (
     <View>
+      {onExpand && (
+        <TouchableOpacity
+          style={styles.expandBtn}
+          onPress={onExpand}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t('report.openFullView')}
+        >
+          <Ionicons name="expand-outline" size={20} color={HEADER_TEXT} />
+        </TouchableOpacity>
+      )}
       <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.avgSleepDuration')}</Text>
       <Text style={[styles.statValue, { fontFamily: FONTS.heading }]}>{formatDuration(avgSleepDuration)}</Text>
       {chronotypeBands && visibleMids.length > 0 && (
@@ -351,12 +294,9 @@ export default function ActogramChart({ entries, chronotypeBands = null }) {
           <Svg width={plotWidth} height={totalHeight}>
             <Defs>
               {calendarDays.map((day) => {
-                const entry = day.entry;
-                if (!entry) return null;
-                const a = entry.answers;
-                const bed      = shiftedMinutes(a.mq1);
-                const outOfBed = shiftedMinutes(a.mq7);
-                if (bed === null || outOfBed === null) return null;
+                const night = day.entry ? nightTimes(day.entry) : null;
+                if (!night) return null;
+                const { bed, outOfBed } = night;
                 const yBed = yFor(bed) + TOP_PAD;
                 const yOut = yFor(outOfBed) + TOP_PAD;
                 return (
@@ -416,25 +356,19 @@ export default function ActogramChart({ entries, chronotypeBands = null }) {
                 );
               }
 
-              const a = entry.answers;
               const x = colCenter - barWidth / 2;
 
-              const bed      = shiftedMinutes(a.mq1);
-              const tried    = shiftedMinutes(a.mq2) ?? bed;
-              const solMin   = a.mq3 ? a.mq3.hours * 60 + a.mq3.minutes : 0;
-              const onset    = tried + solMin;
-              const outOfBed = shiftedMinutes(a.mq7);
-              const finalWake = shiftedMinutes(a.mq6) ?? outOfBed;
-              if (bed === null || outOfBed === null) return null;
+              const night = nightTimes(entry);
+              if (!night) return null;
+              const { bed, tried, onset, finalWake, outOfBed, wakings } = night;
 
               const yBed   = yFor(bed) + TOP_PAD;
               const yTried = yFor(tried) + TOP_PAD;
               const yOnset = yFor(onset) + TOP_PAD;
               const yWake  = yFor(finalWake) + TOP_PAD;
               const yOut   = yFor(outOfBed) + TOP_PAD;
-              const kind   = chronotypeBands ? classifyMidSleep((onset + finalWake) / 2, chronotypeBands) : null;
+              const kind   = chronotypeBands ? classifyMidSleep(night.mid, chronotypeBands) : null;
 
-              const wakings = a.mq4 === 'yes' ? (a.mq4b ?? 0) : 0;
               // Dots sit in a row just above the bar rather than inside it —
               // exact within-night timing isn't recorded, so a count of
               // markers reads more honestly than scattering them through the
@@ -536,4 +470,5 @@ const styles = StyleSheet.create({
   statValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F', paddingHorizontal: 4, marginBottom: 8 },
   bandSummary: { fontSize: SIZES.caption, color: '#1E3A5F', paddingHorizontal: 4 },
   bandBreakdown: { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4, marginBottom: 8 },
+  expandBtn:   { position: 'absolute', top: 0, right: 4, zIndex: 1 },
 });

@@ -159,6 +159,8 @@ export default {
     tagWork:             'W',
     tagFree:             'F',
     tagBoth:             'W+F',
+    openFullView:        'Open the full sleep pattern',
+    closeFullView:       'Close',
     bandSummary_one:     '{{inBand}} of {{count}} night with mid-sleep in a band',
     bandSummary_other:   '{{inBand}} of {{count}} nights with mid-sleep in a band',
     bandBreakdown:       '{{work}} workday only · {{free}} free-day only · {{both}} both · {{none}} neither',

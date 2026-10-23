@@ -19,6 +19,8 @@ import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import ScreenBackground from '../components/ScreenBackground';
 import ActogramChart from '../components/ActogramChart';
+import ActogramFullView from '../components/ActogramFullView';
+import ActogramLegend from '../components/ActogramLegend';
 import {
   getReferenceRanges,
   durationColor as durationColorFor,
@@ -519,6 +521,8 @@ export default function FinalReportScreen() {
   // Usual-sleep bands for the actogram: workday and free-day mid-sleep from the MCTQ answers,
   // with the participant's chosen width. null (nothing extra drawn) when the MCTQ is missing.
   const [bandWidth, setBandWidth] = useState(DEFAULT_BAND_WIDTH);
+  // The full-screen horizontal actogram, opened by tapping the chart card.
+  const [actogramOpen, setActogramOpen] = useState(false);
   const chronotypeBands = useMemo(
     () => getChronotypeBands(qResults.find((r) => r.id === 'mctq'), bandWidth),
     [qResults, bandWidth],
@@ -643,44 +647,22 @@ export default function FinalReportScreen() {
           </View>
 
           <Section title={t('report.sleepPattern')}>
-            <View style={styles.actogramLegendRow}>
-              <View style={styles.legendItem}><View style={[styles.legendSwatch, { backgroundColor: '#2E7D3233', borderWidth: 1, borderColor: '#2E7D3255' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendAsleep')}</Text></View>
-              <View style={styles.legendItem}><View style={[styles.legendSwatch, { backgroundColor: '#F59E0B33', borderWidth: 1, borderColor: '#F59E0B55' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendAwake')}</Text></View>
-              <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#DC2626' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendWaking')}</Text></View>
-              <View style={styles.legendItem}><View style={styles.legendDash} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendMidpoint')}</Text></View>
-              {chronotypeBands && (
-                <>
-                  {chronotypeBands.merged ? (
-                    <>
-                      <View style={styles.legendItem}><View style={styles.legendBand} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendUsualBand', { start: formatBandClock(chronotypeBands.single.lo), end: formatBandClock(chronotypeBands.single.hi) })}</Text></View>
-                      <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#1E3A5F' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendInBand')}</Text></View>
-                    </>
-                  ) : (
-                    <>
-                      {chronotypeBands.work && (
-                        <>
-                          <View style={styles.legendItem}><View style={styles.legendBand} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendWorkBand', { start: formatBandClock(chronotypeBands.work.lo), end: formatBandClock(chronotypeBands.work.hi) })}</Text></View>
-                          <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#1E3A5F' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendInWork')}</Text></View>
-                        </>
-                      )}
-                      {chronotypeBands.free && (
-                        <>
-                          <View style={styles.legendItem}><View style={styles.legendBandFree} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendFreeBand', { start: formatBandClock(chronotypeBands.free.lo), end: formatBandClock(chronotypeBands.free.hi) })}</Text></View>
-                          <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#E07A20' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendInFree')}</Text></View>
-                        </>
-                      )}
-                      {chronotypeBands.work && chronotypeBands.free && (
-                        <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#1E3A5F', borderWidth: 2, borderColor: '#E07A20' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.legendInBoth')}</Text></View>
-                      )}
-                    </>
-                  )}
-                  <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#1E3A5F' }]} /><Text style={[styles.legendLabel, { fontFamily: FONTS.bodyMedium }]}>{chronotypeBands.work && chronotypeBands.free && !chronotypeBands.merged ? t('report.legendNeither') : t('report.legendOutside')}</Text></View>
-                </>
-              )}
-            </View>
-            <View style={styles.actogramCard}>
-              <ActogramChart entries={morning} chronotypeBands={chronotypeBands} />
-            </View>
+            <ActogramLegend chronotypeBands={chronotypeBands} />
+            <TouchableOpacity
+              style={styles.actogramCard}
+              activeOpacity={0.85}
+              onPress={() => setActogramOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('report.openFullView')}
+            >
+              <ActogramChart entries={morning} chronotypeBands={chronotypeBands} onExpand={() => setActogramOpen(true)} />
+            </TouchableOpacity>
+            <ActogramFullView
+              visible={actogramOpen}
+              onClose={() => setActogramOpen(false)}
+              entries={morning}
+              chronotypeBands={chronotypeBands}
+            />
             <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.sleepPatternNote')}</Text>
             {chronotypeBands && (
               <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>
@@ -782,14 +764,6 @@ const styles = StyleSheet.create({
   disclaimer:   { fontSize: SIZES.caption, color: '#64748B', textAlign: 'center', lineHeight: 22, paddingHorizontal: 8, marginTop: 8 },
   thresholdNote: { fontSize: SIZES.caption, color: '#64748B', lineHeight: 22, marginTop: 4, paddingHorizontal: 2, textAlign: 'center' },
   actogramCard:  { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },
-  actogramLegendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingHorizontal: 2 },
-  legendItem:    { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendSwatch:  { width: 12, height: 12, borderRadius: 3 },
-  legendDot:     { width: 10, height: 10, borderRadius: 5 },
-  legendDash:    { width: 16, height: 0, borderTopWidth: 2, borderStyle: 'dashed', borderColor: '#1E3A5F' },
-  legendBand:    { width: 14, height: 10, backgroundColor: '#1E3A5F17', borderWidth: 1, borderColor: '#1E3A5F66' },
-  legendBandFree: { width: 14, height: 10, backgroundColor: '#E07A2021', borderWidth: 1, borderStyle: 'dashed', borderColor: '#E07A20' },
-  legendLabel:   { fontSize: SIZES.caption, color: '#5B7089' },
 
   // Questionnaire report cards
   qReportCard:       { backgroundColor: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#4A7BB5', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 8, elevation: 3 },

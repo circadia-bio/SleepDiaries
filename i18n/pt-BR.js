@@ -159,6 +159,8 @@ export default {
     tagWork:             'T',
     tagFree:             'L',
     tagBoth:             'T+L',
+    openFullView:        'Abrir o padrão de sono completo',
+    closeFullView:       'Fechar',
     bandSummary_one:     '{{inBand}} de {{count}} noite com ponto médio do sono em uma faixa',
     bandSummary_other:   '{{inBand}} de {{count}} noites com ponto médio do sono em uma faixa',
     bandBreakdown:       '{{work}} só trabalho · {{free}} só dias livres · {{both}} ambas · {{none}} nenhuma',

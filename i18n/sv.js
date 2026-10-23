@@ -144,6 +144,8 @@ export default {
     tagWork: 'A',
     tagFree: 'L',
     tagBoth: 'A+L',
+    openFullView: 'Öppna hela sömnmönstret',
+    closeFullView: 'Stäng',
     bandSummary_one: '{{inBand}} av {{count}} natt med sömnens mittpunkt i ett band',
     bandSummary_other: '{{inBand}} av {{count}} nätter med sömnens mittpunkt i ett band',
     bandBreakdown: '{{work}} bara arbetsdag · {{free}} bara ledig dag · {{both}} båda · {{none}} inget',
