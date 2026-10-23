@@ -521,6 +521,44 @@ export const STOPBANG = {
 
 // ─── MCTQ ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Mid-sleep arithmetic for the MCTQ, shared by MCTQ.score below and by the
+ * actogram's usual-sleep bands (utils/chronotypeBand.js). Times are decimal
+ * hours on a 24 h clock: msw and msf are the uncorrected mid-sleep on workdays
+ * and free days, sd_w and sd_f the sleep durations in hours, wd and fd the
+ * number of workdays and free days a week. Missing answers fall back to the
+ * defaults the questionnaire starts from.
+ */
+export const mctqSleepTimes = (answers) => {
+  // All times converted to decimal hours
+  const toH = (t) => t ? t.hour + t.minute / 60 : null;
+
+  const wd = answers['mctq_wd'] ?? 5;
+  const fd = 7 - wd;
+
+  // Workday sleep onset & duration
+  let bt_w = toH(answers['mctq_bt_w'] ?? { hour: 23, minute: 0 });
+  const sl_w = (answers['mctq_sl_w'] ?? 15) / 60;
+  let so_w = bt_w + sl_w;
+  let wt_w = toH(answers['mctq_wt_w'] ?? { hour: 7, minute: 0 });
+  if (wt_w <= so_w) wt_w += 24; // handle midnight wrap
+  const sd_w = wt_w - so_w;
+  const msw = (so_w + sd_w / 2) % 24;
+
+  // Free day sleep onset & duration
+  let bt_f = toH(answers['mctq_bt_f'] ?? { hour: 0, minute: 0 });
+  if (bt_f < 12) bt_f += 24; // treat early-AM bedtimes as post-midnight
+  const sl_f = (answers['mctq_sl_f'] ?? 15) / 60;
+  let so_f = bt_f + sl_f;
+  let wt_f = toH(answers['mctq_wt_f'] ?? { hour: 8, minute: 30 });
+  if (wt_f < 12) wt_f += 24;
+  if (wt_f <= so_f) wt_f += 24;
+  const sd_f = wt_f - so_f;
+  const msf = (so_f + sd_f / 2) % 24;
+
+  return { wd, fd, sd_w, sd_f, msw, msf };
+};
+
 export const MCTQ = {
   id:         'mctq',
   title:      'Munich Chronotype Questionnaire',
@@ -547,31 +585,7 @@ export const MCTQ = {
     { id: 'mctq_wt_f', number: 'B4', text: 'Free days — What time do you usually wake up?',                                      type: 'time',         defaultValue: { hour: 8, minute: 30 } },
   ],
   score: (answers) => {
-    // All times converted to decimal hours
-    const toH = (t) => t ? t.hour + t.minute / 60 : null;
-
-    const wd = answers['mctq_wd'] ?? 5;
-    const fd = 7 - wd;
-
-    // Workday sleep onset & duration
-    let bt_w = toH(answers['mctq_bt_w'] ?? { hour: 23, minute: 0 });
-    const sl_w = (answers['mctq_sl_w'] ?? 15) / 60;
-    let so_w = bt_w + sl_w;
-    let wt_w = toH(answers['mctq_wt_w'] ?? { hour: 7, minute: 0 });
-    if (wt_w <= so_w) wt_w += 24; // handle midnight wrap
-    const sd_w = wt_w - so_w;
-    const msw = (so_w + sd_w / 2) % 24;
-
-    // Free day sleep onset & duration
-    let bt_f = toH(answers['mctq_bt_f'] ?? { hour: 0, minute: 0 });
-    if (bt_f < 12) bt_f += 24; // treat early-AM bedtimes as post-midnight
-    const sl_f = (answers['mctq_sl_f'] ?? 15) / 60;
-    let so_f = bt_f + sl_f;
-    let wt_f = toH(answers['mctq_wt_f'] ?? { hour: 8, minute: 30 });
-    if (wt_f < 12) wt_f += 24;
-    if (wt_f <= so_f) wt_f += 24;
-    const sd_f = wt_f - so_f;
-    const msf = (so_f + sd_f / 2) % 24;
+    const { wd, fd, sd_w, sd_f, msw, msf } = mctqSleepTimes(answers);
 
     // MSFsc — sleep-corrected mid-sleep on free days
     // Per Roenneberg et al.: if SD_F <= SD_W, no correction needed.

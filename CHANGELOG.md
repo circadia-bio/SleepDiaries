@@ -10,21 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Chronotype band on the actogram.** When the participant has completed the MCTQ, the final report's sleep-pattern chart shades a band behind the diary data, centred on their chronotype (MSFsc) at the same clock time on every row. Each night's sleep-midpoint marker is filled when it falls inside the band and hollow when it falls outside, and the header counts how many of the nights in view landed inside. The legend and a short note under the chart explain it, and the note says the band is a reference, not a target
-- **Band width setting** under **Settings → Report**: ±15, ±30 (default) or ±45 minutes either side of MSFsc. It is stored on the device only and is not part of the export. The Report section shows on the web build as well as on the phone apps
-- `utils/chronotypeBand.js` (band, inside/outside test, clock formatting), `components/BandWidthPicker.jsx`, and `loadBandWidth` / `saveBandWidth` in `storage/storage.js`
-- **Tests** for the band centre and widths, inclusive edges, a band that straddles midnight, agreement with the real MCTQ scoring, and the stored width
+- **Usual-sleep bands on the actogram.** When the participant has completed the MCTQ, the final report's sleep-pattern chart shades two bands behind the diary data across every row: usual workday sleep (centred on MSW) and usual free-day sleep (centred on MSF). Every night is tested against both, so no night has to be classed as a workday or a free day. A night whose sleep midpoint falls in either band, or both, is highlighted with a tinted column, a coloured marker and a W / F / W+F tag; a night in neither gets a hollow marker. The header counts the nights in view that landed in a band, with a breakdown. If the two bands sit close together they are drawn as one. The legend and a short note under the chart explain it, and the note says the bands are a reference, not a target
+- **Band width setting** under **Settings → Report**: ±15, ±30 or ±45 (default) minutes either side of each band's centre. It is stored on the device only and is not part of the export. The Report section shows on the web build as well as on the phone apps
+- `utils/chronotypeBand.js` (bands, merge rule, classification, clock formatting), `components/BandWidthPicker.jsx`, and `loadBandWidth` / `saveBandWidth` in `storage/storage.js`
+- **Tests** for both band centres and widths, the merge rule, work / free / both / neither classification with inclusive edges, a band that straddles midnight, the MCTQ arithmetic and the stored width
 
 ### Changed
 
-- `ActogramChart` takes an optional `chronotypeBand` prop. Without it the chart is unchanged. With it, the time axis widens if needed so the whole band is visible
+- `ActogramChart` takes an optional `chronotypeBands` prop. Without it the chart is unchanged. With it, the time axis widens if needed so both bands are visible and a row of day tags is added under the day labels
+- `MCTQ.score` now gets its mid-sleep arithmetic from a new exported helper, `mctqSleepTimes`, in `data/questionnaires.js`, so the bands and the score share one calculation. The stored score and exports are unchanged
 - `clearAll` also removes the saved band width
 - English, Portuguese (Brazil) and Swedish strings for the legend, summary line, chart note and setting
 
 ### Notes
 
-- The MCTQ is optional in Sleep Diaries, so the band only appears for participants who have completed it. It is also not drawn if the result has no usable MSFsc, or if the participant reported working or having commitments on all 7 days (no free days, so MSFsc is not meaningful)
-- The width is a presentation choice. The MCTQ literature defines no tolerance around MSFsc, so "inside the band" is not a clinical category
+- The MCTQ is optional in Sleep Diaries, so the bands only appear for participants who have completed it. With 7 work days there is no free-day band (there are no free days, so the free-day answers would be defaults), and with 0 work days there is no workday band. The bands use uncorrected MSW and MSF, which is what a diary midpoint measures, not the sleep-debt-corrected MSFsc
+- The width is a presentation choice. The MCTQ literature defines no tolerance around mid-sleep, so "in a band" is not a clinical category. Midpoints are compared with both bands on any day, so holiday and shift-work nights need no special handling, but a workday night can land in the free-day band
 
 ---
 

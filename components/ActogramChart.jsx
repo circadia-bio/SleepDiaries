@@ -36,12 +36,17 @@
  * header — including the average sleep duration for the visible week, also
  * Apple-Health-style — updates as you scroll either way.
  *
- * Optional chronotype band: when a `chronotypeBand` prop is passed (built from
- * the participant's MCTQ chronotype by utils/chronotypeBand.js), a soft navy
- * band is drawn behind the grid at that clock range on every row. Each night's
- * sleep-midpoint marker is then filled when it falls inside the band and
- * hollow when it falls outside, and the header counts how many of the nights
- * in view landed inside. Without the prop the chart is unchanged.
+ * Optional usual-sleep bands: when a `chronotypeBands` prop is passed (built
+ * from the participant's MCTQ answers by utils/chronotypeBand.js), two soft
+ * bands are drawn behind the grid across every row: navy for usual workday
+ * sleep and orange, with dashed edges, for usual free-day sleep. Every night is
+ * tested against both, so no night has to be classed as a workday or a free
+ * day. A night whose sleep midpoint falls inside either band, or both, gets a
+ * tinted column, a filled marker (navy = workday band, orange = free-day band,
+ * navy with an orange ring = both) and a W / F / W+F tag under its day label;
+ * a night in neither gets a hollow marker and a dash. If the two bands sit
+ * close together they are drawn as one. The header counts the nights in view
+ * that landed in a band. Without the prop the chart is unchanged.
  */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
@@ -49,7 +54,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Circle, Line, Path, Text as SvgText, Defs, ClipPath, G } from 'react-native-svg';
 import t, { locale } from '../i18n';
 import { computeMetrics } from '../utils/metrics';
-import { isMidSleepInBand } from '../utils/chronotypeBand';
+import { classifyMidSleep } from '../utils/chronotypeBand';
 import { FONTS, SIZES } from '../theme/typography';
 
 const ASLEEP_FILL   = '#2E7D3233'; // green @ 20% — matches BandBar's band alpha
@@ -59,8 +64,16 @@ const WAKING_DOT_R      = 3;
 const WAKING_DOT_GAP    = 7;   // preferred centre-to-centre spacing
 const WAKING_ROW_OFFSET = 9;   // distance above the bar's top edge
 const MIDPOINT_COLOR = '#1E3A5F';  // navy dashed trend line — sleep midpoint
-const BAND_FILL      = '#1E3A5F17'; // navy @ ~9% — chronotype band, drawn behind the grid
-const BAND_EDGE      = '#1E3A5F59'; // navy @ ~35% — the band's top and bottom edge
+const WORK_COLOR  = '#1E3A5F';   // usual workday sleep band, and markers inside it
+const WORK_FILL   = '#1E3A5F17'; // navy @ ~9% — band, drawn behind the grid
+const WORK_EDGE   = '#1E3A5F66'; // navy @ 40% — the band's top and bottom edge
+const WORK_COLUMN = '#1E3A5F12'; // navy @ ~7% — column highlight behind a night in the band
+const FREE_COLOR  = '#E07A20';   // usual free-day sleep band, and markers inside it (the app's orange)
+const FREE_FILL   = '#E07A2021'; // orange @ ~13%
+const FREE_EDGE   = '#E07A20B3'; // orange @ 70% — drawn dashed
+const FREE_COLUMN = '#E07A201A'; // orange @ 10%
+const FREE_TEXT   = '#B45309';   // darker orange for the small "F" tags (contrast on white)
+const TAG_ROW     = 15;          // extra row under the day labels for the W / F tags
 const GRID_COLOR    = '#E2EAF4';
 const EMPTY_COLOR    = '#D8E2EC';  // placeholder line for a day with no entry
 const AXIS_TEXT     = '#64748B';
@@ -109,7 +122,7 @@ const nextDateStr = (dateStr) => {
   return `${y}-${m}-${dd}`;
 };
 
-export default function ActogramChart({ entries, chronotypeBand = null }) {
+export default function ActogramChart({ entries, chronotypeBands = null }) {
   const scrollRef = useRef(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [scrollX, setScrollX] = useState(0);
@@ -142,10 +155,10 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
       if (bed !== null) min = Math.min(min, bed);
       if (out !== null) max = Math.max(max, out);
     }
-    // Keep the whole band on the axis even when the diary times sit outside it.
-    if (chronotypeBand) {
-      min = Math.min(min, chronotypeBand.lo);
-      max = Math.max(max, chronotypeBand.hi);
+    // Keep the whole of the bands on the axis even when the diary times sit outside them.
+    if (chronotypeBands) {
+      min = Math.min(min, chronotypeBands.lo);
+      max = Math.max(max, chronotypeBands.hi);
     }
     return {
       rangeStart: floorTo(min - 30, 120),
@@ -190,7 +203,7 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
 
   if (calendarDays.length === 0) return null;
 
-  const totalHeight = chartHeight + TOP_PAD * 2 + LABEL_GAP;
+  const totalHeight = chartHeight + TOP_PAD * 2 + LABEL_GAP + (chronotypeBands ? TAG_ROW : 0);
 
   // Date range + average currently in view, for the header — mirrors Apple
   // Health's big "avg time asleep" stat with a "18 – 24 May" range beneath it.
@@ -227,8 +240,8 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
       x: i * colStep + colStep / 2,
       y: yFor((onset + finalWake) / 2) + TOP_PAD,
       date: day.date,
-      // null when there is no band, so nothing is marked inside or outside.
-      inside: chronotypeBand ? isMidSleepInBand((onset + finalWake) / 2, chronotypeBand) : null,
+      // null when there are no bands, so nothing is marked or counted.
+      kind: chronotypeBands ? classifyMidSleep((onset + finalWake) / 2, chronotypeBands) : null,
     };
   });
 
@@ -244,18 +257,46 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
   }
   if (currentRun.length) midpointRuns.push(currentRun);
 
-  // Nights in view with a midpoint, and how many of them fall inside the band.
+  // Nights in view with a midpoint, and where each one falls.
   const visibleMids  = midpoints.slice(leftIndex, rightIndex + 1).filter(Boolean);
-  const nightsInBand = visibleMids.filter((p) => p.inside).length;
+  const countKind    = (k) => visibleMids.filter((p) => p.kind === k).length;
+  const nightsInBand = visibleMids.filter((p) => p.kind && p.kind !== 'none').length;
+  // The workday / free-day breakdown only makes sense with two separate bands.
+  const twoBands     = !!chronotypeBands && !chronotypeBands.merged && !!chronotypeBands.work && !!chronotypeBands.free;
+
+  const renderBand = (key, lo, hi, fill, edge, dash) => (
+    <React.Fragment key={key}>
+      <Rect x={0} y={yFor(lo) + TOP_PAD} width={plotWidth} height={(hi - lo) * PX_PER_MIN} fill={fill} />
+      <Line x1={0} y1={yFor(lo) + TOP_PAD} x2={plotWidth} y2={yFor(lo) + TOP_PAD} stroke={edge} strokeWidth={1} strokeDasharray={dash} />
+      <Line x1={0} y1={yFor(hi) + TOP_PAD} x2={plotWidth} y2={yFor(hi) + TOP_PAD} stroke={edge} strokeWidth={1} strokeDasharray={dash} />
+    </React.Fragment>
+  );
+
+  // Text under each day label, so the band a night fell in never depends on colour.
+  const tagText  = (kind) => (
+    kind === 'both' ? t('report.tagBoth')
+      : kind === 'work' ? t('report.tagWork')
+      : kind === 'free' ? t('report.tagFree')
+      : kind === 'in'   ? '\u2713'
+      : '\u2013'
+  );
+  const tagColor = (kind) => (kind === 'free' ? FREE_TEXT : kind === 'none' ? AXIS_TEXT : HEADER_TEXT);
 
   return (
     <View>
       <Text style={[styles.statLabel, { fontFamily: FONTS.bodyMedium }]}>{t('report.avgSleepDuration')}</Text>
       <Text style={[styles.statValue, { fontFamily: FONTS.heading }]}>{formatDuration(avgSleepDuration)}</Text>
-      {chronotypeBand && visibleMids.length > 0 && (
-        <Text style={[styles.bandSummary, { fontFamily: FONTS.bodyMedium }]}>
-          {t('report.bandSummary', { inBand: nightsInBand, count: visibleMids.length })}
-        </Text>
+      {chronotypeBands && visibleMids.length > 0 && (
+        <>
+          <Text style={[styles.bandSummary, !twoBands && { marginBottom: 8 }, { fontFamily: FONTS.bodyMedium }]}>
+            {t('report.bandSummary', { inBand: nightsInBand, count: visibleMids.length })}
+          </Text>
+          {twoBands && (
+            <Text style={[styles.bandBreakdown, { fontFamily: FONTS.bodyMedium }]}>
+              {t('report.bandBreakdown', { work: countKind('work'), free: countKind('free'), both: countKind('both'), none: countKind('none') })}
+            </Text>
+          )}
+        </>
       )}
 
       <View style={styles.header}>
@@ -283,6 +324,18 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
                 {formatClock(m)}
               </SvgText>
             ))}
+            {chronotypeBands && !chronotypeBands.merged && chronotypeBands.work && (
+              <>
+                <Rect x={AXIS_WIDTH - 18} y={yFor(chronotypeBands.work.centre) + TOP_PAD - 7} width={16} height={14} rx={4} fill={WORK_COLOR} />
+                <SvgText x={AXIS_WIDTH - 10} y={yFor(chronotypeBands.work.centre) + TOP_PAD + 4} fontFamily={FONTS.bodyMedium} fontSize={10} fill="#fff" textAnchor="middle">{t('report.tagWork')}</SvgText>
+              </>
+            )}
+            {chronotypeBands && !chronotypeBands.merged && chronotypeBands.free && (
+              <>
+                <Rect x={AXIS_WIDTH - 18} y={yFor(chronotypeBands.free.centre) + TOP_PAD - 7} width={16} height={14} rx={4} fill={FREE_COLOR} />
+                <SvgText x={AXIS_WIDTH - 10} y={yFor(chronotypeBands.free.centre) + TOP_PAD + 4} fontFamily={FONTS.bodyMedium} fontSize={10} fill="#fff" textAnchor="middle">{t('report.tagFree')}</SvgText>
+              </>
+            )}
           </Svg>
         </View>
 
@@ -314,25 +367,12 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
               })}
             </Defs>
 
-            {chronotypeBand && (
-              <>
-                <Rect
-                  x={0} y={yFor(chronotypeBand.lo) + TOP_PAD}
-                  width={plotWidth} height={(chronotypeBand.hi - chronotypeBand.lo) * PX_PER_MIN}
-                  fill={BAND_FILL}
-                />
-                <Line
-                  x1={0} y1={yFor(chronotypeBand.lo) + TOP_PAD}
-                  x2={plotWidth} y2={yFor(chronotypeBand.lo) + TOP_PAD}
-                  stroke={BAND_EDGE} strokeWidth={1}
-                />
-                <Line
-                  x1={0} y1={yFor(chronotypeBand.hi) + TOP_PAD}
-                  x2={plotWidth} y2={yFor(chronotypeBand.hi) + TOP_PAD}
-                  stroke={BAND_EDGE} strokeWidth={1}
-                />
-              </>
-            )}
+            {chronotypeBands && (chronotypeBands.merged
+              ? renderBand('merged', chronotypeBands.single.lo, chronotypeBands.single.hi, WORK_FILL, WORK_EDGE)
+              : [
+                  chronotypeBands.work && renderBand('work', chronotypeBands.work.lo, chronotypeBands.work.hi, WORK_FILL, WORK_EDGE),
+                  chronotypeBands.free && renderBand('free', chronotypeBands.free.lo, chronotypeBands.free.hi, FREE_FILL, FREE_EDGE, '4,3'),
+                ])}
 
             {gridTimes.map((m) => (
               <Line
@@ -392,6 +432,7 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
               const yOnset = yFor(onset) + TOP_PAD;
               const yWake  = yFor(finalWake) + TOP_PAD;
               const yOut   = yFor(outOfBed) + TOP_PAD;
+              const kind   = chronotypeBands ? classifyMidSleep((onset + finalWake) / 2, chronotypeBands) : null;
 
               const wakings = a.mq4 === 'yes' ? (a.mq4b ?? 0) : 0;
               // Dots sit in a row just above the bar rather than inside it —
@@ -409,6 +450,12 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
 
               return (
                 <React.Fragment key={day.date}>
+                  {(kind === 'work' || kind === 'both' || kind === 'in') && (
+                    <Rect x={colCenter - colStep * 0.42} y={TOP_PAD} width={colStep * 0.84} height={chartHeight} rx={8} fill={WORK_COLUMN} />
+                  )}
+                  {(kind === 'free' || kind === 'both') && (
+                    <Rect x={colCenter - colStep * 0.42} y={TOP_PAD} width={colStep * 0.84} height={chartHeight} rx={8} fill={FREE_COLUMN} />
+                  )}
                   <G transform={`translate(${x}, 0)`} clipPath={`url(#clip-${day.date})`}>
                     <Rect x={0} y={yBed}   width={barWidth} height={Math.max(0, yTried - yBed)} fill={AWAKE_FILL} />
                     <Rect x={0} y={yTried} width={barWidth} height={Math.max(0, yOnset - yTried)} fill={AWAKE_FILL} />
@@ -428,6 +475,18 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
                   >
                     {dayLabel}
                   </SvgText>
+                  {chronotypeBands && (
+                    <SvgText
+                      x={colCenter}
+                      y={chartHeight + TOP_PAD * 2 + LABEL_GAP - 6 + TAG_ROW}
+                      fontFamily={FONTS.bodyMedium}
+                      fontSize={11}
+                      fill={tagColor(kind)}
+                      textAnchor="middle"
+                    >
+                      {tagText(kind)}
+                    </SvgText>
+                  )}
                 </React.Fragment>
               );
             })}
@@ -444,14 +503,16 @@ export default function ActogramChart({ entries, chronotypeBand = null }) {
                   />
                 )}
                 {run.map((p) => {
-                  // Hollow = outside the band. Shape, not colour, carries the meaning.
-                  const outside = chronotypeBand && !p.inside;
+                  // Hollow = in no band. The fill says which band; a ring marks both.
+                  const hollow = p.kind === 'none';
+                  const free   = p.kind === 'free';
+                  const both   = p.kind === 'both';
                   return (
                     <Circle
-                      key={p.date} cx={p.x} cy={p.y} r={3}
-                      fill={outside ? '#fff' : MIDPOINT_COLOR}
-                      stroke={outside ? MIDPOINT_COLOR : '#fff'}
-                      strokeWidth={outside ? 1.5 : 1}
+                      key={p.date} cx={p.x} cy={p.y} r={both ? 4 : 3}
+                      fill={hollow ? '#fff' : free ? FREE_COLOR : MIDPOINT_COLOR}
+                      stroke={hollow ? MIDPOINT_COLOR : both ? FREE_COLOR : '#fff'}
+                      strokeWidth={hollow ? 1.5 : both ? 2 : 1}
                     />
                   );
                 })}
@@ -473,5 +534,6 @@ const styles = StyleSheet.create({
   headerLabel: { fontSize: SIZES.caption, color: '#1E3A5F' },
   statLabel:   { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4 },
   statValue:   { fontSize: SIZES.sectionTitle, color: '#1E3A5F', paddingHorizontal: 4, marginBottom: 8 },
-  bandSummary: { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4, marginBottom: 8 },
+  bandSummary: { fontSize: SIZES.caption, color: '#1E3A5F', paddingHorizontal: 4 },
+  bandBreakdown: { fontSize: SIZES.caption, color: '#64748B', paddingHorizontal: 4, marginBottom: 8 },
 });

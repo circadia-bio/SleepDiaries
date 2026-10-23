@@ -8,7 +8,7 @@
  *   user_name               — participant's name string
  *   research_code           — optional research code string
  *   age_band                — optional age group ('under18' | 'adult' | 'older'); device-only, never exported
- *   chronotype_band_width   — half-width of the actogram chronotype band, in minutes (15 | 30 | 45); device-only, never exported
+ *   chronotype_band_width   — half-width of the actogram usual-sleep bands, in minutes (15 | 30 | 45); device-only, never exported
  *   entries                 — JSON array of diary entry objects
  *   seen_instructions       — 'true' once the instructions modal has been dismissed
  *   questionnaire_{id}      — one object per completed one-time questionnaire
@@ -152,7 +152,7 @@ export const loadAgeBand = async () => {
 
 // ─── Chronotype band width ─────────────────────────────────────────────────────────────────────
 /**
- * Half-width, in minutes, of the shaded chronotype band on the final report's
+ * Half-width, in minutes, of the shaded usual-sleep bands on the final report's
  * actogram. A display preference: stored on the device, not part of the export.
  * Anything that is not one of BAND_WIDTH_OPTIONS is rejected on save and
  * ignored on load, so a corrupted value falls back to the default.
