@@ -636,7 +636,7 @@ A night's midpoint is the middle of its asleep segment: sleep onset (time tried 
 
 **Merged, single or missing bands.** If the two centres are closer together than one half-width (low social jetlag at the chosen width), the bands would mostly coincide, so they are drawn as one "usual sleep" band and nights are simply in it or not. With 7 work days there is no free-day band, because there are no free days and the free-day answers behind MSF would be defaults. With 0 work days there is no workday band. If the MCTQ has not been completed, or a band's times were not answered, the chart is unchanged for that band, with no placeholder.
 
-**Wording.** The bands are a reference for the participant's own patterns, not a target, and the in-app text says so. Avoid calling them "ideal" or "optimal" in anything built on top of them. MSW in particular is largely set by the alarm, so it is not a chronotype.
+**Wording.** The bands are a reference for the participant's own patterns, not a target, and the in-app text says so. Avoid calling them "ideal" or "optimal" in anything built on top of them. MSW in particular is largely set by the alarm, so it is not a chronotype. Under the chart the report also states that the actogram is for educational purposes only, and, when bands are drawn, that the margin around them is an arbitrary range (not a clinical threshold) that can be adjusted under Settings → Report.
 
 ```jsx
 import { getChronotypeBands } from '../utils/chronotypeBand';

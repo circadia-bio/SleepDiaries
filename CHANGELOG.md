@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Tests** for both band centres and widths, the merge rule, work / free / both / neither classification with inclusive edges, a band that straddles midnight, the MCTQ arithmetic and the stored width
 - **Full sleep pattern view.** Tapping the actogram card in the final report, or its new expand button, opens a full-screen view with the chart turned on its side: time runs across, each night is a row (oldest at the top, opening at the newest) and a month or more reads at a glance. Rows scale to the space below the time axis, between 14 and 36 px, so the 14 nights the report needs get taller rows, and 31 nights fit when at least 440 px are free; longer studies, short screens and larger system font sizes scroll instead. It draws the same bars, midpoint line and usual-sleep bands, and its counts cover every night in the study
 - `utils/actogram.js` (shared calendar, night-time, time-range and row-sizing helpers), `components/ActogramFullView.jsx` and `components/ActogramLegend.jsx`, with tests in `__tests__/actogram.test.js`
+- **Educational-use notes under the sleep pattern chart** in the final report: one stating that the chart is for educational purposes only and is not a diagnosis or clinical measure, and, when bands are drawn, one stating that the ±N min margin is an arbitrary range, not a clinical threshold, that can be adjusted under Settings → Report. The margin note shows the width currently in use
 
 ### Changed
 
@@ -24,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `clearAll` also removes the saved band width
 - The weekly actogram now reads its calendar, night times and time range from `utils/actogram.js`, and the report's legend is the shared `ActogramLegend` component. What is drawn is unchanged
 - English, Portuguese (Brazil) and Swedish strings for the legend, summary line, chart note and setting
+- The chart notes no longer end with "You can change the width in Settings"; the new margin note says it instead, so it is not repeated
 
 ### Notes
 

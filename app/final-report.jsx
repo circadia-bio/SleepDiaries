@@ -673,6 +673,10 @@ export default function FinalReportScreen() {
                     : t('report.sleepPatternBandNoteOne', { centre: formatBandClock(chronotypeBands.single.centre), minutes: chronotypeBands.halfWidth })}
               </Text>
             )}
+            <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.actogramDisclaimer')}</Text>
+            {chronotypeBands && (
+              <Text style={[styles.thresholdNote, { fontFamily: FONTS.bodyMedium }]}>{t('report.actogramMarginNote', { minutes: chronotypeBands.halfWidth })}</Text>
+            )}
           </Section>
 
           <Section title={t('report.sleepTiming')}>
